@@ -3,421 +3,1214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D&D 2024 Level Up Tool</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Character Forge | Level Up Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
-body{
-background:#1a1209;
-color:#1a1209;
-font-family:'Crimson Pro',serif;
-padding:30px;
-display:flex;
-justify-content:center;
-}
+  :root {
+    --parchment: #f4e8c1;
+    --parchment-dark: #e8d5a0;
+    --ink: #1a1209;
+    --ink-light: #3d2b1a;
+    --crimson: #8b1a1a;
+    --crimson-light: #b52a2a;
+    --gold: #c9973a;
+    --gold-light: #e8b84b;
+    --shadow: rgba(26,18,9,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.container{
-max-width:1000px;
-width:100%;
-background:#f4e8c1;
-padding:30px;
-border:3px solid #c9973a;
-}
+  body {
+    background-color: #1a1209;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%231a1209'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
+    min-height: 100vh;
+    font-family: 'Crimson Pro', serif;
+    color: var(--ink);
+    padding: 2rem 1rem 4rem;
+  }
 
-h1{
-font-family:'Cinzel',serif;
-color:#8b1a1a;
-margin-bottom:20px;
-}
+  .page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.7s ease both;
+  }
+  .page-header h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 24px rgba(201,151,58,0.4);
+  }
+  .page-header p {
+    color: var(--parchment-dark);
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 0.4rem;
+    opacity: 0.7;
+  }
+  .back-link {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+  .back-link:hover { opacity: 1; }
 
-.controls{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:20px;
-margin-bottom:20px;
-}
+  .divider {
+    width: 320px; height: 2px;
+    margin: 1rem auto;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    position: relative;
+  }
+  .divider::before {
+    content: '⚔'; position: absolute;
+    left: 50%; top: 50%; transform: translate(-50%,-50%);
+    background: #1a1209; padding: 0 0.6rem;
+    color: var(--gold); font-size: 1rem;
+  }
 
-select,input{
-padding:8px;
-font-size:16px;
-}
+  /* ── Sheet ── */
+  .sheet {
+    max-width: 960px;
+    margin: 0 auto;
+    background: var(--parchment);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    border-radius: 4px;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--crimson), 0 8px 48px rgba(0,0,0,0.7), inset 0 0 60px rgba(201,151,58,0.07);
+    padding: 2.5rem 2.5rem 3rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
 
-button{
-padding:12px;
-background:#8b1a1a;
-color:white;
-border:none;
-cursor:pointer;
-margin-top:10px;
-}
+  /* ── Controls ── */
+  .controls-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 2rem;
+  }
+  label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 0.3rem;
+  }
+  input[type="number"], select {
+    width: 100%;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid var(--gold);
+    border-bottom: 2px solid var(--crimson);
+    border-radius: 2px 2px 0 0;
+    padding: 0.5rem 0.7rem;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    transition: background 0.2s;
+  }
+  input:focus, select:focus { background: rgba(255,255,255,0.75); }
+  select {
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b1a1a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.8rem center;
+    padding-right: 2rem;
+  }
+  .btn {
+    background: var(--crimson);
+    color: var(--gold-light);
+    border: none;
+    padding: 0.6rem 1.4rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    white-space: nowrap;
+    transition: background 0.15s;
+    height: fit-content;
+  }
+  .btn:hover { background: var(--crimson-light); }
 
-.level-card{
-background:white;
-padding:16px;
-margin-top:15px;
-border-left:6px solid #8b1a1a;
-}
+  /* ── Section title ── */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--crimson), transparent);
+    opacity: 0.4;
+  }
 
-.level-title{
-font-family:'Cinzel';
-margin-bottom:10px;
-}
+  /* ── Level timeline ── */
+  .timeline {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .tl-pip {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1.5px solid rgba(139,26,26,0.25);
+    border-radius: 3px;
+    background: rgba(255,255,255,0.2);
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tl-pip:hover { border-color: var(--gold); color: var(--crimson); }
+  .tl-pip.in-range {
+    background: rgba(139,26,26,0.08);
+    border-color: var(--crimson);
+    color: var(--crimson);
+  }
+  .tl-pip.asi-level { border-color: var(--gold); }
+  .tl-pip.subclass-level { border-style: dashed; }
 
-.section{
-margin-top:10px;
-padding-left:10px;
-border-left:3px solid #c9973a;
-}
+  /* ── Level cards ── */
+  .level-cards { display: flex; flex-direction: column; gap: 1.5rem; }
 
-.section h4{
-margin-bottom:4px;
-font-family:'Cinzel';
-}
+  .level-card {
+    border: 1px solid var(--gold);
+    border-top: 4px solid var(--crimson);
+    border-radius: 0 0 4px 4px;
+    background: rgba(255,255,255,0.3);
+    overflow: hidden;
+  }
+  .level-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.8rem 1.2rem;
+    background: rgba(139,26,26,0.07);
+    border-bottom: 1px solid rgba(201,151,58,0.3);
+    flex-wrap: wrap;
+  }
+  .level-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--crimson);
+  }
+  .level-card-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .pill {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(201,151,58,0.15);
+    border: 1px solid var(--gold);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .pill.crimson { background: rgba(139,26,26,0.1); border-color: var(--crimson); color: var(--crimson); }
 
-.feature{margin-bottom:6px}
+  .level-card-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
 
-.choice{
-background:#fff7e3;
-padding:6px;
-margin-bottom:6px;
-}
+  /* ── Blocks inside level card ── */
+  .block {
+    padding: 0.75rem 1rem;
+    border-radius: 3px;
+  }
+  .block-auto { background: rgba(255,255,255,0.4); border-left: 3px solid var(--gold); }
+  .block-choice { background: rgba(201,151,58,0.08); border-left: 3px solid var(--gold); border: 1px solid rgba(201,151,58,0.4); }
+  .block-spell { background: rgba(139,26,26,0.04); border-left: 3px solid var(--crimson); }
+  .block-write { background: rgba(139,26,26,0.06); border: 1.5px dashed rgba(139,26,26,0.3); }
 
-.timeline{
-display:flex;
-gap:6px;
-margin-bottom:15px;
-flex-wrap:wrap;
-}
+  .block-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .block-auto .block-title { color: var(--gold); }
+  .block-choice .block-title { color: var(--crimson); }
+  .block-spell .block-title { color: var(--crimson); }
+  .block-write .block-title { color: var(--crimson); }
 
-.timeline div{
-padding:6px 10px;
-border:1px solid #8b1a1a;
-cursor:pointer;
-}
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+  .feature-list li {
+    font-size: 0.95rem;
+    color: var(--ink);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+    line-height: 1.4;
+  }
+  .feature-list li .feat-name {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .feature-list li .feat-desc {
+    color: var(--ink-light);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
 
-.timeline .active{
-background:#8b1a1a;
-color:white;
-}
+  .write-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+  .write-list li {
+    font-size: 0.92rem;
+    color: var(--ink);
+    padding-left: 1.2rem;
+    position: relative;
+    line-height: 1.4;
+  }
+  .write-list li::before {
+    content: '✏';
+    position: absolute; left: 0;
+    font-size: 0.75rem;
+  }
 
+  .choice-block-inner { display: flex; flex-direction: column; gap: 0.4rem; }
+  .choice-option {
+    font-size: 0.9rem;
+    color: var(--ink);
+    padding: 0.4rem 0.6rem;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(201,151,58,0.35);
+    border-radius: 3px;
+    line-height: 1.4;
+  }
+  .choice-option strong { color: var(--crimson); font-family: 'Cinzel', serif; font-size: 0.82rem; display: block; margin-bottom: 0.15rem; }
+  .choice-note {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--ink-light);
+    margin-top: 0.3rem;
+  }
+
+  /* Spell slot table */
+  .slot-table {
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    width: 100%;
+    margin-top: 0.4rem;
+  }
+  .slot-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    padding: 0.3rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(139,26,26,0.2);
+  }
+  .slot-table td {
+    padding: 0.3rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,151,58,0.15);
+    color: var(--ink);
+  }
+  .slot-table tr.current-row td { background: rgba(201,151,58,0.1); font-weight: 600; }
+  .slot-table .new-gain { color: var(--crimson); font-weight: 700; }
+
+  /* Subclass grid */
+  .subclass-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+  .subclass-card {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid rgba(201,151,58,0.4);
+    border-top: 3px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    background: rgba(255,255,255,0.35);
+  }
+  .subclass-card strong {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--crimson);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .subclass-card span { font-size: 0.85rem; color: var(--ink-light); line-height: 1.35; }
+
+  .rule { border: none; border-top: 1px solid rgba(201,151,58,0.3); margin: 1rem 0; }
+
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(20px);}  to{opacity:1;transform:translateY(0);} }
+
+  @media(max-width:600px) {
+    .sheet { padding: 1.5rem 1.2rem 2rem; }
+    .controls-row { grid-template-columns: 1fr 1fr; }
+    .controls-row .btn { grid-column: 1/-1; }
+  }
 </style>
 </head>
 <body>
 
-<div class="container">
-
-<h1>Level Up Planner (Levels 1‑10)</h1>
-
-<div class="controls">
-
-<div>
-<label>Class</label>
-<select id="classSelect"></select>
+<div style="max-width:960px; margin:0 auto; padding-bottom:1rem;">
+  <a href="index.html" class="back-link">← Back to Character Forge</a>
 </div>
 
-<div>
-<label>From Level</label>
-<input id="fromLevel" type="number" min="1" max="9" value="1">
-</div>
+<header class="page-header">
+  <h1>Level Up Guide</h1>
+  <div class="divider"></div>
+  <p>Dungeons &amp; Dragons 2024 · Levels 1–10</p>
+</header>
 
-<div>
-<label>To Level</label>
-<input id="toLevel" type="number" min="2" max="10" value="5">
-</div>
+<div class="sheet">
 
-</div>
+  <div class="controls-row">
+    <div>
+      <label for="classSelect">Class</label>
+      <select id="classSelect" onchange="renderGuide()">
+        <option value="">— Choose Class —</option>
+        <option value="barbarian">Barbarian</option>
+        <option value="bard">Bard</option>
+        <option value="cleric">Cleric</option>
+        <option value="druid">Druid</option>
+        <option value="fighter">Fighter</option>
+        <option value="monk">Monk</option>
+        <option value="paladin">Paladin</option>
+        <option value="ranger">Ranger</option>
+        <option value="rogue">Rogue</option>
+        <option value="sorcerer">Sorcerer</option>
+        <option value="warlock">Warlock</option>
+        <option value="wizard">Wizard</option>
+      </select>
+    </div>
+    <div>
+      <label for="fromLevel">From Level</label>
+      <input type="number" id="fromLevel" min="1" max="9" value="1" onchange="renderGuide()">
+    </div>
+    <div>
+      <label for="toLevel">To Level</label>
+      <input type="number" id="toLevel" min="2" max="10" value="5" onchange="renderGuide()">
+    </div>
+    <button class="btn" onclick="renderGuide()">Show Guide ⚔</button>
+  </div>
 
-<button onclick="generate()">Show Level Gains</button>
-
-<div class="timeline" id="timeline"></div>
-
-<div id="results"></div>
+  <div id="timeline" class="timeline"></div>
+  <div id="results"></div>
 
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════════
 
-const ASI_LEVELS=[4,8]
-const PROF={1:2,2:2,3:2,4:2,5:3,6:3,7:3,8:3,9:4,10:4}
+const PROF_BONUS = {1:2,2:2,3:2,4:2,5:3,6:3,7:3,8:3,9:4,10:4};
 
-const CLASSES={
+// PHB 2024 fixed HP per level (not die average — the new fixed values)
+const HP_PER_LEVEL = {
+  barbarian: 7,
+  fighter: 6, paladin: 6, ranger: 6,
+  bard: 5, cleric: 5, druid: 5, monk: 5, rogue: 5, warlock: 5,
+  sorcerer: 4, wizard: 4
+};
 
-barbarian:{
- hitDie:12,
- subclasses:["Berserker","Totem Warrior","Zealot","Wild Heart"],
- levels:{
-1:{auto:["Rage","Unarmored Defense","Weapon Mastery"]},
-2:{auto:["Reckless Attack","Danger Sense"]},
-3:{choice:["Primal Path"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Extra Attack","Fast Movement"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["Feral Instinct"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["Brutal Strike"]},
-10:{auto:["Subclass Feature"]}
-}
+// Full spell slot tables per class, levels 1–10
+// Format: [L1, L2, L3, L4, L5] slots
+const SPELL_SLOTS = {
+  wizard:   {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
+  sorcerer: {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
+  bard:     {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
+  cleric:   {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
+  druid:    {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
+  paladin:  {1:[2,0,0,0,0],2:[2,0,0,0,0],3:[3,0,0,0,0],4:[3,0,0,0,0],5:[4,2,0,0,0],6:[4,2,0,0,0],7:[4,3,0,0,0],8:[4,3,0,0,0],9:[4,3,2,0,0],10:[4,3,2,0,0]},
+  ranger:   {1:[0,0,0,0,0],2:[2,0,0,0,0],3:[3,0,0,0,0],4:[3,0,0,0,0],5:[4,2,0,0,0],6:[4,2,0,0,0],7:[4,3,0,0,0],8:[4,3,0,0,0],9:[4,3,2,0,0],10:[4,3,2,0,0]},
+  warlock:  {1:[1,0,0,0,0],2:[2,0,0,0,0],3:[0,2,0,0,0],4:[0,2,0,0,0],5:[0,0,2,0,0],6:[0,0,2,0,0],7:[0,0,0,2,0],8:[0,0,0,2,0],9:[0,0,0,0,2],10:[0,0,0,0,2]},
+};
+
+// Cantrips known per level per class (0 = no change from previous)
+const CANTRIPS_KNOWN = {
+  wizard:   {1:3,2:0,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
+  sorcerer: {1:4,2:0,3:0,4:5,5:0,6:0,7:0,8:0,9:0,10:6},
+  bard:     {1:2,2:0,3:0,4:3,5:0,6:0,7:0,8:0,9:0,10:4},
+  cleric:   {1:3,2:0,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
+  druid:    {1:2,2:0,3:0,4:3,5:0,6:0,7:0,8:0,9:0,10:4},
+  warlock:  {1:2,2:3,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
+};
+
+// Spells known (for non-preparer classes) — new spells gained each level
+const SPELLS_KNOWN_GAINED = {
+  bard:     {1:4,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:2},
+  sorcerer: {1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1},
+  warlock:  {1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1},
+  ranger:   {1:2,2:0,3:1,4:0,5:1,6:0,7:1,8:0,9:1,10:0},
+};
+
+// Highest spell level accessible at each level per class
+const SPELL_LEVEL_ACCESS = {
+  wizard:   {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  sorcerer: {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  bard:     {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  cleric:   {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  druid:    {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  paladin:  {1:1,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3},
+  ranger:   {1:0,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3},
+  warlock:  {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+};
+
+// ── Full class level data ────────────────────────────────────────────────────
+const CLASSES = {
+
+barbarian: {
+  name: "Barbarian", hitDie: "d12",
+  subclasses: {
+    "Berserker":    "Frenzy lets you make bonus attacks while Raging but gain Exhaustion. High STR.",
+    "Wild Heart":   "Bestow an animal aspect on yourself — Wolverine for melee, Bear for HP, Eagle for speed. WIS helps some abilities.",
+    "World Tree":   "Channel the power of Yggdrasil — summon guardians, teleport allies. Support-focused.",
+    "Zealot":       "Rage in the name of a deity — deal bonus radiant/necrotic damage, revive without gold cost.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Reckless Attack", "When you make a melee attack on your turn, you can choose to attack with Advantage — but attacks against you have Advantage until your next turn. Declare before rolling. Core damage tool."],
+            ["Danger Sense", "Advantage on DEX saving throws against effects you can see (e.g. traps, spells). You must not be Blinded, Deafened, or Incapacitated."],
+          ]},
+    3:  { subclass: true },
+    4:  { asi: true },
+    5:  { auto: [
+            ["Extra Attack", "You can attack twice whenever you take the Attack action on your turn. Write 2 attacks on your sheet."],
+            ["Fast Movement", "While not wearing Heavy Armor, your speed increases by 10 ft. Update your Speed on your sheet."],
+          ]},
+    6:  { auto: [
+            ["Subclass Feature", "You gain a feature from your chosen Primal Path. Check your subclass."],
+          ]},
+    7:  { auto: [
+            ["Feral Instinct", "You have Advantage on Initiative rolls. If you are Surprised but not Incapacitated, you can still Rage on your first turn."],
+          ]},
+    8:  { asi: true },
+    9:  { auto: [
+            ["Brutal Strike", "When you use Reckless Attack, you can forgo Advantage on one attack. If it hits, you deal an extra 1d10 damage and apply one Brutal Strike effect (Forceful Blow or Hamstring Blow). Update damage on your sheet."],
+          ]},
+    10: { auto: [
+            ["Subclass Feature", "You gain a second feature from your Primal Path."],
+          ]},
+  }
 },
 
-bard:{
- hitDie:8,
- subclasses:["Lore","Valor","Glamour","Swords"],
- levels:{
-1:{auto:["Bardic Inspiration","Spellcasting"]},
-2:{auto:["Jack of All Trades","Song of Rest"]},
-3:{choice:["Bard College"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Font of Inspiration"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Spells"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Spells"]},
-10:{auto:["Magical Secrets"]}
-}
+bard: {
+  name: "Bard", hitDie: "d8",
+  subclasses: {
+    "College of Lore":    "Extra skill proficiencies, Cutting Words to debuff enemies (uses Bardic Inspiration die).",
+    "College of Valor":   "Martial proficiencies, Combat Inspiration for weapon damage/AC. More combat-focused.",
+    "College of Glamour": "Fey enchantment magic — Mantle of Inspiration, Enthralling Performance. Very CHA-heavy.",
+    "College of Swords":  "Blade flourishes using Inspiration die, melee combat style, extra attack at L6.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Jack of All Trades", "Add half your Proficiency Bonus (rounded down) to any ability check you are not already proficient in. Write +1 next to all non-proficient skills."],
+            ["Song of Rest", "During a Short Rest, if allies can hear you play/sing, each one regains extra HP when they spend Hit Dice: 1d6 extra HP."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Expertise", "Choose 2 skills you are proficient in. Your Proficiency Bonus is doubled for those skills. Circle them on your sheet and note ×2."],
+          ]},
+    4:  { asi: true,
+          spellNote: "You learn 1 new Bard spell of any level you can cast, and can also swap one known spell." },
+    5:  { auto: [
+            ["Font of Inspiration", "You regain all Bardic Inspiration uses after a Short or Long Rest (previously only Long Rest)."],
+          ]},
+    6:  { auto: [
+            ["Subclass Feature", "Your Bard College grants a feature. Check your subclass."],
+            ["Bardic Inspiration die upgrade", "Your Bardic Inspiration die increases to d8. Update all references on your sheet."],
+          ]},
+    7:  { spellNote: "You now have access to 4th-level spells. Learn 1 new 4th-level spell on level up." },
+    8:  { asi: true },
+    9:  { spellNote: "You now have access to 5th-level spells. Learn 1 new 5th-level spell on level up." },
+    10: { auto: [
+            ["Magical Secrets", "Choose 2 spells from any class's spell list that you can cast. These become Bard spells for you. Very powerful — pick wisely."],
+            ["Bardic Inspiration die upgrade", "Your Bardic Inspiration die increases to d10."],
+          ]},
+  }
 },
 
-cleric:{
- hitDie:8,
- subclasses:["Life","Light","War","Knowledge"],
- levels:{
-1:{auto:["Divine Order","Spellcasting"]},
-2:{auto:["Channel Divinity"]},
-3:{choice:["Divine Domain"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Destroy Undead","3rd‑Level Spells"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Spells"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Spells"]},
-10:{auto:["Divine Intervention"]}
-}
+cleric: {
+  name: "Cleric", hitDie: "d8",
+  subclasses: {
+    "Life Domain":     "Enhanced healing (Blessed Healer), heavy armor proficiency, Disciple of Life adds extra HP to Cure Wounds. Best WIS.",
+    "Light Domain":    "Radiant damage, Warding Flare reaction, Fireball at L5. Offensive caster with WIS.",
+    "War Domain":      "Bonus attack per turn using Channel Divinity, martial weapon proficiency, heavy armor.",
+    "Knowledge Domain":"Expertise in two skills, learn languages, share knowledge. INT + WIS heavy support.",
+    "Trickery Domain": "Illusion, deception, shadow magic. CHA synergy for Invoke Duplicity.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Channel Divinity (1/rest)", "Gain one Channel Divinity use per Short/Long Rest. All clerics get Turn Undead. Your domain grants a second option. Write on sheet: Channel Divinity ☐."],
+            ["Turn Undead", "Use Channel Divinity: each Undead within 30 ft that can see/hear you must pass a WIS save or is Turned for 1 min. It can't take actions except to Dash/Dodge to flee."],
+          ]},
+    3:  { subclass: true,
+          spellNote: "Your Domain may grant you bonus spells at L3. These are always prepared and don't count against your prepared spells limit." },
+    4:  { asi: true,
+          spellNote: "Your spell preparation count increases by 1 (WIS mod + level). Update your sheet." },
+    5:  { auto: [
+            ["Destroy Undead CR 1/2", "When you Turn Undead, creatures of CR 1/2 or lower are instantly destroyed rather than just Turned."],
+            ["3rd-Level Spell Slots", "You can now prepare and cast 3rd-level spells. Add Dispel Magic and Spirit Guardians to your considerations."],
+          ]},
+    6:  { auto: [
+            ["Channel Divinity (2/rest)", "You now regain 2 uses of Channel Divinity per Short/Long Rest. Update your sheet."],
+            ["Subclass Feature", "Your Divine Domain grants an additional feature."],
+          ]},
+    7:  { spellNote: "4th-level spells unlocked. Banishment, Guardian of Faith, and Stone Shape become available." },
+    8:  { asi: true,
+          auto: [
+            ["Destroy Undead CR 1", "Channel Divinity now destroys Undead of CR 1 or lower."],
+          ]},
+    9:  { spellNote: "5th-level spells unlocked. Mass Cure Wounds, Flame Strike, and Scrying are now available." },
+    10: { auto: [
+            ["Divine Intervention", "Once per Long Rest, call on your deity to directly intervene. Roll a d100 — your DM determines the effect. You can choose to use this even if it fails, and it automatically succeeds if you haven't used it in 10 days."],
+          ]},
+  }
 },
 
-druid:{
- hitDie:8,
- subclasses:["Land","Moon","Stars","Wildfire"],
- levels:{
-1:{auto:["Druidic","Spellcasting"]},
-2:{auto:["Wild Shape"]},
-3:{choice:["Druid Circle"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["3rd‑Level Spells"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Spells"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Spells"]},
-10:{auto:["Subclass Feature"]}
-}
+druid: {
+  name: "Druid", hitDie: "d8",
+  subclasses: {
+    "Circle of the Land": "Bonus spells from chosen terrain, Natural Recovery restores spell slots. Great WIS caster.",
+    "Circle of the Moon": "Powerful Wild Shape forms (CR scales with level), elemental forms at higher levels. CON helps.",
+    "Circle of the Sea":  "Ocean/storm themed spells, Wrath of the Sea aura. Strong with WIS.",
+    "Circle of Stars":    "Star map constellations grant combat/healing/divination modes without spending Wild Shape.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Wild Shape (2/rest)", "Transform into a CR 1/4 or lower Beast (no fly/swim speed). Lasts 1 hr. You keep your mental stats. Your gear melds. HP is Beast's HP until you revert. Write: Wild Shape ☐☐."],
+          ]},
+    3:  { subclass: true,
+          spellNote: "Circle spells from Land subclass are always prepared (if taken). Add 2nd-level spells to your preparation list." },
+    4:  { asi: true,
+          auto: [
+            ["Wild Shape improvement", "Your Wild Shape can now include Beasts with a swim speed (CR 1/2 or lower)."],
+          ]},
+    5:  { spellNote: "3rd-level spells unlocked. Call Lightning, Conjure Animals, and Sleet Storm available." },
+    6:  { auto: [
+            ["Subclass Feature", "Your Circle grants an additional ability."],
+          ]},
+    7:  { spellNote: "4th-level spells unlocked. Polymorph, Control Water, and Dominate Beast available." },
+    8:  { asi: true,
+          auto: [
+            ["Wild Shape improvement", "Your Wild Shape can now include Beasts with a fly speed (CR 1 or lower)."],
+          ]},
+    9:  { spellNote: "5th-level spells unlocked. Commune with Nature, Wrath of Nature, and Transmute Rock available." },
+    10: { auto: [
+            ["Subclass Feature", "Your Circle grants another ability. Moon druids get Elemental Wild Shape."],
+          ]},
+  }
 },
 
-fighter:{
- hitDie:10,
- subclasses:["Champion","Battle Master","Eldritch Knight","Psi Warrior"],
- levels:{
-1:{auto:["Fighting Style","Second Wind","Weapon Mastery"]},
-2:{auto:["Action Surge","Tactical Mind"]},
-3:{choice:["Martial Archetype"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Extra Attack"]},
-6:{choice:["Ability Score Improvement or Feat"]},
-7:{auto:["Subclass Feature"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["Indomitable"]},
-10:{auto:["Subclass Feature"]}
-}
+fighter: {
+  name: "Fighter", hitDie: "d10",
+  subclasses: {
+    "Battle Master":   "Maneuvers (d8 die) let you trip, disarm, inspire, push — very tactical. Great with STR or DEX.",
+    "Champion":        "Expanded crit range (19-20 at L3, 18-20 at L15), bonus style at L7. Simple but effective high-STR build.",
+    "Eldritch Knight": "Wizard spell slots (INT based) — Shield and Booming Blade pair great with melee. Needs INT investment.",
+    "Psi Warrior":     "Psychic dice for extra damage, telekinetic moves, defense. INT synergy like Eldritch Knight.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Action Surge (1/rest)", "On your turn, take one additional Action. Recharges on Short or Long Rest. Doubles your attacks that turn. Write: Action Surge ☐."],
+            ["Tactical Mind", "When you fail an ability check, you can expend a Second Wind use to add 1d10 to the roll (potentially turning failure to success)."],
+          ]},
+    3:  { subclass: true },
+    4:  { asi: true,
+          auto: [
+            ["Weapon Mastery (swap)", "You can swap one Weapon Mastery choice for a different weapon. Note on sheet."],
+          ]},
+    5:  { auto: [
+            ["Extra Attack", "Attack twice when you take the Attack action. Write 2 attacks on your sheet. Massive damage increase."],
+          ]},
+    6:  { asi: true,
+          auto: [
+            ["Weapon Mastery (swap)", "Swap another Weapon Mastery choice if desired."],
+          ]},
+    7:  { auto: [
+            ["Subclass Feature", "Your Martial Archetype grants a new feature."],
+          ]},
+    8:  { asi: true },
+    9:  { auto: [
+            ["Indomitable (1/Long Rest)", "Reroll a failed saving throw. You must use the new result. Write: Indomitable ☐."],
+            ["Tactical Shift", "When you use Action Surge, you can move up to half your speed without provoking opportunity attacks."],
+          ]},
+    10: { auto: [
+            ["Subclass Feature", "Another feature from your Martial Archetype."],
+            ["Weapon Mastery (swap)", "Can swap another Weapon Mastery if desired."],
+          ]},
+  }
 },
 
-monk:{
- hitDie:8,
- subclasses:["Open Hand","Shadow","Elements","Mercy"],
- levels:{
-1:{auto:["Martial Arts","Unarmored Defense"]},
-2:{auto:["Ki","Unarmored Movement"]},
-3:{choice:["Monastic Tradition"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Extra Attack","Stunning Strike"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["Evasion","Stillness of Mind"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["Improved Movement"]},
-10:{auto:["Self‑Restoration"]}
-}
+monk: {
+  name: "Monk", hitDie: "d8",
+  subclasses: {
+    "Warrior of the Open Hand": "Extra unarmed effects — push, topple, deny reactions. Pure martial power.",
+    "Warrior of Shadow":        "Darkness and Shadow Step (teleport between shadows). Stealth and WIS synergy.",
+    "Warrior of the Four Elements": "Spend Focus Points on elemental spells (WIS based). Expensive but flavorful.",
+    "Warrior of Mercy":         "Healing/cursing hands. Lay on Hands variant. Strong WIS helps.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Monk's Focus (Ki)", "You gain Focus Points equal to your Monk level (2 at L2). Recharge on Short/Long Rest. Used for Flurry of Blows, Patient Defense, Step of the Wind, and subclass features. Write: Focus ☐☐."],
+            ["Unarmored Movement", "Speed increases by 10 ft while not wearing armor or a shield. Update Speed on sheet."],
+            ["Uncanny Metabolism", "Once per Long Rest when you roll Initiative, regain all Focus Points and one use of Stunning Strike (if applicable)."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Deflect Attacks", "When hit by an attack, use Reaction to reduce the damage by 1d10 + DEX mod + Monk level. If reduced to 0, you catch the attack and can throw it back."],
+          ]},
+    4:  { asi: true,
+          auto: [
+            ["Slow Fall", "Reaction: reduce fall damage by 5 × Monk level."],
+          ]},
+    5:  { auto: [
+            ["Extra Attack", "Attack twice when you take the Attack action. Write 2 attacks on your sheet."],
+            ["Stunning Strike", "Spend 1 Focus Point after hitting. Target makes a CON save (DC = 8 + Prof + WIS). On fail: Stunned until end of your next turn. Extremely powerful. Note DC on sheet."],
+          ]},
+    6:  { auto: [
+            ["Subclass Feature", "Your Monastic Tradition grants a new feature."],
+            ["Empowered Strikes", "Your unarmed strikes now count as magical for overcoming resistance."],
+          ]},
+    7:  { auto: [
+            ["Evasion", "When a DEX save would deal half damage, you take no damage on success, and half damage on fail."],
+            ["Stillness of Mind", "Action: end the Charmed or Frightened condition on yourself."],
+          ]},
+    8:  { asi: true },
+    9:  { auto: [
+            ["Acrobatic Movement", "While not grounded, movement costs no extra over difficult terrain. You can run up walls until your movement ends."],
+          ]},
+    10: { auto: [
+            ["Heightened Focus", "Some of your key Focus abilities improve. Flurry of Blows lets you impose conditions; Patient Defense grants extra benefits."],
+            ["Self-Restoration", "At the end of your turn: end the Frightened or Poisoned condition, or reduce Exhaustion by 1."],
+          ]},
+  }
 },
 
-paladin:{
- hitDie:10,
- subclasses:["Devotion","Ancients","Vengeance","Glory"],
- levels:{
-1:{auto:["Lay on Hands","Weapon Mastery"]},
-2:{auto:["Fighting Style","Divine Smite","Spellcasting"]},
-3:{choice:["Sacred Oath"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Extra Attack"]},
-6:{auto:["Aura of Protection"]},
-7:{auto:["Subclass Feature"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["3rd‑Level Spells"]},
-10:{auto:["Aura Improvement"]}
-}
+paladin: {
+  name: "Paladin", hitDie: "d10",
+  subclasses: {
+    "Oath of Devotion":  "Sacred Weapon (CHA to attacks), Turn the Unholy, Smite spells. Classic holy warrior.",
+    "Oath of the Ancients": "Nature/fey protection, Aura of Warding (resistance to spell damage), versatile.",
+    "Oath of Vengeance": "Vow of Enmity (Advantage on attacks), relentless pursuer. High damage, DEX or STR.",
+    "Oath of Glory":     "Inspirational leader — boost allies, area speed buffs, radiant damage. CHA-heavy.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Fighting Style", "Choose a Fighting Style: Defense (+1 AC with armor), Dueling (+2 damage one-handed), Great Weapon Fighting (reroll 1s/2s), Protection (impose Disadvantage on attack vs ally), Blessed Warrior (learn 2 Cleric cantrips). Write chosen style on sheet."],
+            ["Divine Smite", "When you hit with a melee weapon, expend a spell slot to deal extra radiant damage: 2d8 per L1 slot (+1d8 per slot level above 1st, max 5d8). Bonus 1d8 vs Undead/Fiends. This is your main damage button."],
+            ["Spellcasting begins", "You can now prepare and cast Paladin spells. Use CHA for all spells. You have 2 L1 slots. Prepare CHA mod + half your Paladin level (rounded down, min 1) spells."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Sacred Oath", "Your oath defines your Channel Divinity options and grants bonus spells always prepared. Choose your oath now."],
+            ["Channel Divinity (1/rest)", "Gain one Channel Divinity use per Short/Long Rest. Write: CD ☐."],
+          ]},
+    4:  { asi: true },
+    5:  { auto: [
+            ["Extra Attack", "Attack twice when you take the Attack action. Write 2 attacks on your sheet."],
+            ["Faithful Steed", "Cast Find Steed (once per Long Rest without a slot) and always have it prepared."],
+          ]},
+    6:  { auto: [
+            ["Aura of Protection", "While conscious, you and friendly creatures within 10 ft add your CHA modifier (min +1) to all Saving Throws. This is one of the best auras in the game — note your CHA mod on the sheet and update all saves in range."],
+          ]},
+    7:  { auto: [
+            ["Subclass Feature", "Your Sacred Oath grants a new feature."],
+          ]},
+    8:  { asi: true },
+    9:  { spellNote: "3rd-level Paladin spells now accessible. Dispel Magic and Revivify are excellent picks." },
+    10: { auto: [
+            ["Aura of Courage", "While conscious, you and allies within 10 ft cannot be Frightened."],
+          ]},
+  }
 },
 
-ranger:{
- hitDie:10,
- subclasses:["Hunter","Beast Master","Gloom Stalker","Fey Wanderer"],
- levels:{
-1:{auto:["Favored Enemy","Weapon Mastery"]},
-2:{auto:["Fighting Style","Spellcasting"]},
-3:{choice:["Ranger Conclave"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Extra Attack"]},
-6:{auto:["Roving"]},
-7:{auto:["Subclass Feature"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["3rd‑Level Spells"]},
-10:{auto:["Nature's Veil"]}
-}
+ranger: {
+  name: "Ranger", hitDie: "d10",
+  subclasses: {
+    "Hunter":         "Colossus Slayer / Horde Breaker for damage, Defensive Tactics at L7. Flexible, needs DEX/WIS.",
+    "Beast Master":   "Bond with a Beast companion that fights alongside you. WIS affects some bond features.",
+    "Gloom Stalker":  "Mastery of ambush and darkness — Dread Ambusher, invisible in darkness. DEX heavy.",
+    "Fey Wanderer":   "Enchantment/fey magic + CHA synergy, Misty Wanderer teleport at L7.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Fighting Style", "Choose: Archery (+2 ranged attacks), Defense (+1 AC), Druidic Warrior (2 Druid cantrips), Thrown Weapon Fighting, Two-Weapon Fighting. Write your choice on sheet."],
+            ["Spellcasting begins", "You can now cast Ranger spells using WIS. 2 L1 slots. You know 2 spells."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Roving", "Speed +10 ft. Gain Climb and Swim speeds equal to your walking speed. Update sheet."],
+          ]},
+    4:  { asi: true,
+          spellNote: "Learn 1 new Ranger spell." },
+    5:  { auto: [
+            ["Extra Attack", "Attack twice when you take the Attack action. Write 2 attacks on your sheet."],
+          ]},
+    6:  { auto: [
+            ["Subclass Feature", "Your Ranger conclave grants a new ability."],
+          ]},
+    7:  { auto: [
+            ["Roving upgrade", "Your Roving speed bonus increases. Check subclass for additional mobility features."],
+          ]},
+    8:  { asi: true },
+    9:  { spellNote: "3rd-level Ranger spells accessible: Conjure Barrage, Lightning Arrow, Nondetection." },
+    10: { auto: [
+            ["Nature's Veil (d6/Long Rest)", "As a Bonus Action, turn Invisible until the start of your next turn. Uses = Proficiency Bonus per Long Rest. Write: Veil ☐☐☐."],
+          ]},
+  }
 },
 
-rogue:{
- hitDie:8,
- subclasses:["Thief","Assassin","Arcane Trickster","Swashbuckler"],
- levels:{
-1:{auto:["Sneak Attack","Expertise","Thieves' Cant"]},
-2:{auto:["Cunning Action"]},
-3:{choice:["Roguish Archetype"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["Uncanny Dodge"]},
-6:{auto:["Expertise"]},
-7:{auto:["Evasion"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["Subclass Feature"]},
-10:{auto:["Reliable Talent"]}
-}
+rogue: {
+  name: "Rogue", hitDie: "d8",
+  subclasses: {
+    "Thief":            "Fast Hands (bonus action tool use + objects), Second-Story Work (climb speed), Superior Sneak.",
+    "Assassin":         "Assassinate (auto-crit vs surprised, Advantage vs those who haven't acted yet), bonus damage at L9.",
+    "Arcane Trickster": "Wizard spells (INT based) — Mage Hand legerdemain, enchantment/illusion focus.",
+    "Swashbuckler":     "Fancy Footwork (no opportunity attacks after melee), Rakish Audacity (Sneak Attack alone).",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Cunning Action", "Each turn, Bonus Action: Dash, Disengage, or Hide. This is your mobility backbone. Note on sheet."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Steady Aim", "Bonus Action: gain Advantage on your next attack if you don't move this turn."],
+          ]},
+    4:  { asi: true },
+    5:  { auto: [
+            ["Uncanny Dodge", "When an attacker you can see hits you, use your Reaction to halve the attack's damage against you. Very powerful against burst damage."],
+            ["Sneak Attack increases", "Your Sneak Attack damage increases to 3d6. Update your sheet."],
+          ]},
+    6:  { auto: [
+            ["Expertise (2nd pair)", "Choose 2 more proficient skills to double your Proficiency Bonus. Update those skills on your sheet."],
+          ]},
+    7:  { auto: [
+            ["Evasion", "When a DEX save would deal half damage, you take no damage on success, and half damage on fail."],
+            ["Sneak Attack increases", "Sneak Attack increases to 4d6. Update your sheet."],
+          ]},
+    8:  { asi: true },
+    9:  { auto: [
+            ["Subclass Feature", "Your Roguish Archetype grants a new feature."],
+            ["Sneak Attack increases", "Sneak Attack increases to 5d6. Update your sheet."],
+          ]},
+    10: { auto: [
+            ["Reliable Talent", "Whenever you make an ability check you're proficient in, treat any roll of 9 or lower as a 10 on the die. You can't roll below 10 + your proficiency bonus on these checks."],
+            ["Sneak Attack increases", "Sneak Attack increases to 6d6. Update your sheet."],
+          ]},
+  }
 },
 
-sorcerer:{
- hitDie:6,
- subclasses:["Draconic","Wild Magic","Aberrant Mind","Clockwork Soul"],
- levels:{
-1:{auto:["Spellcasting","Innate Sorcery"]},
-2:{auto:["Font of Magic"]},
-3:{choice:["Sorcerous Origin"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["3rd‑Level Spells"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Spells"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Spells"]},
-10:{auto:["Metamagic Improvement"]}
-}
+sorcerer: {
+  name: "Sorcerer", hitDie: "d6",
+  subclasses: {
+    "Draconic Bloodline": "Dragon ancestor — bonus HP per level (add CHA mod to HP at L1 onward), scales eventually to natural AC 13+DEX.",
+    "Wild Magic":         "Surge table on spell casting — random wild effects that can be great or chaotic. Fun RP.",
+    "Aberrant Mind":      "Telepathic, psionics-flavored spells. Choose extra spells from Divination/Enchantment. INT-flavor.",
+    "Clockwork Soul":     "Order/modakarath magic, cancel advantage/disadvantage. Strong utility.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Font of Magic", "Gain Sorcery Points equal to your Sorcerer level (2 at L2). Recharge on Long Rest. You can: convert a spell slot to SP (1 SP per slot level) or convert SP to a slot. Write: Sorcery Points ☐☐."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Metamagic (choose 2)", "Choose 2 Metamagic options:\n• Careful Spell: spend 1 SP — chosen creatures auto-succeed saving throws against your spell.\n• Distant Spell: 1 SP — double spell range.\n• Empowered Spell: 1 SP — reroll up to CHA mod damage dice.\n• Extended Spell: 1 SP — double duration.\n• Heightened Spell: 2 SP — one target has Disadvantage on first save vs spell.\n• Quickened Spell: 2 SP — cast a spell with a casting time of 1 Action as a Bonus Action.\n• Subtle Spell: 1 SP — no verbal/somatic components (cast in social situations or while restrained).\n• Twinned Spell: 1 SP per spell level — target a second creature with a single-target spell.\nNote chosen Metamagics on your sheet."],
+          ]},
+    4:  { asi: true,
+          spellNote: "Learn 1 new Sorcerer spell and can swap 1 known spell." },
+    5:  { spellNote: "3rd-level spells unlocked. Fireball and Counterspell are standout picks." },
+    6:  { auto: [
+            ["Subclass Feature", "Your Sorcerous Origin grants a new feature."],
+          ]},
+    7:  { spellNote: "4th-level spells unlocked. Banishment, Dimension Door, and Greater Invisibility available." },
+    8:  { asi: true },
+    9:  { spellNote: "5th-level spells unlocked. Dominate Person, Hold Monster, and Wall of Force available." },
+    10: { auto: [
+            ["Metamagic (3rd option)", "You learn a 3rd Metamagic option. Add it to your sheet."],
+          ]},
+  }
 },
 
-warlock:{
- hitDie:8,
- subclasses:["Fiend","Archfey","Great Old One","Celestial"],
- levels:{
-1:{auto:["Pact Magic","Eldritch Invocations"]},
-2:{auto:["More Invocations"]},
-3:{choice:["Warlock Patron"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["3rd‑Level Pact Slots"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Pact Slots"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Pact Slots"]},
-10:{auto:["Subclass Feature"]}
-}
+warlock: {
+  name: "Warlock", hitDie: "d8",
+  subclasses: {
+    "The Fiend":       "Temporary HP on kills (Dark One's Blessing), bonus fire/cold spells, eventually resistance to all damage. Strong CHA.",
+    "The Archfey":     "Fey Presence (charm/frighten), Misty Escape (teleport + invisibility as Reaction). Enchantment-heavy.",
+    "The Great Old One":"Telepathy, expanded mind spells, eventually detect thoughts at will. Psychic and CHA heavy.",
+    "The Celestial":   "Healing Light pool (1d6/warlock level), bonus healing/radiant spells. Support warlock.",
+  },
+  subclassLevel: 3,
+  levels: {
+    2:  { auto: [
+            ["Eldritch Invocations (2nd)", "You now know 2 Invocations. At each level listed, you gain more or can swap old ones. Common picks: Agonizing Blast (+CHA to Eldritch Blast), Devil's Sight (darkvision 120ft, see in magical darkness), Armor of Shadows (cast Mage Armor free at will), Mask of Many Faces (cast Disguise Self at will)."],
+          ]},
+    3:  { subclass: true,
+          auto: [
+            ["Pact Boon", "Choose your Pact:\n• Pact of the Blade: Conjure a magical melee weapon (use CHA for attacks with it). Lets you fight in melee with CHA.\n• Pact of the Chain: Find Familiar + special familiar options (quasit, imp, pseudodragon, sprite).\n• Pact of the Tome: Book of Shadows — 3 extra cantrips from any class list.\n• Pact of the Talisman: Amulet that adds a d4 to failed ability checks.\nNote your Pact on your sheet."],
+            ["2nd-level Pact Magic slots", "Your Pact Magic slots upgrade to 2nd level. All spell slots are now L2. Update sheet."],
+          ]},
+    4:  { asi: true,
+          auto: [
+            ["Invocation (new)", "You learn a 3rd Eldritch Invocation. Add to sheet."],
+          ]},
+    5:  { auto: [
+            ["3rd-level Pact Magic slots", "Your Pact Magic slots upgrade to 3rd level. Update sheet."],
+          ],
+          spellNote: "Learn 1 new Warlock spell (now from 3rd-level list)." },
+    6:  { auto: [
+            ["Subclass Feature", "Your Patron grants a new feature."],
+          ]},
+    7:  { auto: [
+            ["4th-level Pact Magic slots", "Your Pact Magic slots upgrade to 4th level. Update sheet."],
+            ["Invocation (new)", "You learn a new Eldritch Invocation. Add to sheet."],
+          ]},
+    8:  { asi: true },
+    9:  { auto: [
+            ["5th-level Pact Magic slots", "Your Pact Magic slots upgrade to 5th level. Update sheet."],
+          ],
+          spellNote: "Learn 1 new Warlock spell from 5th-level list." },
+    10: { auto: [
+            ["Subclass Feature", "Your Patron grants another feature."],
+            ["Invocation (new)", "You learn a new Eldritch Invocation."],
+          ]},
+  }
 },
 
-wizard:{
- hitDie:6,
- subclasses:["Evocation","Illusion","Divination","Abjuration"],
- levels:{
-1:{auto:["Spellcasting","Arcane Recovery"]},
-2:{auto:["Scholar","Arcane Tradition"]},
-3:{auto:["2nd‑Level Spells"]},
-4:{choice:["Ability Score Improvement or Feat"]},
-5:{auto:["3rd‑Level Spells"]},
-6:{auto:["Subclass Feature"]},
-7:{auto:["4th‑Level Spells"]},
-8:{choice:["Ability Score Improvement or Feat"]},
-9:{auto:["5th‑Level Spells"]},
-10:{auto:["Subclass Feature"]}
+wizard: {
+  name: "Wizard", hitDie: "d6",
+  subclasses: {
+    "School of Evocation":  "Sculpt Spells (spare allies from AoE), Potent Cantrip, Empowered Evocation (+INT to damage). Best fire/lightning blaster.",
+    "School of Abjuration": "Arcane Ward (HP buffer), Projected Ward (extend buffer to allies), Spell Resistance. Durable tank wizard.",
+    "School of Divination": "Portent (replace any d20 roll with pre-rolled dice), Expert Divination (slot refund). Extremely powerful.",
+    "School of Illusion":   "Improved Minor Illusion, Malleable Illusions, Illusory Reality. Flavor and utility.",
+  },
+  subclassLevel: 2,
+  levels: {
+    2:  { subclass: true,
+          auto: [
+            ["Scholar", "You gain Expertise in one skill: Arcana, History, Medicine, Nature, or Religion. Double your Proficiency Bonus for that skill. Note on sheet."],
+          ]},
+    3:  { spellNote: "2nd-level spell slots unlocked. Add Misty Step, Invisibility, and Scorching Ray to your consideration list. Also: copy 2 new spells into your spellbook (treasure or downtime)." },
+    4:  { asi: true,
+          spellNote: "Learn 2 new spells of any level you can cast (free, from leveling). Add to spellbook." },
+    5:  { spellNote: "3rd-level spells unlocked. Counterspell, Fireball, and Fly are the big-three picks. Add 2 new spells to spellbook." },
+    6:  { auto: [
+            ["Subclass Feature", "Your Arcane Tradition grants a new feature."],
+          ]},
+    7:  { spellNote: "4th-level spells unlocked. Banishment, Polymorph, and Greater Invisibility become available." },
+    8:  { asi: true },
+    9:  { spellNote: "5th-level spells unlocked. Wall of Force, Telekinesis, and Dominate Person are top picks." },
+    10: { auto: [
+            ["Subclass Feature", "Your Arcane Tradition grants another feature."],
+          ]},
+  }
+},
+
+}; // end CLASSES
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function renderGuide() {
+  const cls   = document.getElementById('classSelect').value;
+  const from  = Math.max(1, parseInt(document.getElementById('fromLevel').value) || 1);
+  const to    = Math.min(10, parseInt(document.getElementById('toLevel').value) || 5);
+  const tl    = document.getElementById('timeline');
+  const res   = document.getElementById('results');
+
+  if (!cls) { res.innerHTML = '<p style="font-style:italic;color:var(--ink-light);text-align:center;padding:2rem;">Select a class to begin.</p>'; tl.innerHTML=''; return; }
+
+  const data  = CLASSES[cls];
+  const prof  = PROF_BONUS;
+  const hpPer = HP_PER_LEVEL[cls];
+
+  // ── Timeline ────────────────────────────────────────────────────────────────
+  tl.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'tl-pip';
+    if (i > from && i <= to) pip.classList.add('in-range');
+    if (i === data.subclassLevel) pip.classList.add('subclass-level');
+    if ([4,8].includes(i)) pip.classList.add('asi-level');
+    pip.textContent = i;
+    pip.title = `Level ${i}${i === data.subclassLevel ? ' — Subclass' : ''}${[4,8].includes(i) ? ' — ASI/Feat' : ''}`;
+    pip.onclick = () => {
+      document.getElementById('fromLevel').value = i - 1;
+      document.getElementById('toLevel').value = i;
+      renderGuide();
+    };
+    tl.appendChild(pip);
+  }
+
+  // ── Cards ───────────────────────────────────────────────────────────────────
+  res.innerHTML = '';
+
+  if (from >= to) {
+    res.innerHTML = '<p style="font-style:italic;color:var(--ink-light);text-align:center;padding:1rem;">Set \'From Level\' below \'To Level\'.</p>';
+    return;
+  }
+
+  const container = document.createElement('div');
+  container.className = 'level-cards';
+
+  for (let lvl = from + 1; lvl <= to; lvl++) {
+    const levelData  = data.levels[lvl] || {};
+    const prevSlots  = SPELL_SLOTS[cls]?.[lvl - 1];
+    const currSlots  = SPELL_SLOTS[cls]?.[lvl];
+    const prevProf   = prof[lvl - 1];
+    const currProf   = prof[lvl];
+    const profChange = currProf > prevProf;
+    const prevCantrips = CANTRIPS_KNOWN[cls]?.[lvl - 1] ?? 0;
+    const currCantrips = CANTRIPS_KNOWN[cls]?.[lvl] ?? 0;
+    const cantripsTotal = Object.entries(CANTRIPS_KNOWN[cls] || {})
+      .filter(([l]) => parseInt(l) <= lvl)
+      .reduce((t, [l, v]) => v > 0 ? v : t, 0);
+    const spellsGained = SPELLS_KNOWN_GAINED[cls]?.[lvl] ?? 0;
+
+    const card = document.createElement('div');
+    card.className = 'level-card';
+
+    // ── Header ──
+    let pillsHtml = `<div class="level-card-pills">`;
+    pillsHtml += `<span class="pill">HP +${hpPer} + CON mod</span>`;
+    if (profChange) pillsHtml += `<span class="pill crimson">Prof Bonus → +${currProf}</span>`;
+    if (levelData.asi) pillsHtml += `<span class="pill crimson">ASI / Feat</span>`;
+    if (levelData.subclass) pillsHtml += `<span class="pill crimson">Subclass Choice</span>`;
+    pillsHtml += '</div>';
+
+    card.innerHTML = `
+      <div class="level-card-header">
+        <div class="level-card-title">Level ${lvl}</div>
+        ${pillsHtml}
+      </div>
+      <div class="level-card-body" id="body-${lvl}"></div>
+    `;
+    container.appendChild(card);
+    const body = card.querySelector(`#body-${lvl}`);
+
+    // ── Write on Sheet block ──────────────────────────────────────────────────
+    const writeItems = [];
+    writeItems.push(`Update HP: add ${hpPer} + CON mod to your Maximum HP`);
+    if (profChange) writeItems.push(`Update Proficiency Bonus to +${currProf} — this affects all proficient attacks, skills, saves, and spell DC/attack automatically`);
+    if (levelData.asi) writeItems.push('Choose an ASI or Feat (see below) — update ability scores and any stats that depend on them (attack bonus, save DC, AC, etc.)');
+    if (currSlots && prevSlots) {
+      for (let si = 0; si < 5; si++) {
+        if (currSlots[si] > (prevSlots[si] || 0)) {
+          const gained = currSlots[si] - (prevSlots[si] || 0);
+          writeItems.push(`Spell Slots: L${si+1} slots → ${currSlots[si]} total (+${gained} new slot${gained>1?'s':''})`);
+        }
+      }
+    }
+    if (cls === 'warlock' && currSlots) {
+      const wSlot = currSlots.findIndex(s => s > 0);
+      if (wSlot >= 0) writeItems.push(`Update Pact Magic: slots are now L${wSlot+1} (${currSlots[wSlot]} slots, regain on Short Rest)`);
+    }
+    if (currCantrips > prevCantrips && prevCantrips > 0) {
+      writeItems.push(`Learn ${currCantrips - prevCantrips} new cantrip — update cantrips known`);
+    }
+    if (spellsGained > 0) {
+      writeItems.push(`Choose ${spellsGained} new spell${spellsGained>1?'s':''} known from your class list`);
+    }
+
+    if (writeItems.length) {
+      const wb = document.createElement('div');
+      wb.className = 'block block-write';
+      wb.innerHTML = `<div class="block-title">✏ Write on your sheet</div>
+        <ul class="write-list">${writeItems.map(w=>`<li>${w}</li>`).join('')}</ul>`;
+      body.appendChild(wb);
+    }
+
+    // ── Subclass choice ───────────────────────────────────────────────────────
+    if (levelData.subclass) {
+      const sb = document.createElement('div');
+      sb.className = 'block block-choice';
+      let scHtml = `<div class="block-title">⚜ Subclass Choice — ${data.name} Level ${lvl}</div>`;
+      scHtml += `<div class="choice-note" style="margin-bottom:0.6rem;">This is a permanent choice that defines your character's specialisation. Each subclass gives different features at levels ${data.subclassLevel}, 6, and 10.</div>`;
+      scHtml += `<div class="subclass-grid">`;
+      for (const [name, desc] of Object.entries(data.subclasses)) {
+        scHtml += `<div class="subclass-card"><strong>${name}</strong><span>${desc}</span></div>`;
+      }
+      scHtml += `</div>`;
+      sb.innerHTML = scHtml;
+      body.appendChild(sb);
+    }
+
+    // ── ASI / Feat ────────────────────────────────────────────────────────────
+    if (levelData.asi) {
+      const ab = document.createElement('div');
+      ab.className = 'block block-choice';
+      ab.innerHTML = `<div class="block-title">📈 Ability Score Improvement or Feat</div>
+        <div class="choice-block-inner">
+          <div class="choice-option"><strong>Option A — Ability Score Improvement</strong>Increase one ability score by 2, or two ability scores by 1 each. No score can exceed 20. Best if a key stat (STR/DEX/CHA/WIS/INT/CON) is at an odd number, or if you're raising a primary stat to improve your modifier.</div>
+          <div class="choice-option"><strong>Option B — Take a Feat</strong>Choose any General or Fighting Style feat. Key picks by role: <em>Melee</em> — Great Weapon Master, Polearm Master, Sentinel, War Caster. <em>Ranged</em> — Sharpshooter, Crossbow Expert. <em>Caster</em> — War Caster (concentration), Resilient CON (concentration), Spell Sniper. <em>Utility</em> — Lucky, Alert, Mobile.</div>
+        </div>
+        <div class="choice-note">After choosing: update your ability score block, recalculate all modifiers, and update any stat that uses the modified ability (attack rolls, save DCs, skills, saving throws, AC if relevant, HP if CON).</div>`;
+      body.appendChild(ab);
+    }
+
+    // ── Automatic features ────────────────────────────────────────────────────
+    if (levelData.auto && levelData.auto.length) {
+      const fb = document.createElement('div');
+      fb.className = 'block block-auto';
+      fb.innerHTML = `<div class="block-title">⚔ New Features</div>`;
+      const ul = document.createElement('ul');
+      ul.className = 'feature-list';
+      for (const [name, desc] of levelData.auto) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="feat-name">${name}</span><span class="feat-desc">${desc.replace(/\n/g,'<br>')}</span>`;
+        ul.appendChild(li);
+      }
+      fb.appendChild(ul);
+      body.appendChild(fb);
+    }
+
+    // ── Spell slots table ─────────────────────────────────────────────────────
+    if (currSlots && cls !== 'warlock') {
+      const spb = document.createElement('div');
+      spb.className = 'block block-spell';
+      let spHtml = `<div class="block-title">✨ Spell Slots</div>`;
+      spHtml += `<table class="slot-table"><thead><tr><th>Level</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>L5</th></tr></thead><tbody>`;
+      for (let sl = Math.max(1, lvl - 2); sl <= Math.min(10, lvl); sl++) {
+        const slotRow = SPELL_SLOTS[cls]?.[sl];
+        if (!slotRow) continue;
+        const isCurr = sl === lvl;
+        const prevRow = SPELL_SLOTS[cls]?.[sl - 1] || [0,0,0,0,0];
+        spHtml += `<tr ${isCurr ? 'class="current-row"' : ''}>`;
+        spHtml += `<td>${isCurr ? `<strong>L${sl} ★</strong>` : `L${sl}`}</td>`;
+        for (let si = 0; si < 5; si++) {
+          const val = slotRow[si] || 0;
+          const prev = prevRow[si] || 0;
+          const isNew = isCurr && val > prev;
+          spHtml += `<td class="${isNew ? 'new-gain' : ''}">${val > 0 ? val : '—'}</td>`;
+        }
+        spHtml += '</tr>';
+      }
+      spHtml += '</tbody></table>';
+      if (SPELL_LEVEL_ACCESS[cls]?.[lvl]) {
+        const maxSL = SPELL_LEVEL_ACCESS[cls][lvl];
+        const prevMaxSL = SPELL_LEVEL_ACCESS[cls]?.[lvl-1] || 0;
+        if (maxSL > prevMaxSL) {
+          spHtml += `<div class="choice-note" style="margin-top:0.4rem; color:var(--crimson);">🆕 You can now cast ${maxSL === 1 ? '1st' : maxSL === 2 ? '2nd' : maxSL === 3 ? '3rd' : maxSL+'th'}-level spells for the first time.</div>`;
+        }
+      }
+      spb.innerHTML = spHtml;
+      body.appendChild(spb);
+    }
+
+    // Warlock pact magic special display
+    if (cls === 'warlock' && currSlots) {
+      const wSlot = currSlots.findIndex(s => s > 0);
+      if (wSlot >= 0) {
+        const wpb = document.createElement('div');
+        wpb.className = 'block block-spell';
+        wpb.innerHTML = `<div class="block-title">🔮 Pact Magic</div>
+          <div style="font-size:0.95rem;color:var(--ink);">Slot Level: <strong>L${wSlot+1}</strong> &nbsp;·&nbsp; Slots: <strong>${currSlots[wSlot]}</strong> &nbsp;·&nbsp; Recharge on: <strong>Short or Long Rest</strong></div>
+          <div class="choice-note" style="margin-top:0.3rem;">All Warlock slots are the same level — always the highest level available to you. You can upcast any spell into your slot level automatically.</div>`;
+        body.appendChild(wpb);
+      }
+    }
+
+    // ── Spell note (level-specific) ───────────────────────────────────────────
+    if (levelData.spellNote) {
+      const snb = document.createElement('div');
+      snb.className = 'block block-spell';
+      snb.innerHTML = `<div class="block-title">📖 Spells</div><div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">${levelData.spellNote}</div>`;
+      body.appendChild(snb);
+    }
+
+    // Cantrip gain
+    if (currCantrips > prevCantrips && prevCantrips > 0) {
+      const cb = document.createElement('div');
+      cb.className = 'block block-spell';
+      cb.innerHTML = `<div class="block-title">🕯 Cantrips</div>
+        <div style="font-size:0.95rem;color:var(--ink);">You now know <strong>${cantripsTotal}</strong> cantrips total. Learn <strong>${currCantrips - prevCantrips}</strong> new cantrip${currCantrips-prevCantrips>1?'s':''} — choose from your class cantrip list.</div>`;
+      body.appendChild(cb);
+    }
+
+    // Spells gained (non-preparer classes)
+    if (spellsGained > 0 && !['cleric','druid','paladin','wizard'].includes(cls)) {
+      const sgb = document.createElement('div');
+      sgb.className = 'block block-spell';
+      sgb.innerHTML = `<div class="block-title">📖 Spells Known</div>
+        <div style="font-size:0.95rem;color:var(--ink);">You learn <strong>${spellsGained}</strong> new spell${spellsGained>1?'s':''} from your class list. ${cls === 'sorcerer' || cls === 'bard' ? 'You may also replace 1 known spell with a new one.' : ''}</div>`;
+      body.appendChild(sgb);
+    }
+
+    // Wizard spellbook note
+    if (cls === 'wizard') {
+      const wzb = document.createElement('div');
+      wzb.className = 'block block-spell';
+      const maxSL = SPELL_LEVEL_ACCESS['wizard'][lvl];
+      wzb.innerHTML = `<div class="block-title">📖 Spellbook</div>
+        <div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">
+          Add <strong>2 new Wizard spells</strong> of any level you can cast (up to L${maxSL}) to your spellbook — free from leveling up.<br>
+          <span style="font-size:0.88rem;color:var(--ink-light);">You can also copy spells from scrolls or other spellbooks during downtime (costs 50gp + 2 hrs per spell level). 
+          Each day, prepare <strong>INT mod + ${lvl}</strong> spells from your book.</span>
+        </div>`;
+      body.appendChild(wzb);
+    }
+
+    // Preparer spell preparation count update
+    if (['cleric','druid','paladin'].includes(cls) && !levelData.spellNote) {
+      const prepb = document.createElement('div');
+      prepb.className = 'block block-spell';
+      const keyAb = cls === 'paladin' ? 'CHA' : 'WIS';
+      const formula = cls === 'paladin'
+        ? `CHA mod + half Paladin level (${Math.floor(lvl/2)} at L${lvl})`
+        : `${keyAb} mod + ${lvl}`;
+      prepb.innerHTML = `<div class="block-title">📖 Prepared Spells</div>
+        <div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">
+          Update your max prepared spells: <strong>${formula}</strong>. 
+          You can change your prepared list after each Long Rest. 
+          ${currSlots && SPELL_LEVEL_ACCESS[cls]?.[lvl] > (SPELL_LEVEL_ACCESS[cls]?.[lvl-1]||0) ? `<strong style="color:var(--crimson);">New spell level unlocked — add higher-level spells to your preparation options.</strong>` : ''}
+        </div>`;
+      body.appendChild(prepb);
+    }
+
+  } // end level loop
+
+  res.appendChild(container);
 }
-}
 
-}
-
-const classSelect=document.getElementById("classSelect")
-
-Object.keys(CLASSES).forEach(c=>{
- const opt=document.createElement("option")
- opt.value=c
- opt.innerText=c
- classSelect.appendChild(opt)
-})
-
-function generate(){
-
-const cls=classSelect.value
-const from=parseInt(document.getElementById("fromLevel").value)
-const to=parseInt(document.getElementById("toLevel").value)
-
-const data=CLASSES[cls]
-
-const res=document.getElementById("results")
-const timeline=document.getElementById("timeline")
-
-res.innerHTML=""
-timeline.innerHTML=""
-
-for(let i=1;i<=10;i++){
- const t=document.createElement("div")
- t.innerText=i
- if(i>from && i<=to) t.classList.add("active")
- timeline.appendChild(t)
-}
-
-for(let lvl=from+1;lvl<=to;lvl++){
-
-const card=document.createElement("div")
-card.className="level-card"
-
-let html=`<div class='level-title'>Level ${lvl}</div>`
-
-html+=`<div class='section'><h4>Scaling</h4>
-<div class='feature'>Proficiency Bonus: +${PROF[lvl]}</div>
-<div class='feature'>HP Increase: ${Math.floor(data.hitDie/2)+1}+CON</div>
-</div>`
-
-const levelData=data.levels[lvl]
-
-if(levelData?.auto){
-html+=`<div class='section'><h4>Automatic Gains</h4>`
-levelData.auto.forEach(f=>{
- html+=`<div class='feature'>• ${f}</div>`
-})
-html+=`</div>`
-}
-
-if(levelData?.choice){
-html+=`<div class='section'><h4>Choices</h4>`
-levelData.choice.forEach(c=>{
- html+=`<div class='choice'>${c}`
- if(c.toLowerCase().includes("subclass")||c.toLowerCase().includes("path")||c.toLowerCase().includes("tradition")||c.toLowerCase().includes("oath")||c.toLowerCase().includes("college")||c.toLowerCase().includes("origin")||c.toLowerCase().includes("patron")){
- html+=`<br>Options: ${data.subclasses.join(", ")}`
- }
- html+=`</div>`
-})
-html+=`</div>`
-}
-
-card.innerHTML=html
-res.appendChild(card)
-
-}
-
-}
-
+// Init
+renderGuide();
 </script>
 
 </body>

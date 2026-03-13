@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character Forge | Home</title>
+<title>Character Forge | D&D 2024</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,6 +15,7 @@
     --crimson-light: #b52a2a;
     --gold: #c9973a;
     --gold-light: #e8b84b;
+    --shadow: rgba(26,18,9,0.18);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,137 +25,155 @@
     background-image:
       radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%231a1209'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
     min-height: 100vh;
     font-family: 'Crimson Pro', serif;
+    color: var(--ink);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem 4rem;
   }
 
+  /* ── Header ── */
   .page-header {
     text-align: center;
-    margin-bottom: 4rem;
-    animation: fadeDown 0.8s ease out;
+    margin-bottom: 3.5rem;
+    animation: fadeDown 0.7s ease both;
   }
-
   .page-header h1 {
     font-family: 'Cinzel', serif;
     font-weight: 900;
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-size: clamp(2.2rem, 7vw, 4rem);
     color: var(--gold-light);
-    letter-spacing: 0.15em;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 30px rgba(201,151,58,0.2);
-    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 24px rgba(201,151,58,0.4), 0 0 2px rgba(201,151,58,0.2);
+    line-height: 1.1;
   }
-
+  .page-header p {
+    color: var(--parchment-dark);
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+  }
   .divider {
-    width: 280px;
-    height: 1px;
-    margin: 1.5rem auto;
+    width: 320px;
+    height: 2px;
+    margin: 1.2rem auto;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
     position: relative;
   }
-
-  .divider::after {
-    content: '◈';
+  .divider::before {
+    content: '⚔';
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: 50%; top: 50%;
     transform: translate(-50%, -50%);
     background: #1a1209;
-    padding: 0 10px;
+    padding: 0 0.6rem;
     color: var(--gold);
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
-  .nav-container {
+  /* ── Nav cards ── */
+  .nav-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
     width: 100%;
-    max-width: 900px;
-    animation: fadeUp 0.8s 0.2s ease both;
+    max-width: 820px;
+    animation: fadeUp 0.7s 0.2s ease both;
   }
 
   .nav-card {
     background: var(--parchment);
-    background-image: url("https://www.transparenttextures.com/patterns/p6.png"); /* Subtle paper texture */
-    padding: 3rem 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 6px var(--crimson),
+      0 8px 48px rgba(0,0,0,0.7),
+      inset 0 0 60px rgba(201,151,58,0.07);
+    padding: 2.5rem 2rem 2.2rem;
     text-decoration: none;
     text-align: center;
-    border-radius: 2px;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    border: 1px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
-
-  /* Decorative corners */
-  .nav-card::before {
-    content: '';
-    position: absolute;
-    top: 10px; left: 10px; right: 10px; bottom: 10px;
-    border: 1px solid rgba(139, 26, 26, 0.2);
-    pointer-events: none;
-  }
-
   .nav-card:hover {
-    transform: translateY(-10px);
-    border-color: var(--gold-light);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 15px rgba(201,151,58,0.3);
+    transform: translateY(-6px);
+    box-shadow:
+      0 0 0 3px var(--gold-light),
+      0 0 0 6px var(--crimson),
+      0 16px 56px rgba(0,0,0,0.8),
+      inset 0 0 60px rgba(201,151,58,0.12);
   }
 
+  .nav-card-icon {
+    font-size: 2.6rem;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
   .nav-card h2 {
     font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 0.06em;
     color: var(--crimson);
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
-    letter-spacing: 0.05em;
+    margin-bottom: 0.7rem;
   }
-
   .nav-card p {
-    color: var(--ink-light);
-    font-size: 1.1rem;
-    line-height: 1.4;
+    font-family: 'Crimson Pro', serif;
     font-style: italic;
+    font-size: 1rem;
+    color: var(--ink-light);
+    line-height: 1.5;
+  }
+  .nav-card-divider {
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1rem 0;
   }
 
-  .disclaimer-footer {
-    margin-top: 6rem;
-    max-width: 800px;
+  /* ── Footer / Disclaimer ── */
+  .footer {
+    margin-top: 4rem;
+    max-width: 820px;
+    width: 100%;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .disclaimer {
+    border-top: 1px solid rgba(201,151,58,0.2);
+    padding-top: 1.5rem;
     text-align: center;
-    padding: 2rem;
-    animation: fadeIn 1.5s 0.8s ease both;
   }
-
-  .disclaimer-text {
-    font-size: 0.8rem;
+  .disclaimer p {
+    font-size: 0.78rem;
     color: var(--parchment-dark);
     line-height: 1.8;
-    opacity: 0.5;
-    letter-spacing: 0.02em;
-    border-top: 1px solid rgba(201, 151, 58, 0.15);
-    padding-top: 1.5rem;
+    opacity: 0.45;
+    font-style: italic;
+  }
+  .disclaimer strong {
+    font-style: normal;
+    opacity: 1;
   }
 
   @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @media (max-width: 600px) {
-    .nav-container { grid-template-columns: 1fr; }
+    .nav-grid { grid-template-columns: 1fr; max-width: 400px; }
   }
 </style>
 </head>
@@ -163,26 +182,34 @@
   <header class="page-header">
     <h1>Character Forge</h1>
     <div class="divider"></div>
+    <p>Dungeons &amp; Dragons 2024 · Campaign Companion</p>
   </header>
 
-  <main class="nav-container">
+  <main class="nav-grid">
     <a href="dnd-character-creator.html" class="nav-card">
+      <div class="nav-card-icon">⚔️</div>
       <h2>Character Creator</h2>
-      <p>Birth a new hero from the ashes of fate. Complete with 2024 species and background rules.</p>
+      <div class="nav-card-divider"></div>
+      <p>Birth a new hero. Choose your species, class, and background — all 2024 PHB rules, from ability scores to starting spells.</p>
     </a>
-    
+
     <a href="level-up.html" class="nav-card">
-      <h2>Level Up Assistance</h2>
-      <p>Guide your adventurer to new heights of power and master the next tier of play.</p>
+      <div class="nav-card-icon">📜</div>
+      <h2>Level Up Guide</h2>
+      <div class="nav-card-divider"></div>
+      <p>Advance your adventurer level by level. See every new feature, choice, spell slot, and stat change — ready to write straight onto your sheet.</p>
     </a>
   </main>
 
-  <footer class="disclaimer-footer">
-    <p class="disclaimer-text">
-      <strong>Disclaimer:</strong> This tool is a fan-made creation and is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. 
-      Content is based on the 5th Edition (2024 Refresh) System Reference Document and intended for personal use. 
-      Dungeons & Dragons, D&D, and their respective logos are trademarks of Wizards of the Coast.
-    </p>
+  <footer class="footer">
+    <div class="disclaimer">
+      <p>
+        <strong>Fan Content Notice:</strong> Character Forge is an unofficial fan-made tool and is not affiliated with, endorsed, or approved by Wizards of the Coast LLC.
+        Content is derived from the D&amp;D 2024 System Reference Document (SRD) for personal, non-commercial use.
+        Dungeons &amp; Dragons, D&amp;D, and the D&amp;D logo are trademarks of Wizards of the Coast LLC in the U.S.A. and other countries.
+        © 2024 Wizards of the Coast LLC.
+      </p>
+    </div>
   </footer>
 
 </body>
