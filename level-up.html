@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Forge | Level Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f4e8c1;
+    --parchment-dark: #e8d5a0;
+    --ink: #1a1209;
+    --ink-light: #3d2b1a;
+    --crimson: #8b1a1a;
+    --crimson-light: #b52a2a;
+    --gold: #c9973a;
+    --gold-light: #e8b84b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #1a1209;
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(139,26,26,0.15) 0%, transparent 70%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff05'/%3E%3C/svg%3E");
+    min-height: 100vh;
+    font-family: 'Crimson Pro', serif;
+    color: var(--ink);
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header { text-align: center; margin-bottom: 2rem; }
+  .header h1 { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 2.5rem; letter-spacing: 0.1em; }
+  
+  .forge-container {
+    max-width: 800px;
+    width: 100%;
+    background: var(--parchment);
+    background-image: url("https://www.transparenttextures.com/patterns/p6.png");
+    border-radius: 4px;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--crimson), 0 20px 50px rgba(0,0,0,0.6);
+    padding: 2.5rem;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    color: var(--crimson);
+    border-bottom: 1px solid var(--gold);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  label { display: block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--crimson); margin-bottom: 0.5rem; }
+  
+  select, input {
+    width: 100%;
+    padding: 0.6rem;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--gold);
+    border-bottom: 2px solid var(--crimson);
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.1rem;
+    outline: none;
+  }
+
+  .results-area {
+    margin-top: 2rem;
+    display: none;
+  }
+
+  .gain-card {
+    background: rgba(139, 26, 26, 0.05);
+    border-left: 4px solid var(--crimson);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    animation: slideIn 0.4s ease-out both;
+  }
+
+  .gain-card h3 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--crimson); margin-bottom: 0.3rem; }
+  .gain-card p { font-size: 1rem; color: var(--ink-light); line-height: 1.4; }
+
+  .level-badge {
+    display: inline-block;
+    background: var(--crimson);
+    color: var(--parchment);
+    padding: 2px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+  }
+
+  .calculate-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--crimson);
+    color: var(--gold-light);
+    border: 1px solid var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .calculate-btn:hover { background: var(--crimson-light); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Ascension Chamber</h1>
+    <p style="color: var(--parchment-dark); font-style: italic;">Advance your hero to the next tier of power</p>
+  </div>
+
+  <main class="forge-container">
+    <div class="section-title">Character Details</div>
+    
+    <div class="input-grid">
+      <div>
+        <label>Class</label>
+        <select id="charClass">
+          <option value="fighter">Fighter</option>
+          <option value="wizard">Wizard</option>
+          <option value="rogue">Rogue</option>
+          <option value="cleric">Cleric</option>
+          <option value="paladin">Paladin</option>
+          <option value="barbarian">Barbarian</option>
+          <option value="bard">Bard</option>
+          <option value="druid">Druid</option>
+          <option value="monk">Monk</option>
+          <option value="ranger">Ranger</option>
+          <option value="sorcerer">Sorcerer</option>
+          <option value="warlock">Warlock</option>
+        </select>
+      </div>
+      <div>
+        <label>Current Level</label>
+        <input type="number" id="levelFrom" value="1" min="1" max="19">
+      </div>
+      <div>
+        <label>New Level</label>
+        <input type="number" id="levelTo" value="2" min="2" max="20">
+      </div>
+    </div>
+
+    <button class="calculate-btn" onclick="calculateLevelUp()">Consult the Tome</button>
+
+    <div id="results" class="results-area">
+      <div class="section-title">Gains per Level</div>
+      <div id="gainsList"></div>
+    </div>
+  </main>
+
+  <script>
+    function calculateLevelUp() {
+      const charClass = document.getElementById('charClass').value;
+      const from = parseInt(document.getElementById('levelFrom').value);
+      const to = parseInt(document.getElementById('levelTo').value);
+      const list = document.getElementById('gainsList');
+      const resultsArea = document.getElementById('results');
+
+      if(to <= from) {
+        alert("New level must be higher than current level.");
+        return;
+      }
+
+      list.innerHTML = '';
+      resultsArea.style.display = 'block';
+
+      for (let lvl = from + 1; lvl <= to; lvl++) {
+        const levelGains = getGains(charClass, lvl);
+        levelGains.forEach(gain => {
+          const card = document.createElement('div');
+          card.className = 'gain-card';
+          card.innerHTML = `
+            <span class="level-badge">Level ${lvl}</span>
+            <h3>${gain.title}</h3>
+            <p>${gain.desc}</p>
+          `;
+          list.appendChild(card);
+        });
+      }
+    }
+
+    function getGains(className, level) {
+      let gains = [];
+      
+      // Hit Points
+      gains.push({
+        title: "Hit Point Increase",
+        desc: `Roll your Hit Die or take the average plus your Constitution modifier.`
+      });
+
+      // Proficiency Bonus Scaling (2024 Rules)
+      if ([5, 9, 13, 17].includes(level)) {
+        const pb = level < 5 ? 2 : level < 9 ? 3 : level < 13 ? 4 : level < 17 ? 5 : 6;
+        gains.push({
+          title: "Proficiency Bonus Increase",
+          desc: `Your Proficiency Bonus increases to <strong>+${pb}</strong>.`
+        });
+      }
+
+      // Subclass Trigger (2024 Standard: All classes at Level 3)
+      if (level === 3) {
+        gains.push({
+          title: "Choose a Subclass",
+          desc: `Pick your ${className} archetype. You gain your first subclass feature.`
+        });
+      }
+
+      // Feat / ASI (2024 Standard)
+      if ([4, 8, 12, 16, 19].includes(level)) {
+        gains.push({
+          title: "Ability Score Improvement / Feat",
+          desc: `Choose one: Increase an Ability Score by +2, two scores by +1, or select a General Feat.`
+        });
+      }
+
+      // Epic Boon (Level 19/20 logic)
+      if (level === 19) {
+        gains.push({
+          title: "Epic Boon Feat",
+          desc: `Choose a powerful Epic Boon feat to cement your legend.`
+        });
+      }
+
+      // Class Specific (Simplified examples)
+      if (className === 'fighter' && level === 2) {
+        gains.push({ title: "Action Surge", desc: "You can push yourself beyond your normal limits for a moment." });
+      }
+      if (className === 'wizard' && level === 2) {
+        gains.push({ title: "Scholar", desc: "Gain expertise in one of your academic skills." });
+      }
+
+      return gains;
+    }
+  </script>
+</body>
+</html>
