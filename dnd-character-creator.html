@@ -1,0 +1,2596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D&D 2024 Character Creator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f4e8c1;
+    --parchment-dark: #e8d5a0;
+    --ink: #1a1209;
+    --ink-light: #3d2b1a;
+    --crimson: #8b1a1a;
+    --crimson-light: #b52a2a;
+    --gold: #c9973a;
+    --gold-light: #e8b84b;
+    --shadow: rgba(26,18,9,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #1a1209;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%231a1209'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
+    min-height: 100vh;
+    font-family: 'Crimson Pro', serif;
+    color: var(--ink);
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .page-header h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 24px rgba(201,151,58,0.4), 0 0 2px rgba(201,151,58,0.2);
+    line-height: 1.1;
+  }
+
+  .page-header p {
+    color: var(--parchment-dark);
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 0.4rem;
+    opacity: 0.7;
+  }
+
+  .divider {
+    width: 320px;
+    height: 2px;
+    margin: 1rem auto;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    position: relative;
+  }
+  .divider::before {
+    content: '⚔';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1209;
+    padding: 0 0.6rem;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+
+  .sheet {
+    max-width: 860px;
+    margin: 0 auto;
+    background: var(--parchment);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 0 0 6px var(--crimson),
+      0 8px 48px rgba(0,0,0,0.7),
+      inset 0 0 60px rgba(201,151,58,0.07);
+    padding: 2.5rem 2.5rem 3rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  /* Section headers */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--crimson), transparent);
+    opacity: 0.4;
+  }
+
+  /* Name / Level row */
+  .top-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 0.3rem;
+  }
+
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid var(--gold);
+    border-bottom: 2px solid var(--crimson);
+    border-radius: 2px 2px 0 0;
+    padding: 0.5rem 0.7rem;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    background: rgba(255,255,255,0.75);
+    box-shadow: 0 2px 12px rgba(139,26,26,0.12);
+  }
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b1a1a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    padding-right: 2rem;
+  }
+
+  /* Grid layouts */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+
+  .section { margin-bottom: 2rem; }
+
+  /* Class stat banner */
+  .class-stat-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .stat-pill {
+    flex: 1;
+    min-width: 100px;
+    background: rgba(255,255,255,0.35);
+    border: 1px solid var(--gold);
+    border-top: 3px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    padding: 0.5rem 0.7rem;
+    text-align: center;
+  }
+  .stat-pill-hp {
+    border-top-color: var(--gold);
+    background: rgba(201,151,58,0.1);
+  }
+  .stat-pill-label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 0.25rem;
+  }
+  .stat-pill-value {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  /* Proficiency bonus + saving throws */
+  .prof-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    background: rgba(139,26,26,0.07);
+    border-left: 3px solid var(--crimson);
+    border-radius: 0 3px 3px 0;
+  }
+  .prof-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--crimson);
+  }
+  .prof-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--crimson);
+    line-height: 1;
+  }
+  .prof-level-note {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--ink-light);
+    opacity: 0.65;
+    margin-left: auto;
+  }
+
+  .skills-by-ability {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+  }
+  .skill-column {
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .skill-col-header {
+    background: rgba(139,26,26,0.1);
+    border-bottom: 1px solid var(--gold);
+    padding: 0.35rem 0.4rem;
+    text-align: center;
+  }
+  .skill-col-ability {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    display: block;
+  }
+  .skill-col-score {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--ink-light);
+    display: block;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+  }
+  .skill-row {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.4rem;
+    border-bottom: 1px solid rgba(201,151,58,0.15);
+    gap: 0.25rem;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.12s;
+    min-width: 0;
+  }
+  .skill-row:last-child { border-bottom: none; }
+  .skill-row.proficient {
+    background: rgba(139,26,26,0.07);
+  }
+  .skill-row.proficient .skill-name {
+    color: var(--crimson);
+    font-weight: 600;
+  }
+  .skill-name {
+    font-size: 0.74rem;
+    font-family: 'Crimson Pro', serif;
+    color: var(--ink-light);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .skill-mod {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink);
+    flex-shrink: 0;
+    min-width: 1.6rem;
+    text-align: right;
+  }
+  .skill-row.proficient .skill-mod {
+    color: var(--crimson);
+  }
+  .skill-prof-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    flex-shrink: 0;
+  }
+  .skill-row.proficient .skill-prof-dot {
+    background: var(--crimson);
+    border-color: var(--crimson);
+  }
+
+  /* Keep old saves-grid CSS for nothing — replaced */
+
+  /* Origin Feats */
+  .feats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .feat-card {
+    border: 1px solid var(--gold);
+    border-top: 3px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    padding: 0.8rem 1rem;
+    background: rgba(255,255,255,0.3);
+  }
+  .feat-card.feat-choice {
+    border-top-color: var(--gold);
+    background: rgba(201,151,58,0.08);
+  }
+  .feat-card-source {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+  .feat-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+  .feat-card-desc {
+    font-size: 0.9rem;
+    color: var(--ink-light);
+    line-height: 1.45;
+  }
+  .feat-card select {
+    margin-top: 0.5rem;
+  }
+
+  /* Background ASI panel */
+  .bg-asi-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+  .bg-asi-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--crimson);
+  }
+  .bg-asi-hint {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--ink-light);
+    opacity: 0.75;
+  }
+  .bg-asi-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .bg-asi-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 160px;
+  }
+  .bg-asi-sep {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    line-height: 1;
+    padding-top: 1.2rem;
+  }
+  .bg-asi-totals {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding-top: 1.2rem;
+  }
+  .asi-total-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid var(--gold);
+    background: rgba(201,151,58,0.15);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .asi-total-pill.boosted {
+    background: rgba(139,26,26,0.12);
+    border-color: var(--crimson);
+    color: var(--crimson);
+  }
+
+  /* Ability block highlight for recommended abilities */
+  .ability-block.bg-recommended {
+    border-color: var(--gold);
+    background: rgba(201,151,58,0.18);
+    box-shadow: 0 0 0 2px rgba(201,151,58,0.35);
+  }
+  .ability-block.bg-recommended::after {
+    content: '★';
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    font-size: 0.55rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .ab-total {
+    margin-top: 0.2rem;
+    font-size: 0.7rem;
+    font-family: 'Cinzel', serif;
+    color: var(--crimson);
+    font-weight: 700;
+    min-height: 1rem;
+  }
+
+  /* Point buy budget bar */
+  .points-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    padding: 0.7rem 1rem;
+    background: rgba(255,255,255,0.3);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+  }
+  .points-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    white-space: nowrap;
+  }
+  .points-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(139,26,26,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .points-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--crimson));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .points-count {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--crimson);
+    min-width: 4rem;
+    text-align: right;
+  }
+  .points-count.over { color: #c00; }
+  .points-count.done { color: #2a6b2a; }
+
+  /* Ability scores */
+  .abilities-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.8rem;
+  }
+
+  .ability-block {
+    background: rgba(255,255,255,0.3);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 0.7rem 0.4rem 0.5rem;
+    text-align: center;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .ability-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+  .ability-block label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--crimson);
+    margin-bottom: 0.3rem;
+    text-align: center;
+  }
+  .ability-block .ab-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    margin: 0.2rem 0;
+  }
+  .ab-btn {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--gold);
+    background: rgba(201,151,58,0.15);
+    border-radius: 2px;
+    color: var(--crimson);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .ab-btn:hover { background: rgba(139,26,26,0.2); }
+  .ab-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ab-score {
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: 'Cinzel', serif;
+    color: var(--ink);
+    min-width: 1.8rem;
+    text-align: center;
+    line-height: 1;
+  }
+  .ab-cost {
+    font-size: 0.62rem;
+    color: var(--ink-light);
+    opacity: 0.7;
+    margin-top: 0.1rem;
+  }
+  .modifier {
+    margin-top: 0.3rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--ink-light);
+    font-weight: 600;
+  }
+
+  /* Alignment grid */
+  .alignment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .align-btn {
+    padding: 0.55rem 0.4rem;
+    border: 1.5px solid var(--gold);
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem;
+    color: var(--ink-light);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+  }
+  .align-btn:hover { background: rgba(201,151,58,0.2); }
+  .align-btn.selected {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--parchment);
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(139,26,26,0.3);
+  }
+
+  /* Trait card */
+  .trait-card {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid var(--gold);
+    border-left: 3px solid var(--crimson);
+    border-radius: 0 3px 3px 0;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    color: var(--ink-light);
+    font-style: italic;
+    min-height: 2.5rem;
+    transition: min-height 0.3s;
+  }
+
+  /* Description preview */
+  #species-desc, #class-desc, #background-desc {
+    margin-top: 0.5rem;
+  }
+
+  /* Generate button */
+  .generate-btn {
+    display: block;
+    width: 100%;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--crimson) 0%, #6b1010 100%);
+    border: 2px solid var(--gold);
+    border-radius: 3px;
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(139,26,26,0.4);
+  }
+  .generate-btn:hover {
+    background: linear-gradient(135deg, var(--crimson-light) 0%, var(--crimson) 100%);
+    box-shadow: 0 6px 28px rgba(139,26,26,0.6);
+    transform: translateY(-1px);
+  }
+  .generate-btn:active { transform: translateY(0); }
+
+  /* Character choice picker cards */
+  .choice-card {
+    border: 1px solid var(--gold);
+    border-top: 3px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    padding: 0.8rem 1rem;
+    background: rgba(255,255,255,0.3);
+  }
+  .choice-card-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .choice-card select { margin-bottom: 0; }
+  .choice-card .choice-desc {
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    font-style: italic;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+  .choice-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 0.5rem;
+  }
+  .choice-chip {
+    padding: 3px 9px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.82rem;
+    border: 1px solid rgba(139,26,26,0.3);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.13s;
+  }
+  .choice-chip:hover:not(:disabled) { border-color:var(--crimson); background:rgba(139,26,26,0.07); }
+  .choice-chip.chosen { background:var(--crimson); border-color:var(--crimson); color:var(--gold-light); font-weight:600; }
+  .choice-chip:disabled { opacity:0.35; cursor:not-allowed; }
+  .choice-tally {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .choice-tally.complete { color: var(--crimson); }
+
+  /* Combat stats grid */
+  .combat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.6rem;
+  }
+  .combat-stat {
+    background: rgba(255,255,255,0.3);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+  }
+  .combat-stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .combat-stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    line-height: 1;
+  }
+  .combat-stat-note {
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    font-style: italic;
+    display: block;
+    margin-top: 0.2rem;
+  }
+  .combat-stat.highlight {
+    border-color: var(--crimson);
+    background: rgba(139,26,26,0.07);
+  }
+  .combat-stat.highlight .combat-stat-value {
+    color: var(--crimson);
+  }
+
+  /* Skill chips in class picker */
+  .skill-chip {
+    padding: 3px 10px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.85rem;
+    border: 1px solid rgba(139,26,26,0.35);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .skill-chip:hover:not(:disabled) {
+    border-color: var(--crimson);
+    background: rgba(139,26,26,0.08);
+  }
+  .skill-chip.picked {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+  .skill-chip.bg-granted {
+    border-color: var(--gold);
+    color: var(--gold);
+    cursor: default;
+    opacity: 0.8;
+  }
+  .skill-chip:disabled:not(.bg-granted) {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Equipment section */
+  .equip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .equip-source {
+    border: 1px solid var(--gold);
+    border-top: 3px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    background: rgba(255,255,255,0.3);
+    padding: 0.8rem 1rem;
+  }
+  .equip-source.from-bg {
+    border-top-color: var(--gold);
+    background: rgba(201,151,58,0.06);
+  }
+  .equip-source-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .equip-source.from-bg .equip-source-label { color: var(--gold); }
+  .equip-gold-note {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--ink-light);
+    font-style: italic;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .equip-item {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(201,151,58,0.15);
+    align-items: flex-start;
+  }
+  .equip-item:last-child { border-bottom: none; }
+  .equip-item-icon {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .equip-item-body {}
+  .equip-item-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+  }
+  .equip-item-desc {
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.82rem;
+    color: var(--ink-light);
+    line-height: 1.35;
+  }
+  .equip-total-gold {
+    margin-top: 1rem;
+    padding: 0.6rem 1rem;
+    background: rgba(201,151,58,0.12);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    color: var(--ink);
+    text-align: center;
+  }
+  .equip-total-gold strong { color: var(--crimson); }
+
+  /* Separator */
+  .rule {
+    border: none;
+    border-top: 1px solid rgba(139,26,26,0.25);
+    margin: 2rem 0;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity:0; transform: translateY(-18px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(18px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .sheet { padding: 1.5rem 1.2rem 2rem; }
+    .abilities-grid { grid-template-columns: repeat(3,1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .top-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Character Forge</h1>
+  <div class="divider"></div>
+  <p>Dungeons &amp; Dragons 2024 · Character Creator</p>
+</header>
+
+<div class="sheet">
+
+  <!-- Name & Level -->
+  <div class="top-row">
+    <div>
+      <label for="char-name">Character Name</label>
+      <input type="text" id="char-name" placeholder="Enter your hero's name…">
+    </div>
+    <div>
+      <label for="char-level">Level</label>
+      <input type="number" id="char-level" value="1" min="1" max="1" readonly style="opacity:0.6; cursor:not-allowed;">
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Species / Class / Background -->
+  <div class="section">
+    <div class="section-title">Origin</div>
+    <div class="grid-3">
+      <div>
+        <label for="species">Species</label>
+        <select id="species" onchange="updateDesc('species')">
+          <option value="">— Choose Species —</option>
+          <optgroup label="Common">
+            <option value="human">Human</option>
+            <option value="elf">Elf</option>
+            <option value="dwarf">Dwarf</option>
+            <option value="halfling">Halfling</option>
+            <option value="gnome">Gnome</option>
+            <option value="half-orc">Half-Orc</option>
+            <option value="tiefling">Tiefling</option>
+            <option value="dragonborn">Dragonborn</option>
+          </optgroup>
+          <optgroup label="Uncommon">
+            <option value="aasimar">Aasimar</option>
+            <option value="goliath">Goliath</option>
+            <option value="orc">Orc</option>
+          </optgroup>
+        </select>
+        <div id="species-desc" class="trait-card" style="display:none"></div>
+        <div id="species-bonuses" class="trait-card" style="display:none; margin-top:0.5rem; font-style:normal; background: rgba(139,26,26,0.06); border-left-color: var(--gold);"></div>
+        <!-- Lineage / Legacy picker — shown for Elf and Tiefling -->
+        <div id="lineage-picker" style="display:none; margin-top:0.5rem;">
+          <label id="lineage-label" for="lineage-select" style="font-size:0.68rem;">Lineage</label>
+          <select id="lineage-select" onchange="updateLineage()">
+            <option value="">— Choose Lineage —</option>
+          </select>
+          <div id="lineage-card" class="trait-card" style="display:none; margin-top:0.5rem; font-style:normal; background:rgba(139,26,26,0.06); border-left-color:var(--gold);"></div>
+        </div>
+      </div>
+
+      <div>
+        <label for="class">Class</label>
+        <select id="class" onchange="updateDesc('class')">
+          <option value="">— Choose Class —</option>
+          <optgroup label="Martial">
+            <option value="fighter">Fighter</option>
+            <option value="paladin">Paladin</option>
+            <option value="ranger">Ranger</option>
+            <option value="barbarian">Barbarian</option>
+            <option value="monk">Monk</option>
+            <option value="rogue">Rogue</option>
+          </optgroup>
+          <optgroup label="Spellcaster">
+            <option value="wizard">Wizard</option>
+            <option value="sorcerer">Sorcerer</option>
+            <option value="warlock">Warlock</option>
+            <option value="cleric">Cleric</option>
+            <option value="druid">Druid</option>
+            <option value="bard">Bard</option>
+          </optgroup>
+        </select>
+        <div id="class-desc" class="trait-card" style="display:none"></div>
+        <div id="class-bonuses" class="trait-card" style="display:none; margin-top:0.5rem; font-style:normal; background: rgba(139,26,26,0.06); border-left-color: var(--gold);"></div>
+      </div>
+
+      <div>
+        <label for="background">Background</label>
+        <select id="background" onchange="updateDesc('background')">
+          <option value="">— Choose Background —</option>
+          <option value="acolyte">Acolyte</option>
+          <option value="artisan">Artisan</option>
+          <option value="charlatan">Charlatan</option>
+          <option value="criminal">Criminal</option>
+          <option value="entertainer">Entertainer</option>
+          <option value="farmer">Farmer</option>
+          <option value="guard">Guard</option>
+          <option value="guide">Guide</option>
+          <option value="hermit">Hermit</option>
+          <option value="merchant">Merchant</option>
+          <option value="noble">Noble</option>
+          <option value="sailor">Sailor</option>
+          <option value="scribe">Scribe</option>
+          <option value="soldier">Soldier</option>
+          <option value="wayfarer">Wayfarer</option>
+        </select>
+        <div id="background-desc" class="trait-card" style="display:none"></div>
+        <div id="background-bonuses" class="trait-card" style="display:none; margin-top:0.5rem; font-style:normal; background: rgba(139,26,26,0.06); border-left-color: var(--gold);"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Character Choices — dynamic per selection -->
+  <div id="choices-section" style="display:none;">
+    <div class="section">
+      <div class="section-title">Character Choices</div>
+      <div id="choices-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem;">
+        <!-- JS-generated choice pickers -->
+      </div>
+    </div>
+    <hr class="rule">
+  </div>
+
+  <!-- Ability Scores -->
+  <div class="section">
+    <div class="section-title">Ability Scores — Point Buy</div>
+    <div id="class-stat-banner" style="display:none; margin-bottom:1rem;">
+      <div class="class-stat-banner-inner">
+        <div class="stat-pill">
+          <span class="stat-pill-label">Primary Ability</span>
+          <span class="stat-pill-value" id="banner-primary">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-pill-label">Hit Die</span>
+          <span class="stat-pill-value" id="banner-hitdie">—</span>
+        </div>
+        <div class="stat-pill stat-pill-hp">
+          <span class="stat-pill-label">HP at Level 1</span>
+          <span class="stat-pill-value" id="banner-hp">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-pill-label">Saves</span>
+          <span class="stat-pill-value" id="banner-saves">—</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-pill-label">Armor</span>
+          <span class="stat-pill-value" id="banner-armor">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="points-bar">
+      <span class="points-label">Points Remaining</span>
+      <div class="points-track"><div class="points-fill" id="points-fill"></div></div>
+      <span class="points-count" id="points-count">27 / 27</span>
+    </div>
+    <div class="abilities-grid" id="abilities-grid">
+      <!-- JS-generated -->
+    </div>
+    <!-- Background ASI panel — shown once a background is selected -->
+    <div id="bg-asi-panel" style="display:none; margin-top:1.2rem;">
+      <div class="bg-asi-bar">
+        <span class="bg-asi-title">Background Ability Score Increases</span>
+        <span class="bg-asi-hint" id="bg-asi-hint"></span>
+      </div>
+      <div class="bg-asi-row">
+        <div class="bg-asi-field">
+          <label for="asi-plus2">+2 bonus to</label>
+          <select id="asi-plus2" onchange="applyASI()">
+            <option value="">— choose ability —</option>
+          </select>
+        </div>
+        <div class="bg-asi-sep">+</div>
+        <div class="bg-asi-field">
+          <label for="asi-plus1">+1 bonus to</label>
+          <select id="asi-plus1" onchange="applyASI()">
+            <option value="">— choose ability —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- Proficiency Bonus + Skills -->
+    <div id="prof-section" style="display:none; margin-top:1.5rem;">
+      <div class="prof-header">
+        <span class="prof-label">Proficiency Bonus</span>
+        <span class="prof-value" id="prof-bonus">+2</span>
+        <span class="prof-level-note" id="prof-level-note">Levels 1–4</span>
+      </div>
+      <!-- Class skill picker -->
+      <div id="class-skill-picker" style="display:none; margin: 0.8rem 0 1rem; padding: 0.75rem 1rem; background: rgba(139,26,26,0.06); border: 1px solid rgba(139,26,26,0.2); border-radius: 4px;"></div>
+      <div class="skills-by-ability" id="skills-grid">
+        <!-- JS-generated skill columns -->
+      </div>
+    </div>
+    <!-- Combat Stats -->
+    <div id="combat-section" style="display:none; margin-top:1.2rem;">
+      <div class="prof-header" style="margin-bottom:0.8rem;">
+        <span class="prof-label">Combat</span>
+      </div>
+      <div class="combat-grid" id="combat-grid">
+        <!-- JS-generated -->
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Origin Feats -->
+  <div class="section">
+    <div class="section-title">Origin Feats</div>
+    <div id="feats-section">
+      <p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Background and Species to see your Origin Feats.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Alignment -->
+  <div class="section">
+    <div class="section-title">Alignment</div>
+    <div class="alignment-grid" id="alignment-grid">
+      <!-- JS-generated -->
+    </div>
+    <div id="alignment-desc" class="trait-card" style="display:none; margin-top:0.8rem;"></div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Personality / Notes -->
+  <div class="section">
+    <div class="section-title">Personality & Notes</div>
+    <div class="grid-2">
+      <div>
+        <label for="traits">Personality Traits</label>
+        <textarea id="traits" rows="3" placeholder="How does your character act? What are their quirks?"></textarea>
+      </div>
+      <div>
+        <label for="ideals">Ideals</label>
+        <textarea id="ideals" rows="3" placeholder="What principles drive your character?"></textarea>
+      </div>
+      <div>
+        <label for="bonds">Bonds</label>
+        <textarea id="bonds" rows="3" placeholder="Who or what does your character care about?"></textarea>
+      </div>
+      <div>
+        <label for="flaws">Flaws</label>
+        <textarea id="flaws" rows="3" placeholder="What are your character's weaknesses?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Starting Equipment -->
+  <div class="section">
+    <div class="section-title">Starting Equipment</div>
+    <div id="equipment-section">
+      <p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Class and Background to see your starting equipment.</p>
+    </div>
+  </div>
+
+  <button class="generate-btn" onclick="generateSheet()">⚔ Generate Character Sheet PDF ⚔</button>
+
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const DESCRIPTIONS = {
+  species: {
+    human:      "Adaptable and ambitious. Humans gain an Origin feat of their choice and extra skill proficiency.",
+    elf:        "Graceful and long-lived. Elves have Darkvision, Fey Ancestry, Trance, and Keen Senses.",
+    dwarf:      "Stout and resilient. Dwarves have Darkvision, Dwarven Resilience, and proficiency with tools.",
+    halfling:   "Small but lucky. Halflings can reroll 1s on attack rolls, ability checks, and saving throws.",
+    gnome:      "Curious inventors. Gnomes have Darkvision and Gnomish Cunning against mental saves.",
+    "half-orc": "Fierce and powerful. Half-Orcs have Darkvision, Relentless Endurance, and Savage Attacks.",
+    tiefling:   "Infernal heritage flows in their veins. Tieflings have Darkvision and innate spellcasting.",
+    dragonborn: "Draconic pride made flesh. Breath weapon and damage resistance tied to ancestry.",
+    aasimar:    "Touched by the divine. Healing Hands, Light Bearer, and a powerful Celestial Revelation.",
+    goliath:    "Born of the mountain peaks. Giant Ancestry, Large Form, and Stone's Endurance.",
+    orc:        "Powerful and direct. Adrenaline Rush, Darkvision, and Relentless Endurance.",
+  },
+  class: {
+    fighter:   "Master of combat. Weapon Mastery, Action Surge, and a powerful Martial Archetype at level 3.",
+    paladin:   "Holy warrior. Divine Smite, Lay on Hands, and a Sacred Oath that shapes your powers.",
+    ranger:    "Wilderness hunter. Favored Enemy, Natural Explorer, and a Ranger Archetype at level 3.",
+    barbarian: "Primal fury. Rage grants bonus damage and resistance; Path of the Berserker and more.",
+    monk:      "Discipline and Ki. Martial Arts, Unarmored Defense, and Monastic Tradition at level 3.",
+    rogue:     "Cunning striker. Sneak Attack, Expertise, and Roguish Archetype at level 3.",
+    wizard:    "Arcane scholar. Spellcasting, Arcane Recovery, and an Arcane Tradition at level 2.",
+    sorcerer:  "Magic in the blood. Sorcerous Origin shapes innate power; Metamagic adds flexibility.",
+    warlock:   "Eldritch pact-maker. Pact Magic recharges on short rests; Eldritch Invocations customize your power.",
+    cleric:    "Divine conduit. Heavy armor, Spellcasting, and a Divine Domain chosen at level 1.",
+    druid:     "Nature's voice. Wild Shape, Spellcasting, and a Circle of the Land or Moon at level 2.",
+    bard:      "Magical performer. Jack of All Trades, Bardic Inspiration, and a Bard College at level 3.",
+  },
+  background: {
+    acolyte:    "Temple-raised devotee. You grew up in the service of a temple, learning sacred rites and the will of the gods.",
+    artisan:    "Skilled craftsperson. You learned your trade in a guild or workshop, mastering a valuable craft.",
+    charlatan:  "Silver-tongued schemer. You've always had a gift for getting others to trust you — and then taking advantage of that trust.",
+    criminal:   "Life outside the law. You spent years making a living by breaking the law, learning to navigate the criminal underworld.",
+    entertainer:"Stage and crowd. You thrive in front of an audience, living for the applause and the rush of performance.",
+    farmer:     "Land and labor. You come from humble roots, earning your keep through honest toil on the land.",
+    guard:      "Trained watchman. You served as a guard or soldier, learning to keep watch and protect others.",
+    guide:      "Wilderness pathfinder. You spent years navigating untamed lands, reading the signs of nature.",
+    hermit:     "Solitary contemplation. You withdrew from society to meditate on great truths, finding wisdom in isolation.",
+    merchant:   "Trade and negotiation. You worked the markets and trade routes, learning the art of the deal.",
+    noble:      "Born to privilege. You were raised in wealth and power, trained in etiquette and courtly politics.",
+    sailor:     "Life at sea. You crewed ships across treacherous waters, learning to survive storm and strife.",
+    scribe:     "Keeper of records. You worked in a scriptorium or library, copying texts and managing knowledge.",
+    soldier:    "Military training. You served in an army, learning discipline, tactics, and the harsh realities of war.",
+    wayfarer:   "Life on the road. You grew up moving from place to place, picking up skills wherever you could find work.",
+  }
+};
+
+// Background mechanical bonuses (2024 PHB)
+const BACKGROUND_BONUSES = {
+  acolyte:    { asi: "+2 to one ability, +1 to another (your choice)", feat: "Magic Initiate (Cleric or Druid or Wizard)", skills: "Insight, Religion", tool: "Calligrapher's Supplies", recommended: ["INT","WIS","CHA"] },
+  artisan:    { asi: "+2 to one ability, +1 to another (your choice)", feat: "Crafter", skills: "Investigation, Persuasion", tool: "One Artisan's Tools of your choice", recommended: ["STR","DEX","INT"] },
+  charlatan:  { asi: "+2 to one ability, +1 to another (your choice)", feat: "Skilled", skills: "Deception, Sleight of Hand", tool: "Forgery Kit", recommended: ["DEX","CON","CHA"] },
+  criminal:   { asi: "+2 to one ability, +1 to another (your choice)", feat: "Alert", skills: "Sleight of Hand, Stealth", tool: "Thieves' Tools", recommended: ["DEX","CON","INT"] },
+  entertainer:{ asi: "+2 to one ability, +1 to another (your choice)", feat: "Musician", skills: "Acrobatics, Performance", tool: "One Musical Instrument of your choice", recommended: ["STR","DEX","CHA"] },
+  farmer:     { asi: "+2 to one ability, +1 to another (your choice)", feat: "Tough", skills: "Animal Handling, Nature", tool: "Carpenter's Tools", recommended: ["STR","CON","WIS"] },
+  guard:      { asi: "+2 to one ability, +1 to another (your choice)", feat: "Alert", skills: "Athletics, Perception", tool: "Gaming Set of your choice", recommended: ["STR","INT","WIS"] },
+  guide:      { asi: "+2 to one ability, +1 to another (your choice)", feat: "Magic Initiate (Druid)", skills: "Stealth, Survival", tool: "Cartographer's Tools", recommended: ["DEX","CON","WIS"] },
+  hermit:     { asi: "+2 to one ability, +1 to another (your choice)", feat: "Healer", skills: "Medicine, Religion", tool: "Herbalism Kit", recommended: ["CON","INT","WIS"] },
+  merchant:   { asi: "+2 to one ability, +1 to another (your choice)", feat: "Lucky", skills: "Animal Handling, Persuasion", tool: "Navigator's Tools", recommended: ["CON","INT","CHA"] },
+  noble:      { asi: "+2 to one ability, +1 to another (your choice)", feat: "Skilled", skills: "History, Persuasion", tool: "Gaming Set of your choice", recommended: ["STR","INT","CHA"] },
+  sailor:     { asi: "+2 to one ability, +1 to another (your choice)", feat: "Tavern Brawler", skills: "Acrobatics, Perception", tool: "Navigator's Tools", recommended: ["STR","DEX","WIS"] },
+  scribe:     { asi: "+2 to one ability, +1 to another (your choice)", feat: "Skilled", skills: "Investigation, Perception", tool: "Calligrapher's Supplies", recommended: ["DEX","INT","WIS"] },
+  soldier:    { asi: "+2 to one ability, +1 to another (your choice)", feat: "Savage Attacker", skills: "Athletics, Intimidation", tool: "Gaming Set of your choice", recommended: ["STR","DEX","CON"] },
+  wayfarer:   { asi: "+2 to one ability, +1 to another (your choice)", feat: "Lucky", skills: "Insight, Stealth", tool: "Thieves' Tools", recommended: ["DEX","WIS","CHA"] },
+};
+
+// Species mechanical traits (2024 PHB)
+const SPECIES_BONUSES = {
+  human:      { speed: "30 ft.", size: "Medium or Small", traits: "Resourceful (Heroic Inspiration after Long Rest), Skillful (one skill proficiency), Versatile (one Origin feat)" },
+  elf:        { speed: "30 ft.", size: "Medium", traits: "Darkvision 60 ft., Fey Ancestry (advantage vs. Charmed, immune to magic sleep), Keen Senses (Insight, Perception, or Survival proficiency), Trance (4 hrs rest = Long Rest)" },
+  dwarf:      { speed: "30 ft.", size: "Medium or Small", traits: "Darkvision 120 ft., Dwarven Resilience (resistance to Poison, advantage on Poison saves), Stonecunning (Tremorsense 60 ft. for 10 min, proficiency bonus uses/Long Rest), Tool Proficiency (one Artisan's tool)" },
+  halfling:   { speed: "30 ft.", size: "Small", traits: "Brave (advantage vs. Frightened), Halfling Nimbleness (move through larger creatures' space), Lucky (reroll 1s on d20 Tests), Naturally Stealthy (Hide behind larger creatures)" },
+  gnome:      { speed: "30 ft.", size: "Small", traits: "Darkvision 60 ft., Gnomish Cunning (advantage on Int/Wis/Cha saves vs. magic), Gnomish Lineage (Forest: Minor Illusion + Speak with Animals; Rock: Mending + prestidigitation; Deep: Dancing Lights + Detect Magic)" },
+  "half-orc": { speed: "30 ft.", size: "Medium", traits: "Adrenaline Rush (Dash as Bonus Action, gain Temp HP = Proficiency Bonus, uses = Proficiency Bonus/Long Rest), Darkvision 60 ft., Relentless Endurance (drop to 1 HP instead of 0, once/Long Rest), Powerful Build (count as Large for carry weight)" },
+  tiefling:   { speed: "30 ft.", size: "Medium", traits: "Darkvision 60 ft., Fiendish Legacy (choose Abyssal, Chthonic, or Infernal — each grants resistance and spells), Otherworldly Presence (Know Thaumaturgy cantrip)" },
+  dragonborn: { speed: "30 ft.", size: "Medium", traits: "Draconic Ancestry (choose dragon type for damage type), Breath Weapon (CON save, scales with level), Damage Resistance (matching ancestry), Darkvision 60 ft. (Chromatic only)" },
+  aasimar:    { speed: "30 ft.", size: "Medium or Small", traits: "Celestial Resistance (resistance to Necrotic and Radiant), Darkvision 60 ft., Healing Hands (heal HP = Proficiency Bonus, uses = Proficiency Bonus/Long Rest), Light Bearer (Know Light cantrip), Celestial Revelation (Heavenly Wings, Inner Radiance, or Necrotic Shroud at level 3)" },
+  goliath:    { speed: "35 ft.", size: "Medium", traits: "Giant Ancestry (choose one Giant-type supernatural boon), Large Form (become Large for 10 min, once/Long Rest), Powerful Build (count as Large for carry weight)" },
+  orc:        { speed: "30 ft.", size: "Medium", traits: "Adrenaline Rush (Dash as Bonus Action, gain Temp HP = Proficiency Bonus, uses = Proficiency Bonus/Long Rest), Darkvision 120 ft., Powerful Build (count as Large for carry weight), Relentless Endurance (drop to 1 HP instead of 0, once/Long Rest)" },
+};
+
+// Elf lineages (2024 PHB)
+const ELF_LINEAGES = {
+  drow: {
+    name: "Drow",
+    desc: "Shaped by millennia in the Underdark. Drow carry the magic of the deep dark wherever they walk.",
+    traits: "Darkvision 120 ft., Dancing Lights cantrip",
+    spells: "Level 3: Faerie Fire · Level 5: Darkness",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+  "high-elf": {
+    name: "High Elf",
+    desc: "Infused with the magic of Feywild crossings. High elves are naturally attuned to arcane forces.",
+    traits: "Cantrip: choose any Wizard cantrip; swap it after each Long Rest",
+    spells: "Level 3: Detect Magic · Level 5: Misty Step",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+  "wood-elf": {
+    name: "Wood Elf",
+    desc: "Carriers of primeval forest magic. Wood elves move with unmatched swiftness through the wild.",
+    traits: "Speed 35 ft., Druidcraft cantrip",
+    spells: "Level 3: Longstrider · Level 5: Pass Without Trace",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+};
+
+// Tiefling legacies (2024 PHB)
+const TIEFLING_LEGACIES = {
+  infernal: {
+    name: "Infernal",
+    desc: "Bound to the Nine Hells and the battlefields of Acheron. Horns, tails, golden eyes, and a faint smell of sulfur are common.",
+    traits: "Resistance to Fire damage, Fire Bolt cantrip, Thaumaturgy cantrip",
+    spells: "Level 3: Hellish Rebuke · Level 5: Darkness",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+  abyssal: {
+    name: "Abyssal",
+    desc: "Touched by the chaos of the Abyss and Pandemonium. Horns, fur, tusks, and peculiar scents mark these tieflings.",
+    traits: "Resistance to Poison damage, Poison Spray cantrip, Thaumaturgy cantrip",
+    spells: "Level 3: Ray of Sickness · Level 5: Hold Person",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+  chthonic: {
+    name: "Chthonic",
+    desc: "Drawn from Gehenna and the gloom of Hades. Some appear cadaverous; others carry an eerie, unearthly beauty.",
+    traits: "Resistance to Necrotic damage, Chill Touch cantrip, Thaumaturgy cantrip",
+    spells: "Level 3: False Life · Level 5: Ray of Enfeeblement",
+    note: "Spellcasting ability: your choice of INT, WIS, or CHA",
+  },
+};
+
+// Currently selected lineage/legacy key
+let selectedLineage = null;
+
+function showLineagePicker(species) {
+  const picker = document.getElementById('lineage-picker');
+  const sel    = document.getElementById('lineage-select');
+  const label  = document.getElementById('lineage-label');
+  const card   = document.getElementById('lineage-card');
+
+  if (species !== 'elf' && species !== 'tiefling') {
+    picker.style.display = 'none';
+    selectedLineage = null;
+    card.style.display = 'none';
+    return;
+  }
+
+  const data   = species === 'elf' ? ELF_LINEAGES : TIEFLING_LEGACIES;
+  const isElf  = species === 'elf';
+  label.textContent = isElf ? 'Elf Lineage' : 'Fiendish Legacy';
+
+  sel.innerHTML = `<option value="">— Choose ${isElf ? 'Lineage' : 'Legacy'} —</option>`;
+  Object.entries(data).forEach(([key, val]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = val.name;
+    sel.appendChild(opt);
+  });
+
+  // Restore prior selection if same species
+  if (selectedLineage && data[selectedLineage]) {
+    sel.value = selectedLineage;
+    renderLineageCard(data[selectedLineage]);
+  } else {
+    selectedLineage = null;
+    card.style.display = 'none';
+  }
+
+  picker.style.display = 'block';
+}
+
+function updateLineage() {
+  const species = document.getElementById('species').value;
+  const key     = document.getElementById('lineage-select').value;
+  const data    = species === 'elf' ? ELF_LINEAGES : TIEFLING_LEGACIES;
+
+  selectedLineage = key || null;
+  if (key && data[key]) {
+    renderLineageCard(data[key]);
+  } else {
+    document.getElementById('lineage-card').style.display = 'none';
+  }
+  charChoices.highElfCantrip = null; // reset if lineage changes
+  updateChoicesSection();
+}
+
+function renderLineageCard(l) {
+  const card = document.getElementById('lineage-card');
+  card.innerHTML = `
+    <div style="display:grid; gap:0.35rem;">
+      <div style="font-style:italic; color:var(--ink-light); font-size:0.88rem; margin-bottom:0.2rem;">${l.desc}</div>
+      <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Traits</strong><br>${l.traits}</div>
+      <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Innate Spells</strong><br>${l.spells}</div>
+      <div style="font-size:0.78rem; font-style:italic; color:var(--ink-light); opacity:0.8;">${l.note}</div>
+    </div>`;
+  card.style.display = 'block';
+}
+
+// Class mechanical details — Level 1 (2024 PHB)
+const CLASS_BONUSES = {
+  fighter:   { primary: "STR or DEX", hitdie: "d10", hpbase: 10, saves: "STR, CON", armor: "All armor, shields", skillCount: 2, skillPool: ["Acrobatics","Animal Handling","Athletics","History","Insight","Intimidation","Perception","Survival"], features: "Fighting Style, Second Wind, Weapon Mastery (3 weapons)" },
+  paladin:   { primary: "STR & CHA",  hitdie: "d10", hpbase: 10, saves: "WIS, CHA", armor: "All armor, shields", skillCount: 2, skillPool: ["Athletics","Insight","Intimidation","Medicine","Persuasion","Religion"], features: "Divine Sense, Lay on Hands (5 HP pool), Weapon Mastery (2 weapons), Spellcasting (Cha)" },
+  ranger:    { primary: "DEX & WIS",  hitdie: "d10", hpbase: 10, saves: "STR, DEX", armor: "Light, medium, shields", skillCount: 3, skillPool: ["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"], features: "Expertise (2 skills), Favored Enemy, Spellcasting (Wis), Weapon Mastery (2 weapons)" },
+  barbarian: { primary: "STR",        hitdie: "d12", hpbase: 12, saves: "STR, CON", armor: "Light, medium, shields", skillCount: 2, skillPool: ["Animal Handling","Athletics","Intimidation","Nature","Perception","Survival"], features: "Rage (2 uses, +2 dmg, resistance), Unarmored Defense (10 + DEX + CON), Weapon Mastery (2 weapons)" },
+  monk:      { primary: "DEX & WIS",  hitdie: "d8",  hpbase: 8,  saves: "STR, DEX", armor: "None", skillCount: 2, skillPool: ["Acrobatics","Athletics","History","Insight","Religion","Stealth"], features: "Martial Arts (d6 unarmed), Unarmored Defense (10 + DEX + WIS), Weapon Mastery (1 weapon)" },
+  rogue:     { primary: "DEX",        hitdie: "d8",  hpbase: 8,  saves: "DEX, INT", armor: "Light", skillCount: 4, skillPool: ["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Persuasion","Sleight of Hand","Stealth"], features: "Expertise (2 skills), Sneak Attack (1d6), Thieves' Cant, Weapon Mastery (2 weapons)" },
+  wizard:    { primary: "INT",        hitdie: "d6",  hpbase: 6,  saves: "INT, WIS", armor: "None", skillCount: 2, skillPool: ["Arcana","History","Insight","Investigation","Medicine","Religion"], features: "Arcane Recovery, Ritual Adept, Spellcasting (Int)" },
+  sorcerer:  { primary: "CHA",        hitdie: "d6",  hpbase: 6,  saves: "CON, CHA", armor: "None", skillCount: 2, skillPool: ["Arcana","Deception","Insight","Intimidation","Persuasion","Religion"], features: "Innate Sorcery (advantage on spell attack rolls, 2 uses), Spellcasting (Cha)" },
+  warlock:   { primary: "CHA",        hitdie: "d8",  hpbase: 8,  saves: "WIS, CHA", armor: "Light", skillCount: 2, skillPool: ["Arcana","Deception","History","Intimidation","Investigation","Nature","Religion"], features: "Eldritch Invocations (1 invocation), Pact Magic (1 spell slot, recharges on Short Rest), Spellcasting (Cha)" },
+  cleric:    { primary: "WIS",        hitdie: "d8",  hpbase: 8,  saves: "WIS, CHA", armor: "Light, medium, shields", skillCount: 2, skillPool: ["History","Insight","Medicine","Persuasion","Religion"], features: "Divine Order (Protector or Thaumaturge), Spellcasting (Wis)" },
+  druid:     { primary: "WIS",        hitdie: "d8",  hpbase: 8,  saves: "INT, WIS", armor: "Light, medium, shields (non-metal)", skillCount: 2, skillPool: ["Arcana","Animal Handling","Insight","Medicine","Nature","Perception","Religion","Survival"], features: "Druidic language, Primal Order (Magician or Warden), Spellcasting (Wis)" },
+  bard:      { primary: "CHA",        hitdie: "d8",  hpbase: 8,  saves: "DEX, CHA", armor: "Light", skillCount: 3, skillPool: ["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"], features: "Bardic Inspiration (d6, uses = CHA mod), Spellcasting (Cha)" },
+};
+
+// Alignment descriptions
+const ALIGNMENT_DESCRIPTIONS = {
+  "Lawful Good":     "A lawful good character acts with compassion within the rule of law. They believe order and structure are the best way to protect others and uphold justice.",
+  "Neutral Good":    "A neutral good character does the best they can to help others without a strong preference for law or chaos. Doing good is the goal, by whatever means work best.",
+  "Chaotic Good":    "A chaotic good character follows their conscience over rules or authority. They value freedom and kindness, and will break unjust laws without hesitation.",
+  "Lawful Neutral":  "A lawful neutral character lives by a strict code — personal, societal, or organizational — without strong moral bias. Order and consistency matter more than outcomes.",
+  "True Neutral":    "A true neutral character avoids taking sides, preferring balance in all things. They act without strong moral or ethical convictions, often out of pragmatism.",
+  "Chaotic Neutral": "A chaotic neutral character follows their whims and values personal freedom above all else. They're unpredictable and resist any authority that limits them.",
+  "Lawful Evil":     "A lawful evil character uses structure, rules, and hierarchy to pursue selfish ends. They respect order only so far as it serves their ambitions.",
+  "Neutral Evil":    "A neutral evil character does whatever they can get away with to advance their own interests, with no loyalty to law or chaos — just pure self-interest.",
+  "Chaotic Evil":    "A chaotic evil character acts with violence and cruelty driven by rage, greed, or malice, with no regard for rules, order, or the welfare of others.",
+};
+
+const ABILITIES  = ["STR","DEX","CON","INT","WIS","CHA"];
+const ALIGNMENTS = [
+  "Lawful Good","Neutral Good","Chaotic Good",
+  "Lawful Neutral","True Neutral","Chaotic Neutral",
+  "Lawful Evil","Neutral Evil","Chaotic Evil"
+];
+
+// ── Class stat banner ────────────────────────────────────────────────────────
+function updateClassBanner() {
+  const cls = document.getElementById('class').value;
+  const banner = document.getElementById('class-stat-banner');
+  if (!cls || !CLASS_BONUSES[cls]) { banner.style.display = 'none'; return; }
+  const c = CLASS_BONUSES[cls];
+  const conMod = Math.floor((scores['CON'] - 10) / 2);
+  const hp1 = c.hpbase + conMod;
+  document.getElementById('banner-primary').textContent = c.primary;
+  document.getElementById('banner-hitdie').textContent  = c.hitdie;
+  document.getElementById('banner-hp').textContent      = `${hp1} (${c.hitdie} + CON mod)`;
+  document.getElementById('banner-saves').textContent   = c.saves;
+  document.getElementById('banner-armor').textContent   = c.armor;
+  banner.style.display = 'block';
+}
+
+// ── Point Buy ────────────────────────────────────────────────────────────────
+const POINT_COST = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
+const TOTAL_POINTS = 27;
+const scores = { STR:8, DEX:8, CON:8, INT:8, WIS:8, CHA:8 };
+
+function pointsSpent() {
+  return Object.values(scores).reduce((sum, v) => sum + (POINT_COST[v] ?? 0), 0);
+}
+
+function updatePointsBar() {
+  const spent = pointsSpent();
+  const remaining = TOTAL_POINTS - spent;
+  const pct = Math.min(100, (spent / TOTAL_POINTS) * 100);
+  document.getElementById('points-fill').style.width = pct + '%';
+  const el = document.getElementById('points-count');
+  el.textContent = remaining + ' / ' + TOTAL_POINTS;
+  el.className = 'points-count' + (remaining === 0 ? ' done' : remaining < 0 ? ' over' : '');
+}
+
+function changeScore(ab, delta) {
+  const cur  = scores[ab];
+  const next = cur + delta;
+  if (next < 8 || next > 15) return;
+  // Check we have enough points when increasing
+  const diff = (POINT_COST[next] ?? 0) - (POINT_COST[cur] ?? 0);
+  if (diff > 0 && pointsSpent() + diff > TOTAL_POINTS) return;
+  scores[ab] = next;
+  refreshAbility(ab);
+  updatePointsBar();
+  applyASI();
+}
+
+function refreshAbility(ab) {
+  const v = scores[ab];
+  document.getElementById(`score-${ab}`).textContent = v;
+  document.getElementById(`cost-${ab}`).textContent  = `cost: ${POINT_COST[v] ?? 0}`;
+  const mod = Math.floor((v - 10) / 2);
+  document.getElementById(`mod-${ab}`).textContent   = (mod >= 0 ? '+' : '') + mod;
+  // Enable/disable buttons
+  const spent = pointsSpent();
+  document.getElementById(`btn-up-${ab}`).disabled =
+    v >= 15 || spent + (POINT_COST[v+1] ?? 99) - POINT_COST[v] > TOTAL_POINTS;
+  document.getElementById(`btn-dn-${ab}`).disabled = v <= 8;
+  // Keep HP and saving throws live when any score changes
+  if (ab === 'CON') updateClassBanner();
+  updateProficiencySection();
+}
+
+// ── Build Ability Score blocks ───────────────────────────────────────────────
+const grid = document.getElementById('abilities-grid');
+ABILITIES.forEach(ab => {
+  const block = document.createElement('div');
+  block.className = 'ability-block';
+  block.id = `block-${ab}`;
+  block.innerHTML = `
+    <label>${ab}</label>
+    <div class="ab-controls">
+      <button class="ab-btn" id="btn-dn-${ab}" onclick="changeScore('${ab}',-1)">−</button>
+      <span  class="ab-score" id="score-${ab}">8</span>
+      <button class="ab-btn" id="btn-up-${ab}" onclick="changeScore('${ab}',1)">+</button>
+    </div>
+    <div class="ab-cost" id="cost-${ab}">cost: 0</div>
+    <div class="modifier" id="mod-${ab}">−1</div>
+    <div class="ab-total" id="total-${ab}"></div>
+  `;
+  grid.appendChild(block);
+  refreshAbility(ab);
+});
+updatePointsBar();
+
+// ── Build Alignment buttons ──────────────────────────────────────────────────
+let selectedAlignment = null;
+const alignGrid = document.getElementById('alignment-grid');
+ALIGNMENTS.forEach(a => {
+  const btn = document.createElement('button');
+  btn.className = 'align-btn';
+  btn.textContent = a;
+  btn.onclick = () => {
+    document.querySelectorAll('.align-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAlignment = a;
+    const descEl = document.getElementById('alignment-desc');
+    descEl.textContent  = ALIGNMENT_DESCRIPTIONS[a] || '';
+    descEl.style.display = 'block';
+  };
+  alignGrid.appendChild(btn);
+});
+
+// ── Background ASI logic ─────────────────────────────────────────────────────
+const asiBonus = { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 };
+
+function buildASIDropdowns(recommended) {
+  ['asi-plus2','asi-plus1'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— choose ability —</option>';
+    ABILITIES.forEach(ab => {
+      const opt = document.createElement('option');
+      opt.value = ab;
+      opt.textContent = recommended.includes(ab) ? `${ab} ★ recommended` : ab;
+      if (recommended.includes(ab)) opt.style.fontWeight = '600';
+      sel.appendChild(opt);
+    });
+    sel.value = cur; // restore prior selection if still valid
+  });
+}
+
+function updateASIHighlights(recommended) {
+  ABILITIES.forEach(ab => {
+    const block = document.getElementById(`block-${ab}`);
+    if (!block) return;
+    block.classList.toggle('bg-recommended', recommended.includes(ab));
+  });
+}
+
+function applyASI() {
+  const p2 = document.getElementById('asi-plus2').value;
+  const p1 = document.getElementById('asi-plus1').value;
+
+  // Reset all bonuses
+  ABILITIES.forEach(ab => { asiBonus[ab] = 0; });
+
+  if (p2) asiBonus[p2] += 2;
+  if (p1 && p1 !== p2) asiBonus[p1] += 1;
+  // If same chosen for both, just apply +2 (warn visually)
+  if (p1 && p1 === p2) asiBonus[p2] = 2; // cap — can't double-dip same score
+
+  // Refresh totals on each block
+  ABILITIES.forEach(ab => {
+    const base  = scores[ab];
+    const bonus = asiBonus[ab];
+    const total = base + bonus;
+    const totalEl = document.getElementById(`total-${ab}`);
+    if (totalEl) totalEl.textContent = bonus > 0 ? `→ ${total} (+${bonus})` : '';
+  });
+
+  // Keep HP banner and saving throws live
+  updateClassBanner();
+  updateProficiencySection();
+}
+
+function showASIPanel(bg) {
+  const panel = document.getElementById('bg-asi-panel');
+  if (!bg || !BACKGROUND_BONUSES[bg]) { panel.style.display = 'none'; return; }
+  const rec = BACKGROUND_BONUSES[bg].recommended;
+  document.getElementById('bg-asi-hint').textContent =
+    `Recommended for this background: ${rec.join(', ')}`;
+  buildASIDropdowns(rec);
+  updateASIHighlights(rec);
+  panel.style.display = 'block';
+  applyASI(); // refresh totals with current selections
+}
+
+// Also update HP in banner to include CON ASI bonus
+const _origUpdateClassBanner = updateClassBanner;
+updateClassBanner = function() {
+  const cls = document.getElementById('class').value;
+  const banner = document.getElementById('class-stat-banner');
+  if (!cls || !CLASS_BONUSES[cls]) { banner.style.display = 'none'; return; }
+  const c = CLASS_BONUSES[cls];
+  const conTotal = scores['CON'] + (asiBonus['CON'] || 0);
+  const conMod = Math.floor((conTotal - 10) / 2);
+  const hp1 = c.hpbase + conMod;
+  document.getElementById('banner-primary').textContent = c.primary;
+  document.getElementById('banner-hitdie').textContent  = c.hitdie;
+  document.getElementById('banner-hp').textContent      = `${hp1} (${c.hitdie} + CON mod)`;
+  document.getElementById('banner-saves').textContent   = c.saves;
+  document.getElementById('banner-armor').textContent   = c.armor;
+  banner.style.display = 'block';
+};
+function updateDesc(type) {
+  const val = document.getElementById(type).value;
+  const el  = document.getElementById(`${type}-desc`);
+
+  if (val && DESCRIPTIONS[type][val]) {
+    el.textContent  = DESCRIPTIONS[type][val];
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+
+  // Background bonuses second card
+  if (type === 'background') {
+    const bonusEl = document.getElementById('background-bonuses');
+    if (val && BACKGROUND_BONUSES[val]) {
+      const b = BACKGROUND_BONUSES[val];
+      bonusEl.innerHTML = `
+        <div style="display:grid; gap:0.35rem;">
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Ability Score Increase</strong><br>${b.asi}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Origin Feat</strong><br>${b.feat}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Skill Proficiencies</strong><br>${b.skills}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Tool Proficiency</strong><br>${b.tool}</div>
+        </div>`;
+      bonusEl.style.display = 'block';
+    } else {
+      bonusEl.style.display = 'none';
+    }
+    showASIPanel(val);
+  }
+
+  // Class bonuses second card + stat banner
+  if (type === 'class') {
+    const bonusEl = document.getElementById('class-bonuses');
+    if (val && CLASS_BONUSES[val]) {
+      const c = CLASS_BONUSES[val];
+      bonusEl.innerHTML = `
+        <div style="display:grid; gap:0.35rem;">
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Saving Throws</strong><br>${c.saves}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Armor &amp; Weapon Proficiencies</strong><br>${c.armor}; all simple weapons${c.features.includes('Weapon Mastery') ? ' + Weapon Mastery' : ''}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Skill Proficiencies</strong><br>Choose ${c.skillCount} from: ${c.skillPool.join(', ')}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Level 1 Features</strong><br>${c.features}</div>
+        </div>`;
+      bonusEl.style.display = 'block';
+    } else {
+      bonusEl.style.display = 'none';
+    }
+    updateClassBanner();
+  }
+  if (type === 'species') {
+    const bonusEl = document.getElementById('species-bonuses');
+    if (val && SPECIES_BONUSES[val]) {
+      const s = SPECIES_BONUSES[val];
+      bonusEl.innerHTML = `
+        <div style="display:grid; gap:0.35rem;">
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Speed</strong><br>${s.speed}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Size</strong><br>${s.size}</div>
+          <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Traits</strong><br>${s.traits}</div>
+        </div>`;
+      bonusEl.style.display = 'block';
+    } else {
+      bonusEl.style.display = 'none';
+    }
+    showLineagePicker(val); // show lineage/legacy picker for elf and tiefling
+  }
+
+  // Also trigger prof + feats refresh when class or species changes
+  if (type === 'class') {
+    classSkillChoices = new Set(); // reset choices on class change
+    resetChoicesForClass();
+    updateProficiencySection();
+    updateFeatsSection();
+    updateEquipmentSection();
+    updateChoicesSection();
+  }
+  if (type === 'species' || type === 'background') {
+    if (type === 'species') resetChoicesForSpecies();
+    if (type === 'background') resetChoicesForBackground();
+    updateFeatsSection();
+    if (type === 'background') {
+      updateProficiencySection();
+      updateEquipmentSection();
+    }
+    updateChoicesSection();
+  }
+}
+
+// ── Origin Feats Data ─────────────────────────────────────────────────────────
+const ORIGIN_FEATS = {
+  "Alert":           "You gain a +5 bonus to Initiative. You can't be surprised while conscious.",
+  "Crafter":         "You gain proficiency with 3 Artisan's Tools. When you make a long rest you can craft one non-magical item worth up to 5 gp.",
+  "Lucky":           "You have 3 Luck Points. When you make an attack roll, ability check, or saving throw you can spend a Luck Point to roll an extra d20 and choose which to use. Recharges on Long Rest.",
+  "Magic Initiate":  "Choose a class (Cleric, Druid, or Wizard). You learn 2 cantrips and 1 level-1 spell from that class's list. You can cast the spell once per Long Rest without a spell slot, or with one if you have it.",
+  "Musician":        "You gain proficiency with 3 Musical Instruments of your choice. Once per Long Rest, when you play music for at least 1 minute, you can grant Bardic Inspiration to up to 5 allies who hear you.",
+  "Savage Attacker": "Once per turn when you roll damage for a melee weapon attack, you can reroll the damage dice and use either total.",
+  "Skilled":         "You gain proficiency in any combination of 3 skills or tools of your choice.",
+  "Tavern Brawler":  "Your unarmed strikes deal 1d4 + STR bludgeoning damage. You can use an object as an improvised weapon. You can attempt to grapple a creature as a Bonus Action after hitting them with an unarmed strike.",
+  "Tough":           "Your Hit Point maximum increases by 2 for every character level you have, and again each time you gain a level.",
+  "Ability Scores":  "Increase one ability score by 2, or two ability scores by 1 each. This cannot raise a score above 20.",
+  "Actor":           "You gain advantage on Deception and Performance checks when trying to pass yourself off as someone else. You can mimic another person's speech or sounds you've heard, and Insight checks against these mimicries are made with disadvantage.",
+  "Athlete":         "When you are prone, standing up uses only 5 feet of movement. Climbing doesn't cost extra movement. You can make a running long or high jump after moving only 5 feet.",
+  "Charger":         "When you take the Dash action, you can use a Bonus Action to make one melee weapon attack or shove. If you moved 10 feet before this attack, you gain +5 to its damage.",
+  "Crossbow Expert": "You ignore the Loading quality. Being within 5 feet of a hostile creature doesn't impose disadvantage on ranged attacks with crossbows. When you use the Attack action with a one-handed weapon, you can use a Bonus Action to attack with a hand crossbow.",
+  "Defensive Duelist":"When a creature you can see hits you with a melee attack while you're holding a finesse weapon, you can use your Reaction to add your proficiency bonus to your AC.",
+  "Dual Wielder":    "You can use two-weapon fighting even when your weapons aren't light. You gain +1 AC while wielding a separate melee weapon in each hand.",
+  "Dungeon Delver":  "Advantage on Perception and Investigation checks to detect secret doors. Advantage on saves vs. traps. Resistance to trap damage. You can search for traps while traveling at a normal pace.",
+  "Elemental Adept": "Choose a damage type: acid, cold, fire, lightning, or thunder. Spells you cast ignore resistance to that damage type, and you treat 1s as 2s on damage rolls for it.",
+  "Grappler":        "You have advantage on attack rolls against a creature you are grappling. You can use your action to try to pin a grappled creature; it is restrained until the grapple ends.",
+  "Great Weapon Master": "On your turn, when you score a critical hit or reduce a creature to 0 HP with a melee weapon, you can make one melee weapon attack as a Bonus Action. Before making a melee attack with a heavy weapon, you can choose to take a −5 penalty to the attack roll. If it hits, you add +10 to the damage roll.",
+  "Healer":          "When you use a healer's kit to stabilize a dying creature, that creature regains 1 HP. As an action, you can use a healer's kit to restore 1d6 + 4 + creature's maximum number of Hit Dice HP. A creature can only benefit from this once per Short Rest.",
+  "Inspiring Leader": "Spend 10 minutes inspiring up to 6 creatures who can see and hear you. Each gains temporary HP equal to your level + your Charisma modifier.",
+  "Keen Mind":       "You always know which direction is north. You always know how many hours until the next sunrise or sunset. You can accurately recall anything you've seen or heard in the past month.",
+  "Mage Slayer":     "When a creature within 5 feet of you casts a spell, you can use your Reaction to make a melee weapon attack against them. When you damage a creature concentrating on a spell, it has disadvantage on the save to maintain concentration.",
+  "Mobile":          "Your speed increases by 10 feet. When you Dash, difficult terrain doesn't cost extra movement. When you make a melee attack against a creature, you don't provoke opportunity attacks from it for the rest of the turn.",
+  "Mounted Combatant": "You have advantage on melee attacks against unmounted creatures smaller than your mount. You can force an attack targeting your mount to target you instead. If your mount fails a DEX save, it takes no damage on a success (half on fail) if you don't dismount.",
+  "Observant":       "You can lip-read. You gain a +5 bonus to passive Perception and Investigation scores.",
+  "Polearm Master":  "When you attack with a glaive, halberd, pike, or quarterstaff, you can use a Bonus Action to attack with the weapon's butt end (1d4 bludgeoning). You can also make a Reaction opportunity attack when a creature enters your reach.",
+  "Resilient":       "Choose one ability score. You gain proficiency in saving throws using that ability.",
+  "Ritual Caster":   "You gain a ritual book with 2 rituals of your choice from any class (up to 1st level). You can cast these as rituals. You can add other rituals to your book by copying them from scrolls or spellbooks.",
+  "Sentinel":        "When you hit a creature with an opportunity attack, its speed becomes 0. Creatures within 5 feet of you provoke opportunity attacks even after Disengage. When a creature within 5 feet of you makes an attack against someone other than you, you can use your Reaction to make a melee attack against it.",
+  "Sharpshooter":    "Attacking at long range doesn't impose disadvantage. Ranged attacks ignore half and three-quarters cover. Before making a ranged attack you can choose to take −5 to the roll; if it hits, you add +10 to damage.",
+  "Shield Master":   "If you take the Attack action, you can use a Bonus Action to shove with your shield. If a spell or effect forces a DEX save, you can use your Reaction to add your shield's AC bonus to the saving throw.",
+  "Spell Sniper":    "When you cast a spell that requires an attack roll, the range is doubled. Your ranged spell attacks ignore half and three-quarters cover. You learn one cantrip that requires an attack roll.",
+  "War Caster":      "Advantage on CON saves to maintain concentration on spells. You can perform somatic components with weapons or shield in hand. When a creature provokes an opportunity attack from you, you can cast a spell with a casting time of 1 action targeting it.",
+  "Weapon Master":   "You gain proficiency with 4 weapons of your choice.",
+};
+
+// ── Skills data ───────────────────────────────────────────────────────────────
+const SKILLS_BY_ABILITY = {
+  STR: ["Athletics"],
+  DEX: ["Acrobatics", "Sleight of Hand", "Stealth"],
+  CON: [],
+  INT: ["Arcana", "History", "Investigation", "Nature", "Religion"],
+  WIS: ["Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
+  CHA: ["Deception", "Intimidation", "Performance", "Persuasion"],
+};
+
+// Proficiency bonus by level
+function getProfBonus(level) {
+  if (level <= 4)  return 2;
+  if (level <= 8)  return 3;
+  if (level <= 12) return 4;
+  if (level <= 16) return 5;
+  return 6;
+}
+function getProfLevelNote(level) {
+  if (level <= 4)  return 'Levels 1–4';
+  if (level <= 8)  return 'Levels 5–8';
+  if (level <= 12) return 'Levels 9–12';
+  if (level <= 16) return 'Levels 13–16';
+  return 'Levels 17–20';
+}
+
+// ── Class skill choices (picked by player) ────────────────────────────────────
+let classSkillChoices = new Set(); // skills the player has checked
+
+function toggleClassSkill(skill, cls) {
+  const c = CLASS_BONUSES[cls];
+  if (!c) return;
+  if (classSkillChoices.has(skill)) {
+    classSkillChoices.delete(skill);
+  } else {
+    if (classSkillChoices.size >= c.skillCount) return; // cap reached
+    classSkillChoices.add(skill);
+  }
+  updateProficiencySection();
+}
+
+// ── Proficiency + Skills ──────────────────────────────────────────────────────
+function updateProficiencySection() {
+  const cls   = document.getElementById('class').value;
+  const bg    = document.getElementById('background').value;
+  const level = parseInt(document.getElementById('char-level').value) || 1;
+  const sec   = document.getElementById('prof-section');
+  if (!cls || !CLASS_BONUSES[cls]) { sec.style.display = 'none'; return; }
+
+  const c    = CLASS_BONUSES[cls];
+  const prof = getProfBonus(level);
+  document.getElementById('prof-bonus').textContent      = `+${prof}`;
+  document.getElementById('prof-level-note').textContent = getProfLevelNote(level);
+
+  // Background-granted skills (always proficient, no choice needed)
+  const bgSkills = new Set(
+    bg && BACKGROUND_BONUSES[bg]
+      ? BACKGROUND_BONUSES[bg].skills.split(',').map(s => s.trim()).filter(Boolean)
+      : []
+  );
+
+  // Human Skillful bonus
+  if (document.getElementById('species').value === 'human' && charChoices.humanSkill) {
+    bgSkills.add(charChoices.humanSkill);
+  }
+
+  // Saving-throw proficiencies (+ Cleric Protector adds martial weapons note, no save change)
+  const profSaves = c.saves.split(',').map(s => s.trim());
+
+  // ── Skill picker banner ──────────────────────────────────────────────────
+  const pickerEl = document.getElementById('class-skill-picker');
+  if (pickerEl) {
+    const chosen  = classSkillChoices.size;
+    const needed  = c.skillCount;
+    const remaining = needed - chosen;
+    pickerEl.innerHTML = `
+      <div style="font-family:'Cinzel',serif; font-size:0.75rem; color:var(--crimson); letter-spacing:0.06em; margin-bottom:6px; text-transform:uppercase;">
+        Choose ${needed} Class Skills
+        <span style="float:right; color:${remaining > 0 ? 'var(--gold)' : 'var(--crimson)'}; font-size:0.8rem;">
+          ${chosen}/${needed} chosen
+        </span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        ${c.skillPool.map(skill => {
+          const isBg      = bgSkills.has(skill);
+          const isPicked  = classSkillChoices.has(skill);
+          const isMaxed   = classSkillChoices.size >= needed && !isPicked;
+          const disabled  = isBg || isMaxed;
+          return `<button
+            onclick="toggleClassSkill('${skill}', '${cls}')"
+            ${disabled ? 'disabled' : ''}
+            class="skill-chip ${isPicked ? 'picked' : ''} ${isBg ? 'bg-granted' : ''}"
+            title="${isBg ? 'Already granted by background' : ''}"
+          >${skill}${isBg ? ' ✓' : ''}</button>`;
+        }).join('')}
+      </div>
+    `;
+    pickerEl.style.display = 'block';
+  }
+
+  // ── Skill columns grid ───────────────────────────────────────────────────
+  const skillsGrid = document.getElementById('skills-grid');
+  skillsGrid.innerHTML = '';
+
+  ABILITIES.forEach(ab => {
+    const total  = scores[ab] + (asiBonus[ab] || 0);
+    const mod    = Math.floor((total - 10) / 2);
+    const skills = SKILLS_BY_ABILITY[ab] || [];
+    const isSaveProficient = profSaves.includes(ab);
+
+    const col = document.createElement('div');
+    col.className = 'skill-column';
+
+    // Header
+    col.innerHTML = `
+      <div class="skill-col-header">
+        <span class="skill-col-ability">${ab}</span>
+        <span class="skill-col-score">${mod >= 0 ? '+' : ''}${mod} (${total})</span>
+      </div>
+    `;
+
+    // Saving throw row
+    const saveBonus = isSaveProficient ? mod + prof : mod;
+    const saveRow = document.createElement('div');
+    saveRow.className = 'skill-row' + (isSaveProficient ? ' proficient' : '');
+    saveRow.innerHTML = `
+      <span class="skill-prof-dot"></span>
+      <span class="skill-name" style="font-style:italic;">Save</span>
+      <span class="skill-mod">${saveBonus >= 0 ? '+' : ''}${saveBonus}</span>
+    `;
+    col.appendChild(saveRow);
+
+    if (skills.length === 0) {
+      const note = document.createElement('div');
+      note.className = 'skill-row';
+      note.innerHTML = `<span class="skill-name" style="opacity:0.45; font-size:0.72rem; font-style:italic;">No skills</span>`;
+      col.appendChild(note);
+    } else {
+      skills.forEach(skill => {
+        const isClassProf = classSkillChoices.has(skill);
+        const isBgProf    = bgSkills.has(skill);
+        const isProficient = isClassProf || isBgProf;
+        const skillBonus  = isProficient ? mod + prof : mod;
+        const row = document.createElement('div');
+        row.className = 'skill-row' + (isProficient ? ' proficient' : '');
+        row.innerHTML = `
+          <span class="skill-prof-dot"></span>
+          <span class="skill-name">${skill}</span>
+          <span class="skill-mod">${skillBonus >= 0 ? '+' : ''}${skillBonus}</span>
+        `;
+        col.appendChild(row);
+      });
+    }
+
+    skillsGrid.appendChild(col);
+  });
+
+  sec.style.display = 'block';
+  updateCombatSection();
+}
+
+// ── Combat Stats ──────────────────────────────────────────────────────────────
+function updateCombatSection() {
+  const cls  = document.getElementById('class').value;
+  const sec  = document.getElementById('combat-section');
+  if (!cls || !CLASS_BONUSES[cls]) { sec.style.display = 'none'; return; }
+
+  const level = parseInt(document.getElementById('char-level').value) || 1;
+  const prof  = getProfBonus(level);
+  const c     = CLASS_BONUSES[cls];
+
+  const total = ab => scores[ab] + (asiBonus[ab] || 0);
+  const mod   = ab => Math.floor((total(ab) - 10) / 2);
+
+  const strMod = mod('STR');
+  const dexMod = mod('DEX');
+  const conMod = mod('CON');
+  const intMod = mod('INT');
+  const wisMod = mod('WIS');
+  const chaMod = mod('CHA');
+
+  // ── AC (unarmored — equipment section coming later) ───────────────────────
+  let ac, acNote;
+  if (cls === 'barbarian') {
+    ac = 10 + dexMod + conMod;
+    acNote = '10 + DEX + CON';
+  } else if (cls === 'monk') {
+    ac = 10 + dexMod + wisMod;
+    acNote = '10 + DEX + WIS';
+  } else {
+    ac = 10 + dexMod;
+    acNote = '10 + DEX (unarmored)';
+  }
+
+  // ── Initiative ───────────────────────────────────────────────────────────
+  const initiative = dexMod;
+  const initSign   = initiative >= 0 ? '+' : '';
+
+  // ── Attack rolls ─────────────────────────────────────────────────────────
+  const meleeAtk  = strMod + prof;
+  const rangedAtk = dexMod + prof;
+
+  const fmt = n => (n >= 0 ? '+' : '') + n;
+
+  // Spellcasting — only for caster classes
+  const SPELL_ABILITY = {
+    wizard: 'INT', sorcerer: 'CHA', warlock: 'CHA',
+    cleric: 'WIS', druid: 'WIS', bard: 'CHA',
+    paladin: 'CHA', ranger: 'WIS'
+  };
+  const spellAbility = SPELL_ABILITY[cls];
+
+  const stats = [];
+
+  stats.push({ label: 'Armor Class', value: ac, note: acNote, highlight: true });
+  stats.push({ label: 'Initiative', value: initSign + initiative, note: 'DEX modifier', highlight: false });
+  stats.push({ label: 'Melee Attack', value: fmt(meleeAtk), note: `STR mod (${fmt(strMod)}) + Prof (${fmt(prof)})`, highlight: false });
+  stats.push({ label: 'Ranged Attack', value: fmt(rangedAtk), note: `DEX mod (${fmt(dexMod)}) + Prof (${fmt(prof)})`, highlight: false });
+
+  if (spellAbility) {
+    const spellMod  = mod(spellAbility);
+    const spellAtk  = spellMod + prof;
+    const spellDC   = 8 + spellMod + prof;
+    stats.push({ label: 'Spell Attack', value: fmt(spellAtk), note: `${spellAbility} mod (${fmt(spellMod)}) + Prof (${fmt(prof)})`, highlight: false });
+    stats.push({ label: 'Spell Save DC', value: spellDC, note: `8 + ${spellAbility} (${fmt(spellMod)}) + Prof (${fmt(prof)})`, highlight: true });
+  }
+
+  const grid = document.getElementById('combat-grid');
+  grid.innerHTML = stats.map(s => `
+    <div class="combat-stat${s.highlight ? ' highlight' : ''}">
+      <span class="combat-stat-label">${s.label}</span>
+      <span class="combat-stat-value">${s.value}</span>
+      <span class="combat-stat-note">${s.note}</span>
+    </div>
+  `).join('');
+
+  sec.style.display = 'block';
+}
+let selectedHumanFeat = null;
+
+function updateFeatsSection() {
+  const bg      = document.getElementById('background').value;
+  const species = document.getElementById('species').value;
+  const section = document.getElementById('feats-section');
+
+  if (!bg && !species) {
+    section.innerHTML = '<p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Background and Species to see your Origin Feats.</p>';
+    return;
+  }
+
+  const featCards = [];
+
+  // Background feat (fixed)
+  if (bg && BACKGROUND_BONUSES[bg]) {
+    const featName = BACKGROUND_BONUSES[bg].feat.split(' (')[0]; // strip subtype for lookup
+    const featDesc = ORIGIN_FEATS[featName] || ORIGIN_FEATS[BACKGROUND_BONUSES[bg].feat] || 'See Player\'s Handbook for full details.';
+    featCards.push({ source: `Background: ${bg.charAt(0).toUpperCase()+bg.slice(1)}`, name: BACKGROUND_BONUSES[bg].feat, desc: featDesc, choice: false });
+  }
+
+  // Human extra feat (free choice)
+  if (species === 'human') {
+    const featList = Object.keys(ORIGIN_FEATS).sort();
+    featCards.push({ source: 'Species: Human — Versatile', name: 'Choose an Origin Feat', desc: 'Humans gain one additional Origin Feat of their choice.', choice: true, options: featList });
+  }
+
+  if (featCards.length === 0) {
+    section.innerHTML = '<p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Background to see your Origin Feat.</p>';
+    return;
+  }
+
+  section.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'feats-grid';
+
+  featCards.forEach((fc, i) => {
+    const card = document.createElement('div');
+    card.className = 'feat-card' + (fc.choice ? ' feat-choice' : '');
+
+    let descHtml = `<span class="feat-card-desc" id="feat-desc-${i}">${fc.desc}</span>`;
+    let choiceHtml = '';
+    if (fc.choice) {
+      const opts = fc.options.map(f =>
+        `<option value="${f}" ${f === selectedHumanFeat ? 'selected' : ''}>${f}</option>`
+      ).join('');
+      choiceHtml = `
+        <select onchange="selectHumanFeat(this.value, ${i})">
+          <option value="">— choose a feat —</option>
+          ${opts}
+        </select>`;
+      if (selectedHumanFeat && ORIGIN_FEATS[selectedHumanFeat]) {
+        descHtml = `<span class="feat-card-desc" id="feat-desc-${i}">${ORIGIN_FEATS[selectedHumanFeat]}</span>`;
+      }
+    }
+
+    card.innerHTML = `
+      <span class="feat-card-source">${fc.source}</span>
+      <span class="feat-card-name">${fc.name}</span>
+      ${descHtml}
+      ${choiceHtml}
+    `;
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+}
+
+function selectHumanFeat(val, cardIdx) {
+  selectedHumanFeat = val;
+  const descEl = document.getElementById(`feat-desc-${cardIdx}`);
+  if (descEl) descEl.textContent = val && ORIGIN_FEATS[val] ? ORIGIN_FEATS[val] : 'Humans gain one additional Origin Feat of their choice.';
+}
+
+// Hook level changes into proficiency update
+document.getElementById('char-level').addEventListener('input', () => {
+  updateProficiencySection();
+  updateClassBanner();
+});
+function generateSheet() {
+  const name      = document.getElementById('char-name').value || 'Unnamed Hero';
+  const level     = document.getElementById('char-level').value;
+  const species   = document.getElementById('species').value;
+  const cls       = document.getElementById('class').value;
+  const bg        = document.getElementById('background').value;
+  const alignment = selectedAlignment || 'Not chosen';
+
+  if (!species || !cls || !bg) {
+    alert('Please choose a Species, Class, and Background before generating.');
+    return;
+  }
+
+  alert(`Character ready!\n\n${name} · Level ${level} ${species} ${cls}\nBackground: ${bg} · ${alignment}\n\n(PDF export coming soon!)`);
+}
+
+// ── Starting Equipment Data (2024 PHB) ────────────────────────────────────────
+const ITEM_DESC = {
+  // Weapons
+  "Greataxe":           { icon: "⚔️", desc: "1d12 slashing, heavy, two-handed. A brutal heavy weapon favoured by barbarians." },
+  "Handaxe":            { icon: "🪓", desc: "1d6 slashing, light, thrown (20/60 ft). Useful as both melee and ranged." },
+  "Handaxes (4)":       { icon: "🪓", desc: "Four handaxes: 1d6 slashing, light, thrown (20/60 ft)." },
+  "Longsword":          { icon: "⚔️", desc: "1d8 slashing (1d10 versatile), finesse option available. A reliable martial weapon." },
+  "Shortsword":         { icon: "🗡️", desc: "1d6 piercing, finesse, light. Ideal for dual wielding or sneak attacks." },
+  "Rapier":             { icon: "🗡️", desc: "1d8 piercing, finesse. A dueling weapon with deadly precision." },
+  "Dagger":             { icon: "🔪", desc: "1d4 piercing, finesse, light, thrown (20/60 ft). Concealable and versatile." },
+  "Daggers (2)":        { icon: "🔪", desc: "Two daggers: 1d4 piercing, finesse, light, thrown (20/60 ft)." },
+  "Mace":               { icon: "🪄", desc: "1d6 bludgeoning. A classic cleric's weapon that requires no proficiency for its damage." },
+  "Quarterstaff":       { icon: "🪄", desc: "1d6 bludgeoning (1d8 versatile). Can be used as a spellcasting focus by druids and monks." },
+  "Sickle":             { icon: "🌾", desc: "1d4 slashing, light. A simple farming tool that doubles as a weapon." },
+  "Spear":              { icon: "🏹", desc: "1d6 piercing (1d8 versatile), thrown (20/60 ft). Good reach and versatility." },
+  "Shortbow":           { icon: "🏹", desc: "1d6 piercing, ammunition (80/320 ft), two-handed. A light ranged weapon." },
+  "Light Crossbow":     { icon: "🏹", desc: "1d8 piercing, ammunition (80/320 ft), two-handed, loading. Powerful but slow." },
+  "Arrows (20)":        { icon: "🏹", desc: "20 arrows for use with a shortbow or longbow." },
+  "Bolts (20)":         { icon: "🏹", desc: "20 bolts for use with a light or heavy crossbow." },
+  "Hand Crossbow":      { icon: "🏹", desc: "1d6 piercing, ammunition (30/120 ft), light, loading. One-handed crossbow." },
+  "Javelins (4)":       { icon: "🏹", desc: "Four javelins: 1d6 piercing, thrown (30/120 ft)." },
+  "Javelins (2)":       { icon: "🏹", desc: "Two javelins: 1d6 piercing, thrown (30/120 ft)." },
+  "Crowbar":            { icon: "🔧", desc: "Grants advantage on Strength checks when used to pry open doors or containers." },
+  // Armor & Shields
+  "Leather Armor":      { icon: "🛡️", desc: "AC 11 + DEX. Light armor. Flexible and quiet — ideal for agile characters." },
+  "Chain Shirt":        { icon: "🛡️", desc: "AC 13 + DEX (max 2). Medium armor. Decent protection without restricting movement." },
+  "Scale Mail":         { icon: "🛡️", desc: "AC 14 + DEX (max 2). Medium armor. Stealth disadvantage. Solid all-around protection." },
+  "Chain Mail":         { icon: "🛡️", desc: "AC 16. Heavy armor. Requires STR 13. Stealth disadvantage. Standard heavy protection." },
+  "Ring Mail":          { icon: "🛡️", desc: "AC 14. Heavy armor. Stealth disadvantage. Older, cruder form of heavy armor." },
+  "Shield":             { icon: "🛡️", desc: "+2 AC. Can be used with one-handed weapons. Requires a free hand." },
+  // Packs & Kits
+  "Explorer's Pack":    { icon: "🎒", desc: "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50 ft hempen rope." },
+  "Dungeoneer's Pack":  { icon: "🎒", desc: "Backpack, crowbar, hammer, 10 pitons, 10 torches, tinderbox, 10 days rations, waterskin, 50 ft hempen rope." },
+  "Entertainer's Pack": { icon: "🎒", desc: "Backpack, bedroll, 2 costumes, 5 candles, 5 days rations, waterskin, disguise kit." },
+  "Priest's Pack":      { icon: "🎒", desc: "Backpack, blanket, 10 candles, tinderbox, alms box, 2 blocks incense, censer, vestments, 2 days rations, waterskin." },
+  "Scholar's Pack":     { icon: "🎒", desc: "Backpack, book of lore, bottle of ink, ink pen, 10 sheets parchment, small bag sand, small knife." },
+  "Burglar's Pack":     { icon: "🎒", desc: "Backpack, 1000 ball bearings, 10 ft string, bell, 5 candles, crowbar, hammer, 10 pitons, hooded lantern, 2 flasks oil, 5 days rations, tinderbox, waterskin." },
+  "Diplomat's Pack":    { icon: "🎒", desc: "Chest, 2 map cases, fine clothes, bottle of ink, ink pen, lamp, 2 flasks oil, 5 sheets paper, vial of perfume, sealing wax, soap." },
+  // Focuses & Tools
+  "Holy Symbol":        { icon: "✝️", desc: "An amulet, emblem, or reliquary that serves as a divine spellcasting focus for clerics and paladins." },
+  "Arcane Focus":       { icon: "🔮", desc: "A crystal, orb, rod, staff, or wand used as a spellcasting focus for arcane casters." },
+  "Druidic Focus":      { icon: "🌿", desc: "A sprig of mistletoe, totem, staff, or wand used as a spellcasting focus for druids." },
+  "Spellbook":          { icon: "📖", desc: "A leather-bound tome containing your wizard's known spells. Starts with 6 level-1 spells." },
+  "Thieves' Tools":     { icon: "🔑", desc: "Picks, small files, a small mirror, narrow-bladed scissors, pliers. Used to pick locks and disarm traps." },
+  "Herbalism Kit":      { icon: "🌿", desc: "Pouches, clippers, leather gloves, vials. Used to craft antitoxin and healing potions." },
+  "Healer's Kit":       { icon: "💊", desc: "10 uses. Stabilize a dying creature without a Medicine check. Restore 1 HP when used by someone with Healer feat." },
+  "Musical Instrument": { icon: "🎵", desc: "Your choice of instrument (lute, flute, lyre, drum, etc). Serves as a spellcasting focus for bards." },
+  "Cartographer's Tools":{ icon: "🗺️", desc: "Includes a quill, ink, parchment, compasses, calipers, and rulers. Used to make and read maps." },
+  "Calligrapher's Supplies":{ icon: "✒️", desc: "Ink, parchment, and fine-tipped quills for producing written works and documents." },
+  "Carpenter's Tools":  { icon: "🪚", desc: "Saw, hammer, nails, chisels, square, ruler. Used for woodworking and construction." },
+  "Forgery Kit":        { icon: "📝", desc: "Inks, paper, wax, seals, and binding materials. Used to craft convincing written forgeries." },
+  "Navigator's Tools":  { icon: "🧭", desc: "Sextant, compass, calipers, ruler, protractor, and parchment. Used for navigation at sea and on land." },
+  // Clothes & misc
+  "Fine Clothes":       { icon: "👘", desc: "Elegant attire befitting a noble or diplomat. Necessary for high-society social encounters." },
+  "Traveler's Clothes": { icon: "👕", desc: "Durable, practical clothing designed for long journeys in varying weather." },
+  "Costume":            { icon: "🎭", desc: "Theatrical costume for disguise or performance. Advantage on Deception checks to pass as someone else." },
+  "Costumes (2)":       { icon: "🎭", desc: "Two theatrical costumes. Useful for performers and tricksters." },
+  "Bedroll":            { icon: "🛏️", desc: "A padded sleeping mat. Allows for comfortable rest in the wilderness." },
+  "Tent":               { icon: "⛺", desc: "A simple canvas tent. Shelters up to two Medium creatures from the elements." },
+  "Iron Pot":           { icon: "🍲", desc: "A sturdy cooking pot. Useful for preparing hot meals during travel." },
+  "Shovel":             { icon: "⛏️", desc: "A sturdy digging tool. Useful for excavation, graves, or creating cover." },
+  "Hooded Lantern":     { icon: "🔦", desc: "Bright light 30 ft, dim light 60 ft. Can be shuttered to conceal the light." },
+  "Manacles":           { icon: "⛓️", desc: "Iron shackles. Can restrain a creature with a DC 20 Strength check to break free." },
+  "Perfume":            { icon: "🧴", desc: "A small vial of fragrant scent. Useful in social situations." },
+  "Mirror":             { icon: "🪞", desc: "A small steel hand mirror. Useful for seeing around corners or detecting vampires." },
+  "Prayer Book":        { icon: "📖", desc: "A small devotional text. Contains prayers, religious rites, and sacred writings." },
+  "Parchment (5 sheets)":{ icon: "📄", desc: "Five sheets of writing parchment. Used for maps, letters, or spell research." },
+  "Robe":               { icon: "👘", desc: "A simple garment worn by priests and scholars. Modest and unassuming." },
+  "Quiver":             { icon: "🏹", desc: "A leather case for holding up to 20 arrows or bolts." },
+  "2 Pouches":          { icon: "👝", desc: "Two small belt pouches, each holding up to 6 lbs or 1/5 cubic foot of material." },
+  "Pouch":              { icon: "👝", desc: "A small belt pouch holding up to 6 lbs or 1/5 cubic foot of material." },
+  "Tinderbox":          { icon: "🔥", desc: "Flint, steel, and tinder. Used to start fires. Lighting a torch or campfire takes 1 action." },
+  "Shortbow + Quiver":  { icon: "🏹", desc: "Shortbow (1d6 piercing, 80/320 ft) plus a quiver to hold arrows." },
+  "Amulet":             { icon: "✝️", desc: "A holy symbol worn as a necklace, serving as a divine spellcasting focus." },
+};
+
+const CLASS_EQUIPMENT = {
+  barbarian: {
+    items: ["Greataxe", "Handaxes (4)", "Explorer's Pack"],
+    gold: 15,
+    altGold: 75,
+    note: "Or take 75 GP to buy your own gear.",
+  },
+  bard: {
+    items: ["Leather Armor", "Daggers (2)", "Musical Instrument", "Entertainer's Pack"],
+    gold: 19,
+    altGold: 90,
+    note: "Or take 90 GP. Instrument is your spellcasting focus.",
+  },
+  cleric: {
+    items: ["Chain Shirt", "Shield", "Mace", "Holy Symbol", "Priest's Pack"],
+    gold: 7,
+    altGold: 110,
+    note: "Or take 110 GP. Holy Symbol serves as spellcasting focus.",
+  },
+  druid: {
+    items: ["Leather Armor", "Shield", "Sickle", "Druidic Focus", "Explorer's Pack"],
+    gold: 9,
+    altGold: 50,
+    note: "Or take 50 GP. Druidic Focus serves as spellcasting focus.",
+  },
+  fighter: {
+    items: ["Chain Mail", "Longsword", "Shield", "Light Crossbow", "Bolts (20)", "Dungeoneer's Pack"],
+    gold: 4,
+    altGold: 175,
+    note: "Or take 175 GP. Many weapon choices available.",
+  },
+  monk: {
+    items: ["Shortsword", "Dungeoneer's Pack"],
+    gold: 11,
+    altGold: 50,
+    note: "Or take 50 GP. Monks rely on unarmed strikes and need little gear.",
+  },
+  paladin: {
+    items: ["Chain Mail", "Shield", "Longsword", "Holy Symbol", "Priest's Pack"],
+    gold: 9,
+    altGold: 150,
+    note: "Or take 150 GP. Holy Symbol serves as spellcasting focus.",
+  },
+  ranger: {
+    items: ["Scale Mail", "Shortbow", "Arrows (20)", "Quiver", "Shortsword", "Dungeoneer's Pack"],
+    gold: 7,
+    altGold: 150,
+    note: "Or take 150 GP.",
+  },
+  rogue: {
+    items: ["Leather Armor", "Daggers (2)", "Shortsword", "Thieves' Tools", "Burglar's Pack"],
+    gold: 8,
+    altGold: 100,
+    note: "Or take 100 GP.",
+  },
+  sorcerer: {
+    items: ["Arcane Focus", "Dagger", "Dungeoneer's Pack"],
+    gold: 28,
+    altGold: 50,
+    note: "Or take 50 GP. Arcane Focus serves as spellcasting focus.",
+  },
+  warlock: {
+    items: ["Leather Armor", "Arcane Focus", "Dagger", "Scholar's Pack"],
+    gold: 10,
+    altGold: 100,
+    note: "Or take 100 GP. Arcane Focus serves as spellcasting focus.",
+  },
+  wizard: {
+    items: ["Spellbook", "Arcane Focus", "Dagger", "Scholar's Pack"],
+    gold: 5,
+    altGold: 50,
+    note: "Or take 50 GP. Your Spellbook holds your starting 6 spells.",
+  },
+};
+
+const BG_EQUIPMENT = {
+  acolyte:    { items: ["Holy Symbol", "Prayer Book", "Parchment (5 sheets)", "Robe", "Traveler's Clothes"], gold: 8,  altGold: 50 },
+  artisan:    { items: ["Cartographer's Tools", "Traveler's Clothes", "2 Pouches"], gold: 32, altGold: 50 },
+  charlatan:  { items: ["Forgery Kit", "Costumes (2)", "Fine Clothes"], gold: 15, altGold: 50 },
+  criminal:   { items: ["Thieves' Tools", "Crowbar", "Daggers (2)", "Traveler's Clothes", "2 Pouches"], gold: 16, altGold: 50 },
+  entertainer:{ items: ["Costumes (2)", "Mirror", "Perfume", "Traveler's Clothes"], gold: 11, altGold: 50 },
+  farmer:     { items: ["Sickle", "Carpenter's Tools", "Healer's Kit", "Iron Pot", "Shovel", "Traveler's Clothes"], gold: 30, altGold: 50 },
+  guard:      { items: ["Spear", "Light Crossbow", "Bolts (20)", "Hooded Lantern", "Manacles", "Quiver", "Traveler's Clothes"], gold: 12, altGold: 50 },
+  guide:      { items: ["Shortbow", "Arrows (20)", "Cartographer's Tools", "Bedroll", "Quiver", "Tent", "Traveler's Clothes"], gold: 3,  altGold: 50 },
+  hermit:     { items: ["Herbalism Kit", "Bedroll", "Traveler's Clothes", "Pouch"], gold: 16, altGold: 50 },
+  merchant:   { items: ["Navigator's Tools", "Traveler's Clothes", "Pouch"], gold: 22, altGold: 50 },
+  noble:      { items: ["Fine Clothes", "Perfume"], gold: 29, altGold: 50 },
+  sailor:     { items: ["Navigator's Tools", "Rope (50 ft)", "Traveler's Clothes", "Bedroll"], gold: 10, altGold: 50 },
+  scribe:     { items: ["Calligrapher's Supplies", "Parchment (5 sheets)", "Traveler's Clothes"], gold: 23, altGold: 50 },
+  soldier:    { items: ["Shortsword", "Light Crossbow", "Bolts (20)", "Dungeoneer's Pack"], gold: 18, altGold: 50 },
+  wayfarer:   { items: ["Daggers (2)", "Thieves' Tools", "Bedroll", "Traveler's Clothes", "2 Pouches"], gold: 15, altGold: 50 },
+};
+
+// fallback items not in ITEM_DESC
+function getItemData(name) {
+  return ITEM_DESC[name] || { icon: "📦", desc: "A useful piece of adventuring gear." };
+}
+
+function updateEquipmentSection() {
+  const cls = document.getElementById('class').value;
+  const bg  = document.getElementById('background').value;
+  const sec = document.getElementById('equipment-section');
+
+  if (!cls && !bg) {
+    sec.innerHTML = '<p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Class and Background to see your starting equipment.</p>';
+    return;
+  }
+
+  const classData = cls ? CLASS_EQUIPMENT[cls] : null;
+  const bgData    = bg  ? BG_EQUIPMENT[bg]      : null;
+
+  const renderItems = (items, goldGP) => items.map(name => {
+    const d = getItemData(name);
+    return `<div class="equip-item">
+      <span class="equip-item-icon">${d.icon}</span>
+      <div class="equip-item-body">
+        <span class="equip-item-name">${name}${goldGP && name === items[items.length-1] ? '' : ''}</span>
+        <span class="equip-item-desc">${d.desc}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  let html = '<div class="equip-grid">';
+
+  if (classData) {
+    const clsName = cls.charAt(0).toUpperCase() + cls.slice(1);
+    html += `<div class="equip-source">
+      <span class="equip-source-label">⚔ Class: ${clsName}</span>
+      <span class="equip-gold-note">${classData.note}</span>
+      ${renderItems(classData.items)}
+      <div class="equip-item" style="margin-top:0.3rem;">
+        <span class="equip-item-icon">🪙</span>
+        <div class="equip-item-body">
+          <span class="equip-item-name">${classData.gold} GP</span>
+          <span class="equip-item-desc">Starting gold from class package.</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (bgData) {
+    const bgName = bg.charAt(0).toUpperCase() + bg.slice(1);
+    html += `<div class="equip-source from-bg">
+      <span class="equip-source-label">📜 Background: ${bgName}</span>
+      <span class="equip-gold-note">Or take ${bgData.altGold} GP instead of all background equipment.</span>
+      ${renderItems(bgData.items)}
+      <div class="equip-item" style="margin-top:0.3rem;">
+        <span class="equip-item-icon">🪙</span>
+        <div class="equip-item-body">
+          <span class="equip-item-name">${bgData.gold} GP</span>
+          <span class="equip-item-desc">Starting gold from background package.</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html += '</div>';
+
+  if (classData && bgData) {
+    const total = classData.gold + bgData.gold;
+    html += `<div class="equip-total-gold">Total starting gold (both packages): <strong>${total} GP</strong></div>`;
+  }
+
+  sec.innerHTML = html;
+}
+
+// ── Character Choices ─────────────────────────────────────────────────────────
+// State for all choices
+const charChoices = {
+  // Species
+  humanSkill: null,
+  gnomeLineage: null,
+  dragonbornAncestry: null,
+  highElfCantrip: null,
+  // Class
+  fightingStyle: null,
+  weaponMasteries: [],  // array of strings
+  rogueExpertise: [],
+  clericDivineOrder: null,
+  druidPrimalOrder: null,
+  druidMagicianCantrip: null,
+  warlockInvocation: null,
+  // Background tool choices
+  bgToolChoice: null,
+  // Languages
+  languages: [],
+};
+
+const ALL_SKILLS = ["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"];
+
+const ALL_LANGUAGES = ["Common","Draconic","Dwarvish","Elvish","Giant","Gnomish","Goblin","Halfling","Infernal","Orc","Primordial","Sylvan","Undercommon","Abyssal","Celestial","Deep Speech"];
+
+const DRAGONBORN_ANCESTRIES = {
+  "Black (Acid)":      "Acid damage, 5×30 ft. line (DEX save)",
+  "Blue (Lightning)":  "Lightning damage, 5×30 ft. line (DEX save)",
+  "Brass (Fire)":      "Fire damage, 5×30 ft. line (DEX save)",
+  "Bronze (Lightning)":"Lightning damage, 5×30 ft. line (DEX save)",
+  "Copper (Acid)":     "Acid damage, 5×30 ft. line (DEX save)",
+  "Gold (Fire)":       "Fire damage, 15 ft. cone (DEX save)",
+  "Green (Poison)":    "Poison damage, 15 ft. cone (CON save)",
+  "Red (Fire)":        "Fire damage, 15 ft. cone (DEX save)",
+  "Silver (Cold)":     "Cold damage, 15 ft. cone (CON save)",
+  "White (Cold)":      "Cold damage, 15 ft. cone (CON save)",
+};
+
+const GNOME_LINEAGES = {
+  forest: { name: "Forest Gnome", cantrips: "Minor Illusion + Speak with Animals", desc: "Connected to woodland creatures and illusion magic." },
+  rock:   { name: "Rock Gnome",   cantrips: "Mending + Prestidigitation",           desc: "Tinkerers and inventors with a knack for minor magic." },
+  deep:   { name: "Deep Gnome",   cantrips: "Blindness/Deafness + Disguise Self",   desc: "Survivors of the Underdark, masters of concealment." },
+};
+
+const FIGHTING_STYLES = {
+  "Archery":              "+2 to attack rolls with ranged weapons.",
+  "Blind Fighting":       "Blindsight 10 ft. — see invisible creatures and fight in darkness.",
+  "Defense":              "+1 AC while wearing armor.",
+  "Dueling":              "+2 damage with a one-handed melee weapon when no other weapon is held.",
+  "Great Weapon Fighting":"Re-roll 1s and 2s on damage dice for two-handed/versatile weapons.",
+  "Interception":         "Reaction: reduce damage to an adjacent ally by 1d10 + Proficiency Bonus.",
+  "Protection":           "Reaction: impose disadvantage on an attack against an adjacent ally (requires shield).",
+  "Thrown Weapon Fighting":"+2 damage with thrown weapon attacks; draw thrown weapons as part of the attack.",
+  "Two-Weapon Fighting":  "Add ability modifier to the damage of your off-hand attack.",
+  "Unarmed Fighting":     "Unarmed strikes deal 1d6+STR (1d8 if empty-handed); deal 1d4 to a grappled creature each turn.",
+};
+
+const WEAPON_MASTERY_LIST = [
+  "Battleaxe (Cleave)","Club (Slow)","Dagger (Nick)","Dart (Vex)","Flail (Sap)",
+  "Glaive (Graze)","Greataxe (Cleave)","Greatclub (Push)","Greatsword (Graze)",
+  "Halberd (Cleave)","Hand Crossbow (Vex)","Handaxe (Vex)","Heavy Crossbow (Push)",
+  "Javelin (Slow)","Lance (Topple)","Light Crossbow (Slow)","Longbow (Slow)",
+  "Longsword (Sap)","Mace (Sap)","Maul (Topple)","Morningstar (Sap)",
+  "Pike (Push)","Quarterstaff (Topple)","Rapier (Vex)","Scimitar (Nick)",
+  "Shortbow (Vex)","Shortsword (Vex)","Sickle (Nick)","Spear (Sap)",
+  "Trident (Topple)","War Pick (Sap)","Warhammer (Push)","Whip (Slow)",
+];
+
+const WARLOCK_INVOCATIONS_L1 = {
+  "Agonizing Blast":     "Add CHA modifier to Eldritch Blast damage rolls (requires Eldritch Blast cantrip).",
+  "Armor of Shadows":    "Cast Mage Armor on yourself at will, without using a spell slot.",
+  "Devil's Sight":       "See normally in magical and nonmagical darkness to 120 ft.",
+  "Eldritch Mind":       "Advantage on Concentration saving throws.",
+  "Fiendish Vigor":      "Cast False Life on yourself at will as a 1st-level spell, without a spell slot.",
+  "Gaze of Two Minds":   "Touch a willing creature and perceive through its senses until your next turn.",
+  "Mask of Many Faces":  "Cast Disguise Self at will, without using a spell slot.",
+  "Misty Visions":       "Cast Silent Image at will, without using a spell slot.",
+  "Repelling Blast":     "When hitting with Eldritch Blast, push the creature 10 ft. away (requires Eldritch Blast).",
+  "Thief of Five Fates": "Cast Bane once using a Pact Magic slot; regain on Long Rest.",
+};
+
+const WIZARD_CANTRIPS = ["Acid Splash","Blade Ward","Booming Blade","Chill Touch","Control Flames","Create Bonfire","Dancing Lights","Fire Bolt","Friends","Frostbite","Green-Flame Blade","Gust","Infestation","Light","Mage Hand","Mending","Message","Mind Sliver","Minor Illusion","Mold Earth","Poison Spray","Prestidigitation","Ray of Frost","Shape Water","Shocking Grasp","Sword Burst","Thunderclap","Toll the Dead","True Strike"];
+
+const BACKGROUND_TOOL_CHOICES = {
+  artisan:    { label: "Artisan's Tool", options: ["Alchemist's Supplies","Brewer's Supplies","Calligrapher's Supplies","Carpenter's Tools","Cartographer's Tools","Cobbler's Tools","Cook's Utensils","Glassblower's Tools","Jeweler's Tools","Leatherworker's Tools","Mason's Tools","Painter's Supplies","Potter's Tools","Smith's Tools","Tinker's Tools","Weaver's Tools","Woodcarver's Tools"] },
+  entertainer:{ label: "Musical Instrument", options: ["Bagpipes","Drum","Dulcimer","Flute","Lute","Lyre","Horn","Pan Flute","Shawm","Viol"] },
+  guard:      { label: "Gaming Set", options: ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+  noble:      { label: "Gaming Set", options: ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+  soldier:    { label: "Gaming Set", options: ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+};
+
+function makeChoiceCard(id, label, content) {
+  return `<div class="choice-card" id="choicecard-${id}">
+    <span class="choice-card-label">${label}</span>
+    ${content}
+  </div>`;
+}
+
+function chipSelect(id, options, chosen, max, onchange) {
+  const count = chosen.length;
+  const done  = count >= max;
+  return `
+    <div class="choice-tally ${done ? 'complete' : ''}">${count}/${max} chosen</div>
+    <div class="choice-chips">
+      ${options.map(o => {
+        const isCh = chosen.includes(o);
+        const dis  = (!isCh && done) ? 'disabled' : '';
+        return `<button class="choice-chip ${isCh ? 'chosen' : ''}" ${dis} onclick="${onchange}('${o.replace(/'/g,"\\'")}')">
+          ${o}
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+function toggleChip(arr, val, max) {
+  const i = arr.indexOf(val);
+  if (i >= 0) arr.splice(i, 1);
+  else if (arr.length < max) arr.push(val);
+  updateChoicesSection();
+}
+
+// Chip toggle handlers
+function toggleWeaponMastery(w) { toggleChip(charChoices.weaponMasteries, w, weaponMasteryMax()); }
+function toggleRogueExpertise(s){ toggleChip(charChoices.rogueExpertise, s, 2); }
+function toggleLanguage(l)       { toggleChip(charChoices.languages, l, 2); }
+
+function weaponMasteryMax() {
+  const cls = document.getElementById('class').value;
+  return cls === 'fighter' ? 3 : 2; // fighter=3, barbarian/paladin/ranger/rogue=2
+}
+
+function updateChoicesSection() {
+  const cls     = document.getElementById('class').value;
+  const species = document.getElementById('species').value;
+  const bg      = document.getElementById('background').value;
+  const lineage = selectedLineage;
+
+  const cards = [];
+
+  // ── LANGUAGES (everyone) ──────────────────────────────────────────────────
+  cards.push(makeChoiceCard('languages', '🗣 Languages (choose 2)',
+    chipSelect('lang', ALL_LANGUAGES.filter(l => l !== 'Common'), charChoices.languages, 2, 'toggleLanguage')
+    + `<div class="choice-desc">All characters know Common. Pick 2 additional languages.</div>`
+  ));
+
+  // ── SPECIES CHOICES ───────────────────────────────────────────────────────
+  if (species === 'human') {
+    const bgSkills = bg && BACKGROUND_BONUSES[bg] ? BACKGROUND_BONUSES[bg].skills.split(',').map(s=>s.trim()) : [];
+    const classSkillsChosen = [...classSkillChoices];
+    const alreadyProficient = new Set([...bgSkills, ...classSkillsChosen]);
+    const available = ALL_SKILLS.filter(s => !alreadyProficient.has(s));
+    const chosen = charChoices.humanSkill ? [charChoices.humanSkill] : [];
+    cards.push(makeChoiceCard('human-skill', '⚔ Human: Skillful — Choose 1 Skill',
+      chipSelect('hskill', available, chosen, 1, 'setHumanSkill')
+      + `<div class="choice-desc">Humans gain proficiency in one additional skill of their choice.</div>`
+    ));
+  }
+
+  if (species === 'gnome') {
+    const gl = charChoices.gnomeLineage;
+    const lineageCard = gl && GNOME_LINEAGES[gl] ? `<div class="choice-desc">${GNOME_LINEAGES[gl].desc}<br><strong>Cantrips:</strong> ${GNOME_LINEAGES[gl].cantrips}</div>` : '';
+    cards.push(makeChoiceCard('gnome-lineage', '🌲 Gnomish Lineage',
+      `<select onchange="setGnomeLineage(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose Lineage —</option>
+        ${Object.entries(GNOME_LINEAGES).map(([k,v]) => `<option value="${k}" ${gl===k?'selected':''}>${v.name}</option>`).join('')}
+      </select>` + lineageCard
+    ));
+  }
+
+  if (species === 'dragonborn') {
+    const da = charChoices.dragonbornAncestry;
+    const daCard = da ? `<div class="choice-desc"><strong>Breath Weapon & Resistance:</strong> ${DRAGONBORN_ANCESTRIES[da]}</div>` : '';
+    cards.push(makeChoiceCard('dragonborn-ancestry', '🐉 Draconic Ancestry',
+      `<select onchange="setDragonbornAncestry(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose Dragon Type —</option>
+        ${Object.keys(DRAGONBORN_ANCESTRIES).map(k => `<option value="${k}" ${da===k?'selected':''}>${k}</option>`).join('')}
+      </select>` + daCard
+    ));
+  }
+
+  if (species === 'elf' && lineage === 'high-elf') {
+    const hec = charChoices.highElfCantrip;
+    cards.push(makeChoiceCard('highelf-cantrip', '✨ High Elf: Arcane Cantrip',
+      `<select onchange="setHighElfCantrip(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose a Wizard Cantrip —</option>
+        ${WIZARD_CANTRIPS.map(c => `<option value="${c}" ${hec===c?'selected':''}>${c}</option>`).join('')}
+      </select>` +
+      (hec ? `<div class="choice-desc">You know <strong>${hec}</strong> as a bonus cantrip. You can swap it for a different Wizard cantrip after each Long Rest.</div>` : '')
+    ));
+  }
+
+  // ── CLASS CHOICES ─────────────────────────────────────────────────────────
+  if (cls === 'fighter') {
+    const fs = charChoices.fightingStyle;
+    cards.push(makeChoiceCard('fighting-style', '⚔ Fighter: Fighting Style Feat',
+      `<select onchange="setFightingStyle(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose Fighting Style —</option>
+        ${Object.keys(FIGHTING_STYLES).map(k => `<option value="${k}" ${fs===k?'selected':''}>${k}</option>`).join('')}
+      </select>` +
+      (fs ? `<div class="choice-desc">${FIGHTING_STYLES[fs]}</div>` : '')
+    ));
+  }
+
+  if (['fighter','barbarian','paladin','ranger','rogue'].includes(cls)) {
+    const max = weaponMasteryMax();
+    const label = cls === 'fighter' ? `⚔ Weapon Mastery (choose ${max})` : `⚔ Weapon Mastery (choose ${max})`;
+    cards.push(makeChoiceCard('weapon-mastery', `⚔ ${cls.charAt(0).toUpperCase()+cls.slice(1)}: ${label}`,
+      chipSelect('wm', WEAPON_MASTERY_LIST, charChoices.weaponMasteries, max, 'toggleWeaponMastery')
+      + `<div class="choice-desc">Each weapon's mastery property adds a special effect when you attack with it. You can swap one choice after each Long Rest.</div>`
+    ));
+  }
+
+  if (cls === 'rogue') {
+    const bgSkills = bg && BACKGROUND_BONUSES[bg] ? BACKGROUND_BONUSES[bg].skills.split(',').map(s=>s.trim()) : [];
+    const expertisePool = [...classSkillChoices, ...bgSkills, 'Thieves\' Tools'];
+    cards.push(makeChoiceCard('rogue-expertise', '🗡 Rogue: Expertise (choose 2)',
+      chipSelect('exp', expertisePool, charChoices.rogueExpertise, 2, 'toggleRogueExpertise')
+      + `<div class="choice-desc">Double your Proficiency Bonus for these 2 skills or tools. You must already be proficient.</div>`
+    ));
+  }
+
+  if (cls === 'cleric') {
+    const dop = charChoices.clericDivineOrder;
+    const doDesc = {
+      protector: "Proficiency with Martial Weapons and Heavy Armor. You become a frontline divine warrior.",
+      thaumaturge: "+WIS modifier to Arcana and Religion checks. You become a font of divine knowledge."
+    };
+    cards.push(makeChoiceCard('divine-order', '⛪ Cleric: Divine Order',
+      `<select onchange="setClericDivineOrder(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose Divine Order —</option>
+        <option value="protector" ${dop==='protector'?'selected':''}>Protector</option>
+        <option value="thaumaturge" ${dop==='thaumaturge'?'selected':''}>Thaumaturge</option>
+      </select>` +
+      (dop ? `<div class="choice-desc">${doDesc[dop]}</div>` : '')
+    ));
+  }
+
+  if (cls === 'druid') {
+    const po = charChoices.druidPrimalOrder;
+    const poDesc = {
+      magician: "Know 1 extra Druid cantrip. Add WIS modifier to Arcana or Nature checks.",
+      warden:   "Proficiency with Martial Weapons and training with Medium Armor. You are a battle-ready druid."
+    };
+    let druidContent = `<select onchange="setDruidPrimalOrder(this.value)" style="margin-bottom:0.3rem;">
+      <option value="">— Choose Primal Order —</option>
+      <option value="magician" ${po==='magician'?'selected':''}>Magician</option>
+      <option value="warden" ${po==='warden'?'selected':''}>Warden</option>
+    </select>` + (po ? `<div class="choice-desc">${poDesc[po]}</div>` : '');
+    cards.push(makeChoiceCard('primal-order', '🌿 Druid: Primal Order', druidContent));
+
+    if (po === 'magician') {
+      const mc = charChoices.druidMagicianCantrip;
+      cards.push(makeChoiceCard('druid-cantrip', '🌿 Druid Magician: Bonus Cantrip',
+        `<select onchange="setDruidMagicianCantrip(this.value)" style="margin-bottom:0.3rem;">
+          <option value="">— Choose a Druid Cantrip —</option>
+          ${["Druidcraft","Elementalism","Guidance","Mending","Message","Poison Spray","Produce Flame","Resistance","Shillelagh","Starry Wisp","Thorn Whip","Thunderclap"].map(c => `<option value="${c}" ${mc===c?'selected':''}>${c}</option>`).join('')}
+        </select>` +
+        (mc ? `<div class="choice-desc">You know <strong>${mc}</strong> as a bonus cantrip from your Magician training.</div>` : '')
+      ));
+    }
+  }
+
+  if (cls === 'warlock') {
+    const wi = charChoices.warlockInvocation;
+    cards.push(makeChoiceCard('warlock-invocation', '🔮 Warlock: Eldritch Invocation (choose 1)',
+      `<select onchange="setWarlockInvocation(this.value)" style="margin-bottom:0.3rem;">
+        <option value="">— Choose Invocation —</option>
+        ${Object.keys(WARLOCK_INVOCATIONS_L1).map(k => `<option value="${k}" ${wi===k?'selected':''}>${k}</option>`).join('')}
+      </select>` +
+      (wi ? `<div class="choice-desc">${WARLOCK_INVOCATIONS_L1[wi]}</div>` : '')
+    ));
+  }
+
+  // ── BACKGROUND TOOL CHOICES ───────────────────────────────────────────────
+  if (bg && BACKGROUND_TOOL_CHOICES[bg]) {
+    const btc = BACKGROUND_TOOL_CHOICES[bg];
+    const cur = charChoices.bgToolChoice;
+    cards.push(makeChoiceCard('bg-tool', `📜 Background: ${btc.label}`,
+      `<select onchange="setBgToolChoice(this.value)">
+        <option value="">— Choose ${btc.label} —</option>
+        ${btc.options.map(o => `<option value="${o}" ${cur===o?'selected':''}>${o}</option>`).join('')}
+      </select>`
+    ));
+  }
+
+  const sec = document.getElementById('choices-section');
+  const grid = document.getElementById('choices-grid');
+  if (cards.length === 0) {
+    sec.style.display = 'none';
+    return;
+  }
+  grid.innerHTML = cards.join('');
+  sec.style.display = 'block';
+}
+
+// Individual setters
+function setHumanSkill(val)          { charChoices.humanSkill = val; updateChoicesSection(); updateProficiencySection(); }
+function setGnomeLineage(val)        { charChoices.gnomeLineage = val; updateChoicesSection(); }
+function setDragonbornAncestry(val)  { charChoices.dragonbornAncestry = val; updateChoicesSection(); }
+function setHighElfCantrip(val)      { charChoices.highElfCantrip = val; updateChoicesSection(); }
+function setFightingStyle(val)       { charChoices.fightingStyle = val; updateChoicesSection(); }
+function setClericDivineOrder(val)   { charChoices.clericDivineOrder = val; updateChoicesSection(); updateProficiencySection(); }
+function setDruidPrimalOrder(val)    { charChoices.druidPrimalOrder = val; charChoices.druidMagicianCantrip = null; updateChoicesSection(); }
+function setDruidMagicianCantrip(val){ charChoices.druidMagicianCantrip = val; updateChoicesSection(); }
+function setWarlockInvocation(val)   { charChoices.warlockInvocation = val; updateChoicesSection(); }
+function setBgToolChoice(val)        { charChoices.bgToolChoice = val; updateChoicesSection(); }
+
+// Reset class/species/bg-specific choices on change
+function resetChoicesForClass() {
+  charChoices.fightingStyle = null;
+  charChoices.weaponMasteries = [];
+  charChoices.rogueExpertise = [];
+  charChoices.clericDivineOrder = null;
+  charChoices.druidPrimalOrder = null;
+  charChoices.druidMagicianCantrip = null;
+  charChoices.warlockInvocation = null;
+}
+function resetChoicesForSpecies() {
+  charChoices.humanSkill = null;
+  charChoices.gnomeLineage = null;
+  charChoices.dragonbornAncestry = null;
+  charChoices.highElfCantrip = null;
+}
+function resetChoicesForBackground() {
+  charChoices.bgToolChoice = null;
+}
+</script>
+</body>
+</html>
