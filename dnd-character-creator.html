@@ -784,6 +784,62 @@
   }
   .mastery-tooltip:hover .mastery-tip { display: block; }
 
+  /* Subclass chips in class card */
+  .subclass-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem; }
+  .subclass-chip { position: relative; display: inline-block; }
+  .subclass-chip-btn {
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border: 1px solid var(--gold);
+    border-top: 2px solid var(--crimson);
+    border-radius: 0 0 3px 3px;
+    background: rgba(255,255,255,0.35);
+    color: var(--ink);
+    cursor: default;
+    transition: background 0.12s;
+  }
+  .subclass-chip:hover .subclass-chip-btn { background: rgba(201,151,58,0.15); }
+  .subclass-chip-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.8rem;
+    font-style: normal;
+    line-height: 1.45;
+    padding: 9px 12px;
+    border-radius: 4px;
+    width: 280px;
+    z-index: 20;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    border-top: 2px solid var(--gold);
+  }
+  .subclass-chip-tip .tip-name {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .subclass-chip-tip .tip-summary { display: block; margin-bottom: 5px; }
+  .subclass-chip-tip .tip-build {
+    display: block;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(244,232,193,0.2);
+    color: rgba(244,232,193,0.8);
+    font-size: 0.76rem;
+  }
+  .subclass-chip:hover .subclass-chip-tip { display: block; }
+
   /* Combat stats grid */
   .combat-grid {
     display: grid;
@@ -1815,21 +1871,106 @@ function renderLineageCard(l) {
 }
 
 // Class mechanical details — Level 1 (2024 PHB)
-// hpbase = PHB 2024 fixed HP per level:
+// PHB 2024 fixed HP per level:
 // Barbarian: 7 | Fighter/Paladin/Ranger: 6 | Bard/Cleric/Druid/Monk/Rogue/Warlock: 5 | Sorcerer/Wizard: 4
 const CLASS_BONUSES = {
-  fighter:   { primary: "STR or DEX", hitdie: "d10", hpbase: 6,  saves: "STR, CON", armor: "All armor, shields", skillCount: 2, skillPool: ["Acrobatics","Animal Handling","Athletics","History","Insight","Intimidation","Perception","Survival"], features: "Fighting Style, Second Wind, Weapon Mastery (3 weapons)", subclasses: "Level 3 — Choose a Martial Archetype: Battle Master (tactical maneuvers, high control), Champion (crit range, high STR/DEX builds), Eldritch Knight (uses INT for spells — good if INT is decent), Psi Warrior (uses INT for psychic abilities)." },
-  paladin:   { primary: "STR & CHA",  hitdie: "d10", hpbase: 6,  saves: "WIS, CHA", armor: "All armor, shields", skillCount: 2, skillPool: ["Athletics","Insight","Intimidation","Medicine","Persuasion","Religion"], features: "Divine Sense, Lay on Hands (5 HP pool), Weapon Mastery (2 weapons), Spellcasting (Cha)", subclasses: "Level 3 — Choose a Sacred Oath: Devotion (classic holy warrior, needs CHA), Ancients (nature/life magic, great support), Vengeance (relentless hunter, high damage), Glory (boosts allies, very CHA-heavy)." },
-  ranger:    { primary: "DEX & WIS",  hitdie: "d10", hpbase: 6,  saves: "STR, DEX", armor: "Light, medium, shields", skillCount: 3, skillPool: ["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"], features: "Expertise (2 skills), Favored Enemy, Spellcasting (Wis), Weapon Mastery (2 weapons)", subclasses: "Level 3 — Choose a Ranger Archetype: Hunter (straightforward damage/defense options), Beast Master (animal companion, needs WIS for bond), Fey Wanderer (enchantment magic, CHA synergy), Gloom Stalker (ambush/darkness specialist)." },
-  barbarian: { primary: "STR",        hitdie: "d12", hpbase: 7,  saves: "STR, CON", armor: "Light, medium, shields", skillCount: 2, skillPool: ["Animal Handling","Athletics","Intimidation","Nature","Perception","Survival"], features: "Rage (2 uses, +2 dmg, resistance), Unarmored Defense (10 + DEX + CON), Weapon Mastery (2 weapons)", subclasses: "Level 3 — Choose a Primal Path: Berserker (pure aggression), Wild Heart (animal magic — benefits from WIS), World Tree (support/summoning), Zealot (divine rage, self-healing)." },
-  monk:      { primary: "DEX & WIS",  hitdie: "d8",  hpbase: 5,  saves: "STR, DEX", armor: "None", skillCount: 2, skillPool: ["Acrobatics","Athletics","History","Insight","Religion","Stealth"], features: "Martial Arts (d6 unarmed), Unarmored Defense (10 + DEX + WIS), Weapon Mastery (1 weapon)", subclasses: "Level 3 — Choose a Monastic Tradition: Open Hand (unarmed combatant), Shadow (stealth, WIS spells), Four Elements (elemental magic, costs Focus Points), Mercy (healing/cursing, needs WIS)." },
-  rogue:     { primary: "DEX",        hitdie: "d8",  hpbase: 5,  saves: "DEX, INT", armor: "Light", skillCount: 4, skillPool: ["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Persuasion","Sleight of Hand","Stealth"], features: "Expertise (2 skills), Sneak Attack (1d6), Thieves' Cant, Weapon Mastery (2 weapons)", subclasses: "Level 3 — Choose a Roguish Archetype: Thief (utility, bonus action magic items), Assassin (burst damage from surprise), Arcane Trickster (INT spells + illusion), Soulknife (psychic blades, CHA-optional)." },
-  wizard:    { primary: "INT",        hitdie: "d6",  hpbase: 4,  saves: "INT, WIS", armor: "None", skillCount: 2, skillPool: ["Arcana","History","Insight","Investigation","Medicine","Religion"], features: "Arcane Recovery, Ritual Adept, Spellcasting (Int)", subclasses: "Level 2 — Choose an Arcane Tradition: Evocation (damage spells, sculpt spells to spare allies), Abjuration (defense/counterspell focus), Divination (predict dice, very powerful), Illusion (Portent dice replacement for illusion spells)." },
-  sorcerer:  { primary: "CHA",        hitdie: "d6",  hpbase: 4,  saves: "CON, CHA", armor: "None", skillCount: 2, skillPool: ["Arcana","Deception","Insight","Intimidation","Persuasion","Religion"], features: "Innate Sorcery (advantage on spell attack rolls, 2 uses), Spellcasting (Cha)", subclasses: "Level 3 — Choose a Sorcerous Origin: Draconic Bloodline (durability + elemental flavor), Wild Magic (unpredictable surges, fun RP), Aberrant Mind (telepathy/psionics, INT-flavor), Clockwork Soul (order magic, great utility)." },
-  warlock:   { primary: "CHA",        hitdie: "d8",  hpbase: 5,  saves: "WIS, CHA", armor: "Light", skillCount: 2, skillPool: ["Arcana","Deception","History","Intimidation","Investigation","Nature","Religion"], features: "Eldritch Invocations (1 invocation), Pact Magic (1 spell slot, recharges on Short Rest), Spellcasting (Cha)", subclasses: "Level 3 — Choose a Patron: Archfey (charm/fear magic, CHA-heavy), Fiend (fire/damage, great tanky option), Great Old One (telepathy/madness), Hexblade (melee + CHA for attacks, armor)." },
-  cleric:    { primary: "WIS",        hitdie: "d8",  hpbase: 5,  saves: "WIS, CHA", armor: "Light, medium, shields", skillCount: 2, skillPool: ["History","Insight","Medicine","Persuasion","Religion"], features: "Divine Order (Protector or Thaumaturge), Spellcasting (Wis)", subclasses: "Level 3 — Choose a Divine Domain: Life (healing, needs WIS), Light (radiant damage, DEX less critical), Trickery (illusion/deception, CHA synergy), War (martial prowess, STR viable), Knowledge (information/skills, INT synergy)." },
-  druid:     { primary: "WIS",        hitdie: "d8",  hpbase: 5,  saves: "INT, WIS", armor: "Light, medium, shields (non-metal)", skillCount: 2, skillPool: ["Arcana","Animal Handling","Insight","Medicine","Nature","Perception","Religion","Survival"], features: "Druidic language, Primal Order (Magician or Warden), Spellcasting (Wis)", subclasses: "Level 3 — Choose a Circle: Land (terrain-based bonus spells, extra slots), Moon (powerful Wild Shape forms, CON helps), Sea (ocean + lightning magic), Stars (constellation forms, no Wild Shape needed)." },
-  bard:      { primary: "CHA",        hitdie: "d8",  hpbase: 5,  saves: "DEX, CHA", armor: "Light", skillCount: 3, skillPool: ["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"], features: "Bardic Inspiration (d6, uses = CHA mod), Spellcasting (Cha)", subclasses: "Level 3 — Choose a Bard College: Lore (extra skills + Cutting Words to debuff enemies), Valor (martial bard, needs STR/DEX), Glamour (fey enchantment, very CHA), Swords (blade performer, weapon attacks)." },
+  fighter:   { primary: "STR or DEX", hitdie: "d10", hpbase: 6,  saves: "STR, CON", armor: "All armor, shields", skillCount: 2, skillPool: ["Acrobatics","Animal Handling","Athletics","History","Insight","Intimidation","Perception","Survival"], features: "Fighting Style, Second Wind, Weapon Mastery (3 weapons)",
+    subclasses: {
+      "Battle Master":   { when: "Level 3", summary: "Tactical maneuvers using a Superiority Die (d8). Trip, disarm, push, inspire, feint — each costs one die.", build: "Works with any weapon and any primary stat (STR or DEX). Stack STR/DEX to 18+ first, then feats like Polearm Master or Sentinel synergise perfectly. Plan your 3 maneuver picks carefully — Trip Attack + Disarming Attack + Commander's Strike covers control, offense, and teamwork." },
+      "Champion":        { when: "Level 3", summary: "Expanded critical hit range (19-20 at L3, later 18-20). Extra Fighting Style at L7.", build: "Simple to play, effective at high STR or DEX. Great Weapon Fighting style + Great Weapon Master feat creates consistent high-damage crits. Works best when you can attack many times — Extra Attack at L5 makes every roll another crit chance. No resource management needed." },
+      "Eldritch Knight": { when: "Level 3", summary: "Access to Wizard spells (INT-based). Bond with your weapon so it returns to your hand. War Magic lets you cast + attack in the same turn.", build: "Requires INT investment to make spells reliable. Even INT 14 lets you cast Shield and Absorb Elements effectively — both are Reactions that don't need high spell attack. Booming Blade or Green-Flame Blade scale with your weapon damage. Don't spread too thin — STR/CON/INT all compete." },
+      "Psi Warrior":     { when: "Level 3", summary: "Psionic Dice (d6 at L3) add damage, telekinetic shoves, and damage reduction. All powered by INT.", build: "Similar INT pressure to Eldritch Knight. Even modest INT 14 gives you 4 Psionic Dice. Telekinetic Movement lets you reposition allies or objects — great with a Paladin or other melee. Protective Field (damage reduction) helps you take hits for a low-CON ally. Plan STR/CON/INT priority carefully." },
+    }
+  },
+  paladin:   { primary: "STR & CHA",  hitdie: "d10", hpbase: 6,  saves: "WIS, CHA", armor: "All armor, shields", skillCount: 2, skillPool: ["Athletics","Insight","Intimidation","Medicine","Persuasion","Religion"], features: "Divine Sense, Lay on Hands (5 HP pool), Weapon Mastery (2 weapons), Spellcasting (Cha)",
+    subclasses: {
+      "Oath of Devotion":   { when: "Level 3", summary: "Sacred Weapon (add CHA to attack rolls), Turn the Unholy, bonus Paladin spells (Sanctuary, Shield of Faith, etc.).", build: "The most straightforward Paladin. CHA is your single most important stat — it powers Sacred Weapon attacks, Aura of Protection saves (L6), and all your spells. Aim for CHA 20 first, then STR 16+. Great Weapon Master or Polearm Master are strong feat choices. Pair with Bless for devastating save DC advantage." },
+      "Oath of the Ancients":{ when: "Level 3", summary: "Nature/fey themed spells (Ensnaring Strike, Misty Step, etc.). Aura of Warding at L7 gives you and allies resistance to spell damage.", build: "The defensive/support choice. Aura of Warding is arguably the best aura in the game — resistance to ALL spell damage in a party is extraordinary. CON is more important here than for other Paladins because you'll want concentration for spells like Entangle and Misty Step. Resilient (CON) feat is very strong." },
+      "Oath of Vengeance":  { when: "Level 3", summary: "Vow of Enmity gives Advantage on all attacks vs one target. Hold Person and Misty Step as bonus spells. Relentless Avenger punishes fleeing enemies.", build: "Highest single-target damage Paladin. Vow of Enmity + Divine Smite + Extra Attack is devastating. Great Weapon Master pairs perfectly. Misty Step lets you close gaps without burning movement. Keep CHA high for your Avenging Angel form at L20 and the save DC on Hold Person." },
+      "Oath of Glory":      { when: "Level 3", summary: "Inspiring Smite gives Temp HP to allies after smiting. Peerless Athlete gives Advantage on Athletics/Acrobatics. Very CHA-focused.", build: "The party-buffing Paladin. CHA is paramount — Aura of Protection and Inspiring Smite both scale with it. Works best as the center of a melee-heavy party. Inspiring Leader feat stacks well. Less damage-focused than Vengeance, but makes your whole team significantly more durable." },
+    }
+  },
+  ranger:    { primary: "DEX & WIS",  hitdie: "d10", hpbase: 6,  saves: "STR, DEX", armor: "Light, medium, shields", skillCount: 3, skillPool: ["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"], features: "Expertise (2 skills), Favored Enemy, Spellcasting (Wis), Weapon Mastery (2 weapons)",
+    subclasses: {
+      "Hunter":         { when: "Level 3", summary: "Choose Hunter's Prey (Colossus Slayer +1d8, Horde Breaker extra attack, Giant Killer reaction attack). Later choose Defensive Tactics.", build: "The most flexible Ranger subclass. Colossus Slayer is the simplest and most consistent — just +1d8 on every turn you hit a wounded target. Works with any weapon style. Crossbow Expert + Sharpshooter is the gold standard ranged build. DEX 20 → WIS 16 → feats is the priority order." },
+      "Beast Master":   { when: "Level 3", summary: "Bond with a Beast companion that uses your Proficiency Bonus. It acts on your turn as a Bonus Action. Scales with your level.", build: "WIS matters here — your companion uses your spell save DC for its abilities. The companion takes your Bonus Action to attack, competing with other Bonus Action spells (Hunter's Mark). Primal Companion Beasts (Land/Sea/Sky) are the 2024 picks — they're tankier than wild animals. Consider how often you'll be using Bonus Actions for the pet vs your other options." },
+      "Gloom Stalker":  { when: "Level 3", summary: "Dread Ambusher: extra attack + 1d8 damage on first turn of combat. Invisible in magical darkness. Umbral Sight gives darkvision.", build: "Best single-turn burst damage of any Ranger. DEX 20 first — you want as high an Initiative as possible to guarantee Dread Ambusher fires in round 1. Alert feat is phenomenal here. Pairs beautifully with a Warlock using Devil's Sight + Darkness combo. Disguise Self and Rope Trick as bonus spells are great utility." },
+      "Fey Wanderer":   { when: "Level 3", summary: "Dreadful Strikes add 1d4 psychic damage per hit (not per turn). Otherworldly Glamour adds WIS to CHA checks. Misty Wanderer at L7.", build: "The social + combat hybrid. CHA becomes useful thanks to Otherworldly Glamour — unique among Rangers. WIS still drives your spell DC so keep both CHA and WIS respectable (14+). Beguiling Twist lets you redirect charm/fear effects, which is strong in campaigns with fey/undead. Works well as the party face." },
+    }
+  },
+  barbarian: { primary: "STR",        hitdie: "d12", hpbase: 7,  saves: "STR, CON", armor: "Light, medium, shields", skillCount: 2, skillPool: ["Animal Handling","Athletics","Intimidation","Nature","Perception","Survival"], features: "Rage (2 uses, +2 dmg, resistance), Unarmored Defense (10 + DEX + CON), Weapon Mastery (2 weapons)",
+    subclasses: {
+      "Berserker":    { when: "Level 3", summary: "Frenzy: while Raging, make one bonus attack each turn as a Bonus Action. Mindless Rage makes you immune to Charmed/Frightened during Rage.", build: "Pure aggression — the highest raw melee output Barbarian at low levels. The old Frenzy Exhaustion is gone in 2024, making this much more viable. STR 20 → CON 16 → Great Weapon Master is the standard path. Brutal Critical (L9) and the extra Frenzy attacks turn Great Weapon Master into a damage machine. Simple but devastatingly effective." },
+      "Wild Heart":   { when: "Level 3", summary: "Bestow an animal aspect: Bear (resist all damage except Psychic while Raging), Eagle (Dash as Bonus Action, no opportunity attacks), Wolf (allies gain Advantage on melee attacks vs enemies near you).", build: "More versatile than Berserker. Bear Heart is arguably the best tanking feature in the game — nearly unkillable while Raging. WIS 14+ unlocks the full power of Animal Speaker (speak with animals). Eagle Heart pairs with Mobile feat for incredible battlefield mobility. Wolf Heart turns you into a party-wide damage amplifier — best with melee-heavy parties." },
+      "World Tree":   { when: "Level 3", summary: "Vitality of the Tree gives Temp HP when Raging. Branches of the Tree lets you teleport allies. Support/utility Barbarian.", build: "The support Barbarian — unique playstyle. CON is especially important here since Temp HP scales with CON mod. Works best when your party has other frontliners who benefit from your ally teleportation. Less damage than Berserker or Wild Heart, but unmatched team utility. Resilient (WIS) can help with the Wisdom saving throws you'll face." },
+      "Zealot":       { when: "Level 3", summary: "Divine Fury deals extra Radiant/Necrotic damage while Raging. Warrior of the Gods means reviving you costs no material components. Fanatical Focus at L10.", build: "Best choice for characters who want to stay dead-proof. The no-material-cost resurrection is huge in dangerous campaigns. Radiant damage bypasses more resistances than physical. STR → CON → Sentinel feat is a strong path. Pairs well with a Cleric or Paladin who can cast Revivify on you for free resources. Simple and reliable." },
+    }
+  },
+  monk:      { primary: "DEX & WIS",  hitdie: "d8",  hpbase: 5,  saves: "STR, DEX", armor: "None", skillCount: 2, skillPool: ["Acrobatics","Athletics","History","Insight","Religion","Stealth"], features: "Martial Arts (d6 unarmed), Unarmored Defense (10 + DEX + WIS), Weapon Mastery (1 weapon)",
+    subclasses: {
+      "Warrior of the Open Hand": { when: "Level 3", summary: "Open Hand Technique: after Flurry of Blows hits, impose extra effects (prone, push 15ft, deny Reactions). Wholeness of Body at L6.", build: "The purest martial Monk. DEX and WIS are both critical — DEX for attacks/damage/AC, WIS for AC and Stunning Strike DC. DEX 20 → WIS 16 is the priority. The three Open Hand Technique options make every Flurry of Blows hit a tactical decision. Prone + Flurry next round is devastating. Mobile feat prevents opportunity attacks after your strikes." },
+      "Warrior of Shadow":        { when: "Level 3", summary: "Darkness, Darkvision, Silence, Pass Without Trace are available for Focus Points. Step into shadow lets you teleport between darkness.", build: "The stealth/assassin Monk. WIS matters for your spell save DC on these abilities. Silence (2 Focus Points) completely shuts down casters in a 20ft sphere — powerful in the right fights. Best in campaigns with lots of darkness, dungeons, or stealth missions. Shadow Step teleportation pairs excellently with the Rogue's Cunning Action for action-economy heavy turns." },
+      "Warrior of the Four Elements": { when: "Level 3", summary: "Spend Focus Points to cast elemental spells (Burning Hands, Ice Storm, etc.). WIS-based. Expensive but high ceiling.", build: "Focus Point hungry — you'll often choose between Flurry of Blows and spells. WIS is paramount here since it drives both your Stunning Strike DC and your spell save DC. Prioritise WIS 18-20. This subclass rewards careful resource management. Stunning Strike + follow-up Earth Tremor prone effect is a strong combo. Plan for Short Rests to recover Focus Points." },
+      "Warrior of Mercy":         { when: "Level 3", summary: "Hand of Harm (necrotic damage + poisoned) and Hand of Healing (restore HP). Physician's Touch at L6 adds conditions.", build: "The support/hybrid Monk. WIS directly improves both your healing output and your Stunning Strike DC — max WIS first (aim for 20). Hand of Healing uses your Flurry of Blows hits to also heal an ally, giving outstanding action economy. Works exceptionally well in small parties (2-3 players) where healing is scarce. Poisoned condition from Hand of Harm is consistently powerful." },
+    }
+  },
+  rogue:     { primary: "DEX",        hitdie: "d8",  hpbase: 5,  saves: "DEX, INT", armor: "Light", skillCount: 4, skillPool: ["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Persuasion","Sleight of Hand","Stealth"], features: "Expertise (2 skills), Sneak Attack (1d6), Thieves' Cant, Weapon Mastery (2 weapons)",
+    subclasses: {
+      "Thief":            { when: "Level 3", summary: "Fast Hands: use Thieves' Tools, activate magic items, or use objects as a Bonus Action. Second-Story Work: climb at full speed, jump farther.", build: "Exceptional utility and item-use flexibility. In magic-item-heavy campaigns, activating a Wand of Fireballs as a Bonus Action then Sneak Attacking is outstanding. DEX 20 first, then maximise Perception/Stealth/Thieves' Tools Expertise. Pairs naturally with the Skilled or Alert feats. The ceiling depends heavily on the items available in your campaign — discuss with your DM." },
+      "Assassin":         { when: "Level 3", summary: "Assassinate: automatic crits vs surprised targets, Advantage vs creatures that haven't taken a turn yet. Infiltration Expertise for disguises.", build: "Burst damage specialist — your best turns are round 1 of combat. DEX 20 → Alert feat (can't be surprised, +5 Initiative) → Crossbow Expert is the classic setup. Assassinate + Sneak Attack auto-crit on a surprised target can delete enemies before they act. Coordinate with the party to create surprise conditions. Less effective in long, drawn-out fights." },
+      "Arcane Trickster": { when: "Level 3", summary: "Wizard spells (INT-based). Mage Hand Legerdemain for invisible item theft. Magical Ambush gives Disadvantage on saves when you're hidden.", build: "Requires INT investment — even INT 14 gives you decent utility spells. Booming Blade or Green-Flame Blade replace your standard attack and scale with Sneak Attack. Mage Hand Legerdemain is incredible for creative problem-solving. Misty Step and Shield are standout picks. Split your ASIs: DEX 18 → INT 14-16 → DEX 20 is a reasonable path. Don't try to be a full caster." },
+      "Swashbuckler":     { when: "Level 3", summary: "Fancy Footwork: melee attacks don't provoke opportunity attacks that turn. Rakish Audacity: Sneak Attack alone (no ally needed) if 1v1.", build: "The duelist — mobile, independent, self-sufficient. CHA matters for Panache (charming/provoking enemies). DEX 20 first, then CHA 14+ for Panache utility. Rapier + Defensive Duelist feat is a strong combo. The real power is Sneak Attack without an ally — you don't need to set up flanking, making you much more mobile and reliable in varied encounter layouts. Alert feat ensures you always go first for the Rakish Audacity 1v1." },
+    }
+  },
+  wizard:    { primary: "INT",        hitdie: "d6",  hpbase: 4,  saves: "INT, WIS", armor: "None", skillCount: 2, skillPool: ["Arcana","History","Insight","Investigation","Medicine","Religion"], features: "Arcane Recovery, Ritual Adept, Spellcasting (Int)",
+    subclasses: {
+      "School of Evocation":  { when: "Level 2", summary: "Sculpt Spells: shape AoEs to automatically exclude allies. Potent Cantrip deals half damage even on saves. Empowered Evocation adds INT to one damage roll per spell.", build: "The damage blaster. INT 20 is the priority — it directly adds to every Empowered Evocation damage roll. Sculpt Spells removes the biggest liability of Fireball (hitting allies), making you the most reliable AoE damage dealer. War Caster (concentration) or Resilient CON are essential — you'll be concentrating on Fly or Hypnotic Pattern while also dropping Fireballs." },
+      "School of Abjuration": { when: "Level 2", summary: "Arcane Ward: a hit-point buffer that recharges when you cast Abjuration spells. Projected Ward extends it to allies. Spell Resistance at L10.", build: "Durability-focused Wizard. The Arcane Ward gives you a second HP pool (2×Wizard level + INT mod) that recharges for free when you cast Shield, Counterspell, or Dispel Magic. Keep Ward spells in your prepared list always. CON is your second stat priority for concentration saves. Works beautifully in campaigns with lots of enemy spellcasters." },
+      "School of Divination": { when: "Level 2", summary: "Portent: roll 2d20 at Long Rest and replace any d20 roll (yours or another creature's) with one of those results. No action required.", build: "One of the strongest subclass features in the game — Portent is simply broken when used correctly. Save low rolls to force enemy saves to fail, use high rolls to guarantee critical hits or successful ability checks. INT 20 first. Because you rely on Portent more than spell attacks, WIS for saves is your second stat priority. Resilient (CON) rounds out your defence." },
+      "School of Illusion":   { when: "Level 2", summary: "Improved Minor Illusion creates sound AND image simultaneously. Malleable Illusions let you reshape active illusions. Illusory Reality makes one illusion object real.", build: "Utility and creativity over raw power. This subclass rewards creative players — the ceiling is set by what your DM allows. INT 20 first as always. Illusory Reality (L10) is extraordinary: make a bridge, wall, or weapon real for 1 minute. Pairs naturally with Stealth-heavy parties. Investigation as an Expertise skill helps you understand and counter enemy illusions too." },
+    }
+  },
+  sorcerer:  { primary: "CHA",        hitdie: "d6",  hpbase: 4,  saves: "CON, CHA", armor: "None", skillCount: 2, skillPool: ["Arcana","Deception","Insight","Intimidation","Persuasion","Religion"], features: "Innate Sorcery (advantage on spell attack rolls, 2 uses), Spellcasting (Cha)",
+    subclasses: {
+      "Draconic Bloodline": { when: "Level 3", summary: "Draconic Resilience: AC 13 + DEX without armor, +1 HP per Sorcerer level. Elemental Affinity adds CHA to damage rolls of your damage type.", build: "The durable Sorcerer. With AC 13+DEX you can forgo Mage Armor and save spell slots. CHA 20 → CON 14 is the priority. Elemental Affinity adds CHA mod to every damage roll of your chosen type — pick Fire for Fireball synergy. Twinned Spell + Scorching Ray is a signature combo. Resilient (CON) is almost mandatory since you'll be concentrating on powerful spells." },
+      "Wild Magic":         { when: "Level 3", summary: "Wild Magic Surge: chance of random magical effects after casting. Bend Luck: spend 2 Sorcery Points to add/subtract 1d4 from any roll.", build: "High variance, high entertainment. Bend Luck is quietly excellent — spending 2 SP to impose -1d4 on an enemy's saving throw against your Heightened Spell is a massive spell-DC boost. Tides of Chaos gives Advantage on a roll once, then recharges when a surge occurs. CHA 20 first, then Quickened Spell for Bonus Action casting. Works best when you embrace the chaos rather than fighting it." },
+      "Aberrant Mind":      { when: "Level 3", summary: "Telepathic Speech: communicate telepathically with any creature. Expanded spell list includes Enchantment/Telepathy spells (Dissonant Whispers, Detect Thoughts, etc.).", build: "The social and control Sorcerer. The expanded spell list gives you spells Sorcerers normally can't access — Detect Thoughts and Telepathy are free without spending Spells Known slots. CHA 20 first. Subtle Spell Metamagic (no verbal/somatic components) pairs perfectly with Telepathic casting — you can cast spells invisibly in social situations. Psionic Sorcery lets you cast the bonus spells without Somatic/Verbal components for 1 SP." },
+      "Clockwork Soul":     { when: "Level 3", summary: "Restore Balance: cancel Advantage or Disadvantage on any roll (no action). Bastion of Law at L6 creates a ward absorbing damage.", build: "The utility and reliability Sorcerer. Restore Balance is a free reaction every turn — cancelling enemy Advantage on their attack or your save is quietly powerful. Expanded spells include Alarm, Dispel Magic, and Otiluke's Resilient Sphere. CHA 20 → CON 14. Twinned Spell + Hold Person is a signature move. Bastion of Law (L6) gives a scalable damage reduction ward — great with high SP investment." },
+    }
+  },
+  warlock:   { primary: "CHA",        hitdie: "d8",  hpbase: 5,  saves: "WIS, CHA", armor: "Light", skillCount: 2, skillPool: ["Arcana","Deception","History","Intimidation","Investigation","Nature","Religion"], features: "Eldritch Invocations (1 invocation), Pact Magic (1 spell slot, recharges on Short Rest), Spellcasting (Cha)",
+    subclasses: {
+      "The Fiend":       { when: "Level 3", summary: "Dark One's Blessing: gain Temp HP equal to CHA mod + Warlock level on any kill. Expanded spells: Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball.", build: "The most durable and damage-focused Warlock. Fireball on the bonus spell list is exceptional — Warlocks don't normally get it. Dark One's Blessing gives you a constant Temp HP buffer in combat. CHA 20 → CON 14. Agonizing Blast + Armor of Shadows (free Mage Armor) + Devil's Sight (darkvision in magical darkness) is the classic tanky build. Pact of the Blade with Improved Pact Weapon turns you into a CHA melee striker." },
+      "The Archfey":     { when: "Level 3", summary: "Fey Presence: charm or frighten all creatures in a 10-ft cube (WIS save). Misty Escape: Reaction to teleport 60ft + turn invisible when taking damage.", build: "Control and evasion specialist. WIS save DC is your key number — it's driven by CHA via your spell save DC. CHA 20 first. Misty Escape is extraordinary as a Reaction survival tool — getting hit just means you teleport away and turn invisible. Beguiling Influence invocation (+proficiency to Deception/Persuasion) leans into the social pillar. Best in exploration-heavy, social-heavy campaigns." },
+      "The Great Old One": { when: "Level 3", summary: "Awakened Mind: telepathic communication with any creature within 30ft regardless of language. Entropic Ward: Reaction to impose Disadvantage on an attack against you.", build: "Information and mental manipulation. CHA 20 is the absolute priority. Entropic Ward is a reliable Reaction defence — impose Disadvantage on the attack that would hurt most. At L6 Thought Shield gives you psychic resistance. The expanded spells lean into Enchantment/Divination. Works beautifully as the party's information broker. One D&D Tasha's Hideous Laughter + Heightened Spell is a devastating combo." },
+      "The Celestial":   { when: "Level 3", summary: "Healing Light pool (1d6 per Warlock level, Bonus Action to heal). Expanded spells: Cure Wounds, Flaming Sphere, Lesser Restoration, Daylight.", build: "The support Warlock — unique in the class. Healing Light gives you a finite but renewable healing pool (max 10d6 at L10) on a Bonus Action, freeing your action for Eldritch Blast. CHA 20 first. This is the best choice if your party lacks healing. Sacred Flame cantrip (free) gives you a second damage option. Bless is on your expanded list — one of the best L1 spells in the game. Agonizing Blast still applies normally." },
+    }
+  },
+  cleric:    { primary: "WIS",        hitdie: "d8",  hpbase: 5,  saves: "WIS, CHA", armor: "Light, medium, shields", skillCount: 2, skillPool: ["History","Insight","Medicine","Persuasion","Religion"], features: "Divine Order (Protector or Thaumaturge), Spellcasting (Wis)",
+    subclasses: {
+      "Life Domain":     { when: "Level 3", summary: "Disciple of Life: Cure Wounds restores an extra 2 + spell level HP. Blessed Healer: healing someone also heals you for 2 + spell level. Heavy armor.", build: "The healing specialist. WIS 20 is the priority — every heal you cast is boosted by Disciple of Life. Protector Divine Order gives Heavy Armor and martial weapons at L1, so you can wade into melee. Healing Word (Bonus Action) + Spiritual Weapon (also Bonus Action) + melee attack is a powerful action economy turn. Preserve Life Channel Divinity splits 5×Cleric-level HP among injured allies — use it on the whole party at once." },
+      "Light Domain":    { when: "Level 3", summary: "Warding Flare: Reaction to impose Disadvantage on an attack roll against you or an ally. Radiance of Dawn: Channel Divinity deals 2d10 + Cleric level radiant damage in a 30ft area.", build: "Offensive Cleric with great defense. Warding Flare works CHA mod times per Long Rest (scale CHA secondarily if possible). Fireball at L5 makes you the party's AoE damage dealer — unusual for a Cleric. WIS 20 first, then CHA for more Flare uses. War Caster is excellent for maintaining Spiritual Guardians concentration while also blasting. Corona of Light at L6 can create permanent Disadvantage on saves near you." },
+      "War Domain":      { when: "Level 3", summary: "War Priest: extra attack using a Bonus Action (Proficiency Bonus uses per Long Rest). Guided Strike: spend Channel Divinity for +10 to a weapon attack roll.", build: "Melee Cleric. Protector Divine Order + War Priest gives you heavy armor and a reliable extra attack. STR 16+ alongside WIS 16+ is the build goal — you're a frontline fighter who also casts. Guided Strike is used when you absolutely cannot miss (a crit-setting attack, or against a high-AC enemy). War Caster ensures you keep Spiritual Guardians up while in melee. Sentinel feat makes you a dangerous gatekeeper." },
+      "Knowledge Domain": { when: "Level 3", summary: "Blessings of Knowledge: Expertise in 2 skills from Arcana/History/Nature/Religion. Channel Divinity: Read Thoughts (charm + read thoughts, WIS save).", build: "The information and skill expert. Thaumaturge Divine Order adds WIS to Arcana/Religion — stack that with Knowledge Domain's Expertise for absurdly high checks. WIS 20 first. Visions of the Past (L6) allows you to read the history of objects or locations — invaluable for investigation-heavy campaigns. Read Thoughts is underrated — charming an enemy as a Bonus Action (effectively) can end encounters without combat." },
+      "Trickery Domain": { when: "Level 3", summary: "Blessing of the Trickster: grant Advantage on Stealth to an ally. Invoke Duplicity: create an illusory duplicate — cast spells through it and grant Advantage from it.", build: "Mobile, deceptive support Cleric. CHA matters here — Invoke Duplicity is powerful but its DC is based on spell save DC (WIS-driven), not CHA. WIS 20 first. The duplicate lets you effectively cast Spiritual Weapon from two positions. Pairs exceptionally well with a Rogue — your duplicate grants them Sneak Attack Advantage from anywhere in the encounter. Mobile feat lets you dash around placing the illusion optimally." },
+    }
+  },
+  druid:     { primary: "WIS",        hitdie: "d8",  hpbase: 5,  saves: "INT, WIS", armor: "Light, medium, shields (non-metal)", skillCount: 2, skillPool: ["Arcana","Animal Handling","Insight","Medicine","Nature","Perception","Religion","Survival"], features: "Druidic language, Primal Order (Magician or Warden), Spellcasting (Wis)",
+    subclasses: {
+      "Circle of the Land": { when: "Level 3", summary: "Natural Recovery: restore expended spell slots totalling half your Druid level (min 1) on a Short Rest. Bonus spells based on terrain type.", build: "The pure spellcaster Druid. Natural Recovery gives you extra spell slots on Short Rests — crucial for a half-day adventuring day. Choose your Land at L3: Grassland gives Invisibility + Pass Without Trace, Forest gives Speak with Plants + Call Lightning, Swamp gives Stinking Cloud + Sleet Storm. WIS 20 is paramount. War Caster or Resilient CON are essential — you'll concentrate on Call Lightning or Wall of Stone for multiple turns." },
+      "Circle of the Moon": { when: "Level 3", summary: "Combat Wild Shape: use Wild Shape as a Bonus Action. Elevated CR access — use Beast forms up to CR 1 at L2, scaling by 1 each level.", build: "The melee shapeshifter. Wild Shape is a second health pool — when the Beast form drops, you revert but your actual HP is untouched. CON helps when you revert and take damage. WIS still drives your spells when in humanoid form. Warden Primal Order gives martial weapon and medium armor for the rounds you're not shifted. Moon Druid 2 / Barbarian 1 is a notorious multiclass combo for Rage + Wild Shape resistance stacking." },
+      "Circle of the Sea":  { when: "Level 3", summary: "Wrath of the Sea: Channel Wild Shape to create a water/thunder aura (CON save, 2d6 lightning/thunder + pushed 15ft). Aquatic Affinity gives swim speed.", build: "Strong in aquatic or storm-themed campaigns. CON save DC is based on your spell save DC (WIS-driven), so WIS 20 is the priority. The aura pushes enemies 15ft on a failed save — control plus damage. Thunderwave and Lightning Bolt are on your expanded list. Bonus Action activation of the aura competes with Wild Shape use — decide at the start of combat which mode you're playing." },
+      "Circle of Stars":    { when: "Level 3", summary: "Star Map: always-prepared spells + one free Guidance cast per Long Rest. Starry Form (Bonus Action): Archer (1d8+WIS radiant ranged), Chalice (heal on healing spells), Dragon (concentration advantage).", build: "The no-Wild-Shape Druid. Each Starry Form mode serves a different role — Archer for damage, Chalice for healing amplification, Dragon for concentration protection. Dragon Form advantage on CON saves stacks beautifully with War Caster. WIS 20 is the build goal. Guiding Bolt cast as a Bonus Action from Archer form is excellent. The free Guidance cantrip and bonus Heroism/Beast Bond spells make this the best choice for exploration-heavy campaigns." },
+    }
+  },
+  bard:      { primary: "CHA",        hitdie: "d8",  hpbase: 5,  saves: "DEX, CHA", armor: "Light", skillCount: 3, skillPool: ["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"], features: "Bardic Inspiration (d6, uses = CHA mod), Spellcasting (Cha)",
+    subclasses: {
+      "College of Lore":    { when: "Level 3", summary: "Cutting Words: use Bardic Inspiration as a Reaction to subtract the die from an enemy attack roll, ability check, or damage roll. Bonus Magical Secrets at L6.", build: "The skill master and debuffer. Three extra skill proficiencies at L3 (any) make you the most versatile skill character in the game. CHA 20 → Expertise in Persuasion + Perception. Cutting Words is a powerful Reaction that converts Inspiration dice into damage mitigation or attack negation. The early Magical Secrets at L6 lets you steal Counterspell or Shield from the Wizard list two levels ahead of schedule." },
+      "College of Valor":   { when: "Level 3", summary: "Combat Inspiration: allies use Bardic Inspiration to boost weapon damage OR AC as a Reaction. Bonus proficiency with medium armor, shields, martial weapons.", build: "The martial Bard. Medium armor + shield brings your AC in line with frontliners. Grab a rapier for Sneak Attack-adjacent damage. Combat Inspiration used for AC is excellent — a Bardic die added to AC as a Reaction can negate a hit. CHA 20 first, then DEX 14 for medium armor bonus. Extra Attack at L6 makes you a genuine melee contributor. War Caster is highly recommended for concentration spells in melee." },
+      "College of Glamour": { when: "Level 3", summary: "Mantle of Inspiration: use a Bonus Action + Inspiration die to give multiple allies Temp HP and a free movement reaction. Enthralling Performance charms an audience.", build: "The enchanter. CHA 20 is the absolute priority — everything scales from it. Mantle of Inspiration gives Temp HP to CHA mod creatures in a single Bonus Action — in a 4-person party, that's potentially 4 creatures protected at once. Enthralling Performance (10 min) can charm up to CHA mod creatures — incredible for social encounters and setting up ambushes. Mantle of Majesty (L6) gives free Command each turn. Works best as a second-rank supporter." },
+      "College of Swords":  { when: "Level 3", summary: "Blade Flourish: use Bardic Inspiration on attacks to do Defensive Flourish (+AC), Slashing Flourish (extra damage to second target), or Mobile Flourish (push + teleport).", build: "The melee damage Bard. Medium armor + martial weapons + Fighting Style makes you a genuine frontliner. Blade Flourish restores all Bardic Inspiration uses when you take Initiative — meaning you never run out in combat. DEX 20 → CHA 16 is the priority order (reversed from other Bards) because your attacks use DEX. Mobile Flourish (push 5ft + teleport 5ft) is extraordinary for control. War Caster keeps Hypnotic Pattern running from the melee." },
+    }
+  },
 };
 
 // Alignment descriptions
@@ -1874,7 +2015,7 @@ const TOTAL_POINTS = 27;
 const scores = { STR:8, DEX:8, CON:8, INT:8, WIS:8, CHA:8 };
 
 function pointsSpent() {
-  return Object.values(scores).reduce((sum, v) => sum + (POINT_COST[v] ?? 0), 0);
+  return Object.values(scores).reduce((sum, v) => sum + (POINT_COST[v] !== undefined ? POINT_COST[v] : 0), 0);
 }
 
 function updatePointsBar() {
@@ -1892,7 +2033,7 @@ function changeScore(ab, delta) {
   const next = cur + delta;
   if (next < 8 || next > 15) return;
   // Check we have enough points when increasing
-  const diff = (POINT_COST[next] ?? 0) - (POINT_COST[cur] ?? 0);
+  const diff = (POINT_COST[next] !== undefined ? POINT_COST[next] : 0) - (POINT_COST[cur] !== undefined ? POINT_COST[cur] : 0);
   if (diff > 0 && pointsSpent() + diff > TOTAL_POINTS) return;
   scores[ab] = next;
   refreshAbility(ab);
@@ -1903,13 +2044,13 @@ function changeScore(ab, delta) {
 function refreshAbility(ab) {
   const v = scores[ab];
   document.getElementById(`score-${ab}`).textContent = v;
-  document.getElementById(`cost-${ab}`).textContent  = `cost: ${POINT_COST[v] ?? 0}`;
+  document.getElementById(`cost-${ab}`).textContent  = `cost: ${POINT_COST[v] !== undefined ? POINT_COST[v] : 0}`;
   const mod = Math.floor((v - 10) / 2);
   document.getElementById(`mod-${ab}`).textContent   = (mod >= 0 ? '+' : '') + mod;
   // Enable/disable buttons
   const spent = pointsSpent();
   document.getElementById(`btn-up-${ab}`).disabled =
-    v >= 15 || spent + (POINT_COST[v+1] ?? 99) - POINT_COST[v] > TOTAL_POINTS;
+    v >= 15 || spent + (POINT_COST[v+1] !== undefined ? POINT_COST[v+1] : 99) - POINT_COST[v] > TOTAL_POINTS;
   document.getElementById(`btn-dn-${ab}`).disabled = v <= 8;
   // Keep HP and saving throws live when any score changes
   if (ab === 'CON') updateClassBanner();
@@ -2074,13 +2215,30 @@ function updateDesc(type) {
     const bonusEl = document.getElementById('class-bonuses');
     if (val && CLASS_BONUSES[val]) {
       const c = CLASS_BONUSES[val];
+      const subclassVals = c.subclasses ? Object.values(c.subclasses) : [];
+      const subclassLevel = subclassVals.length > 0 && subclassVals[0].when ? subclassVals[0].when : 'Level 3';
+      const subclassChips = c.subclasses ? Object.entries(c.subclasses).map(([name, data]) =>
+        `<span class="subclass-chip">
+          <span class="subclass-chip-btn">${name}</span>
+          <span class="subclass-chip-tip">
+            <span class="tip-name">${name} · ${data.when}</span>
+            <span class="tip-summary">${data.summary}</span>
+            <span class="tip-build">⚔ Build advice: ${data.build}</span>
+          </span>
+        </span>`
+      ).join('') : '';
+
       bonusEl.innerHTML = `
         <div style="display:grid; gap:0.35rem;">
           <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Saving Throws</strong><br>${c.saves}</div>
           <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Armor &amp; Weapon Proficiencies</strong><br>${c.armor}; all simple weapons${c.features.includes('Weapon Mastery') ? ' + Weapon Mastery' : ''}</div>
           <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Skill Proficiencies</strong><br>Choose ${c.skillCount} from: ${c.skillPool.join(', ')}</div>
           <div><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);">Level 1 Features</strong><br>${c.features}</div>
-          <div style="margin-top:0.2rem; padding-top:0.4rem; border-top:1px solid rgba(139,26,26,0.15);"><strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);">Subclasses</strong><br><span style="font-size:0.84rem; color:var(--ink-light);">${c.subclasses}</span></div>
+          <div style="margin-top:0.2rem; padding-top:0.4rem; border-top:1px solid rgba(139,26,26,0.15);">
+            <strong style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);">Subclasses — ${subclassLevel}</strong>
+            <span style="font-size:0.75rem; color:var(--ink-light); font-style:italic; margin-left:0.4rem;">No choice needed now — hover each for build advice</span>
+            <div class="subclass-chips">${subclassChips}</div>
+          </div>
         </div>`;
       bonusEl.style.display = 'block';
     } else {
@@ -2583,10 +2741,17 @@ function updateFeatsSection() {
 
 function selectHumanFeat(val, cardIdx) {
   selectedHumanFeat = val;
-  if (val !== 'Skilled') skilledChoices.length = 0; // reset if switching away
+  if (val !== 'Skilled') skilledChoices.length = 0;
+  // Reset MI choices if switching away from Magic Initiate
+  if (!val || !val.startsWith('Magic Initiate')) {
+    spellChoices.miClass = null;
+    spellChoices.miCantrips = [];
+    spellChoices.miSpell = null;
+  }
   const descEl = document.getElementById(`feat-desc-${cardIdx}`);
   if (descEl) descEl.textContent = val && ORIGIN_FEATS[val] ? ORIGIN_FEATS[val] : 'Humans gain one additional Origin Feat of their choice.';
-  updateFeatsSection(); // re-render to show/hide skilled picker
+  updateFeatsSection();
+  updateSpellsSection();
 }
 
 // Hook level changes into proficiency update
@@ -2611,149 +2776,87 @@ async function generateSheet() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-  // ── Helpers ─────────────────────────────────────────────────────────────
-  const PW = 210; const PH = 297;
-  const ML = 14; const MR = 14; const MT = 14;
+  // ── Constants & helpers ──────────────────────────────────────────────────────
+  const PW = 210, PH = 297;
+  const ML = 11, MR = 11, MT = 12, MB = 12;
   const CW = PW - ML - MR;
-  let y = MT;
 
   const CRIMSON = [139, 26, 26];
   const GOLD    = [160, 110, 30];
-  const INK     = [26, 18, 9];
+  const GOLD_L  = [201, 151, 58];
+  const INK     = [26,  18,  9];
   const PARCH   = [244, 232, 193];
-  const PARCH2  = [232, 213, 160];
-  const LGREY   = [200, 185, 155];
-  const PROFCOL = [220, 200, 160];
+  const PARCH2  = [235, 218, 175];
+  const PARCH3  = [228, 208, 158];
+  const LGREY   = [195, 178, 145];
+  const PROF_HL = [255, 245, 220];
+  const WHITE   = [255, 255, 255];
 
-  function setFont(style, size, color) {
+  const fmt = n => (n >= 0 ? '+' : '') + n;
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+  function rf(style, size, col) {
     doc.setFont('helvetica', style);
     doc.setFontSize(size);
-    doc.setTextColor(...(color || INK));
+    doc.setTextColor(...(col || INK));
   }
-  function hline(yy, r, g, b, lw) {
-    doc.setDrawColor(r||GOLD[0], g||GOLD[1], b||GOLD[2]);
-    doc.setLineWidth(lw || 0.3);
-    doc.line(ML, yy, PW - MR, yy);
+  function box(x, y, w, h, fill, stroke) {
+    if (fill) { doc.setFillColor(...fill); doc.rect(x, y, w, h, 'F'); }
+    if (stroke) { doc.setDrawColor(...stroke); doc.setLineWidth(0.25); doc.rect(x, y, w, h); }
   }
-  function sectionHeader(title, yy) {
+  function hline(y2, col, lw) {
+    doc.setDrawColor(...(col||GOLD)); doc.setLineWidth(lw||0.25);
+    doc.line(ML, y2, PW-MR, y2);
+  }
+  function miniLabel(txt, x, y2, col) {
+    rf('bold', 5, col || GOLD_L);
+    doc.text(txt.toUpperCase(), x, y2);
+  }
+  function bigVal(txt, x, y2, col) {
+    rf('bold', 11, col || CRIMSON);
+    doc.text(txt, x, y2, { align: 'center' });
+  }
+  function secHeader(title, y2) {
     doc.setFillColor(...CRIMSON);
-    doc.rect(ML, yy, CW, 5.5, 'F');
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(244, 220, 150);
-    doc.text(title.toUpperCase(), ML + 2, yy + 3.8);
-    return yy + 6.5;
+    doc.rect(ML, y2, CW, 5, 'F');
+    rf('bold', 7, [244, 220, 150]);
+    doc.text(title.toUpperCase(), ML + 2, y2 + 3.5);
+    return y2 + 6;
   }
-  function miniLabel(txt, x, yy) {
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(5.5);
-    doc.setTextColor(...GOLD);
-    doc.text(txt.toUpperCase(), x, yy);
+  function pageBg() {
+    doc.setFillColor(...PARCH); doc.rect(0, 0, PW, PH, 'F');
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.9); doc.rect(5, 5, PW-10, PH-10);
+    doc.setDrawColor(...CRIMSON); doc.setLineWidth(0.35); doc.rect(7, 7, PW-14, PH-14);
   }
-  function checkPage(needed) {
-    if (y + needed > PH - 10) {
-      doc.addPage();
-      y = MT;
-      // parchment bg
-      doc.setFillColor(...PARCH);
-      doc.rect(0, 0, PW, PH, 'F');
-      // border
-      doc.setDrawColor(...GOLD);
-      doc.setLineWidth(0.8);
-      doc.rect(6, 6, PW-12, PH-12);
-      doc.setDrawColor(...CRIMSON);
-      doc.setLineWidth(0.3);
-      doc.rect(7.5, 7.5, PW-15, PH-15);
-    }
+  function pageFooter(p, total) {
+    rf('normal', 5.5, GOLD_L);
+    doc.text(`${name}  ·  Level ${level} ${cap(cls)}  ·  Page ${p} of ${total}  ·  Character Forge — D&D 2024`, PW/2, PH-7, { align: 'center' });
+    doc.setDrawColor(...GOLD_L); doc.setLineWidth(0.2);
+    doc.line(ML, PH-9, PW-MR, PH-9);
   }
 
-  // ── Background ───────────────────────────────────────────────────────────
-  doc.setFillColor(...PARCH);
-  doc.rect(0, 0, PW, PH, 'F');
-  doc.setFillColor(244, 235, 205);
-  // subtle noise by stippling — skip, keep flat parchment
-
-  // Border rings
-  doc.setDrawColor(...GOLD); doc.setLineWidth(1);
-  doc.rect(5, 5, PW-10, PH-10);
-  doc.setDrawColor(...CRIMSON); doc.setLineWidth(0.4);
-  doc.rect(7, 7, PW-14, PH-14);
-
-  // ── Title ────────────────────────────────────────────────────────────────
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(18);
-  doc.setTextColor(...CRIMSON);
-  doc.text('CHARACTER SHEET', PW/2, y + 7, { align: 'center' });
-  doc.setFontSize(7.5);
-  doc.setTextColor(...GOLD);
-  doc.text('D&D 2024 · Fifth Edition · Character Forge', PW/2, y + 12, { align: 'center' });
-  hline(y + 14, ...GOLD, 0.5);
-  y += 17;
-
-  // ── Identity row ─────────────────────────────────────────────────────────
-  const c = CLASS_BONUSES[cls] || {};
-  const sb = SPECIES_BONUSES[species] || {};
-  const conTotal = scores['CON'] + (asiBonus['CON']||0);
-  const conMod = Math.floor((conTotal - 10) / 2);
-  const hp1 = (c.hpbase || 8) + conMod;
+  // ── Derived stats ────────────────────────────────────────────────────────────
+  const c    = CLASS_BONUSES[cls] || {};
   const prof = getProfBonus(level);
 
-  const idFields = [
-    ['Name', name],
-    ['Level', String(level)],
-    ['Species', species.charAt(0).toUpperCase()+species.slice(1) + (selectedLineage ? ` (${selectedLineage})` : '')],
-    ['Class', cls.charAt(0).toUpperCase()+cls.slice(1)],
-    ['Background', bg.charAt(0).toUpperCase()+bg.slice(1)],
-    ['Alignment', alignment],
-    ['HP', String(hp1)],
-    ['Prof Bonus', `+${prof}`],
-  ];
+  const total  = ab => scores[ab] + (asiBonus[ab] || 0);
+  const mod    = ab => Math.floor((total(ab) - 10) / 2);
+  const modStr = ab => fmt(mod(ab));
 
-  const ifw = CW / idFields.length;
-  idFields.forEach(([lbl, val], i) => {
-    const x = ML + i * ifw;
-    doc.setFillColor(...PARCH2);
-    doc.rect(x, y, ifw - 1, 11, 'F');
-    doc.setDrawColor(...LGREY); doc.setLineWidth(0.2);
-    doc.rect(x, y, ifw - 1, 11);
-    miniLabel(lbl, x + 1.5, y + 3.5);
-    doc.setFont('helvetica','bold'); doc.setFontSize(7);
-    doc.setTextColor(...INK);
-    doc.text(val, x + 1.5, y + 8.5);
-  });
-  y += 14;
+  const conMod = mod('CON');
+  const dexMod = mod('DEX');
+  const strMod = mod('STR');
+  const wisMod = mod('WIS');
 
-  // ── Ability Scores ────────────────────────────────────────────────────────
-  y = sectionHeader('Ability Scores', y);
-  const ABS = ['STR','DEX','CON','INT','WIS','CHA'];
-  const abw = CW / 6;
-  ABS.forEach((ab, i) => {
-    const x = ML + i * abw;
-    const base  = scores[ab];
-    const bonus = asiBonus[ab] || 0;
-    const tot   = base + bonus;
-    const mod2  = Math.floor((tot - 10) / 2);
-    const modStr = (mod2 >= 0 ? '+' : '') + mod2;
+  const hp1 = (c.hpbase || 5) + conMod;
 
-    doc.setFillColor(...PARCH2);
-    doc.rect(x, y, abw - 1, 18, 'F');
-    doc.setDrawColor(...LGREY); doc.setLineWidth(0.2);
-    doc.rect(x, y, abw - 1, 18);
+  let ac, acNote;
+  if (cls === 'barbarian') { ac = 10 + dexMod + conMod; acNote = '10+DEX+CON'; }
+  else if (cls === 'monk') { ac = 10 + dexMod + wisMod; acNote = '10+DEX+WIS'; }
+  else                     { ac = 10 + dexMod;          acNote = '10+DEX'; }
 
-    miniLabel(ab, x + (abw/2) - 3, y + 3.5);
-    doc.setFont('helvetica','bold'); doc.setFontSize(14);
-    doc.setTextColor(...CRIMSON);
-    doc.text(modStr, x + abw/2, y + 12, { align: 'center' });
-    doc.setFont('helvetica','normal'); doc.setFontSize(7);
-    doc.setTextColor(...INK);
-    const scoreLabel = bonus > 0 ? `${base}+${bonus}=${tot}` : String(tot);
-    doc.text(scoreLabel, x + abw/2, y + 16.5, { align: 'center' });
-  });
-  y += 22;
-
-  // ── Skills & Saves split ──────────────────────────────────────────────────
-  checkPage(80);
-  y = sectionHeader('Skills & Saving Throws', y);
+  const SPELL_AB_MAP = { wizard:'INT', sorcerer:'CHA', warlock:'CHA', cleric:'WIS', druid:'WIS', bard:'CHA', paladin:'CHA', ranger:'WIS' };
+  const spAb = SPELL_AB_MAP[cls];
 
   const bgSkillsSet = new Set(
     bg && BACKGROUND_BONUSES[bg]
@@ -2761,381 +2864,460 @@ async function generateSheet() {
       : []
   );
   if (species === 'human' && charChoices.humanSkill) bgSkillsSet.add(charChoices.humanSkill);
+  if (isSkilledActive()) skilledChoices.forEach(s => { if (ALL_SKILLS.includes(s)) bgSkillsSet.add(s); });
   const profSaves = (c.saves || '').split(',').map(s => s.trim());
 
-  // Skills list — two columns
-  const allSkillsFlat = [];
-  ABS.forEach(ab => {
-    const skMod = Math.floor((scores[ab]+(asiBonus[ab]||0)-10)/2);
-    // Save
-    const saveProficient = profSaves.includes(ab);
-    const saveBonus = saveProficient ? skMod + prof : skMod;
-    allSkillsFlat.push({ name: `${ab} Save`, bonus: saveBonus, proficient: saveProficient });
-    // Skills
-    (SKILLS_BY_ABILITY[ab]||[]).forEach(skill => {
-      const isProficient = classSkillChoices.has(skill) || bgSkillsSet.has(skill);
-      const skBonus = isProficient ? skMod + prof : skMod;
-      allSkillsFlat.push({ name: skill, bonus: skBonus, proficient: isProficient });
-    });
-  });
+  function isProf(skill) { return classSkillChoices.has(skill) || bgSkillsSet.has(skill); }
+  function isSaveProf(ab) { return profSaves.includes(ab); }
+  function skillBonus(skill, ab) { return isProf(skill) ? mod(ab) + prof : mod(ab); }
+  function saveBonus(ab) { return isSaveProf(ab) ? mod(ab) + prof : mod(ab); }
 
-  const half = Math.ceil(allSkillsFlat.length / 2);
-  const col1 = allSkillsFlat.slice(0, half);
-  const col2 = allSkillsFlat.slice(half);
-  const colW = CW / 2 - 1;
-  const rowH = 4.8;
+  const passivePerc = 10 + (isProf('Perception') ? mod('WIS') + prof : mod('WIS'));
 
-  function drawSkillCol(items, x) {
-    items.forEach((sk, i) => {
-      const ry = y + i * rowH;
-      if (sk.proficient) {
-        doc.setFillColor(...PROFCOL);
-        doc.rect(x, ry - 0.5, colW, rowH - 0.2, 'F');
-      }
-      // Dot
-      if (sk.proficient) { doc.setFillColor(...CRIMSON); } else { doc.setFillColor(...LGREY); }
-      doc.circle(x + 2, ry + 1.5, 1, 'F');
-      // Name
-      doc.setFont('helvetica', sk.proficient ? 'bold' : 'normal');
-      doc.setFontSize(6.5);
-      doc.setTextColor(...INK);
-      doc.text(sk.name, x + 5, ry + 2.5);
-      // Bonus
-      const bStr = (sk.bonus >= 0 ? '+' : '') + sk.bonus;
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(6.5);
-      if (sk.proficient) { doc.setTextColor(...CRIMSON); } else { doc.setTextColor(...INK); }
-      doc.text(bStr, x + colW - 1, ry + 2.5, { align: 'right' });
-      // level up note for proficient
-      if (sk.proficient) {
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(4.5);
-        doc.setTextColor(...GOLD);
-        doc.text(`(+${prof} now · +${prof+1} at L5)`, x + colW - 1, ry + 4.5, { align: 'right' });
-      }
-    });
-  }
+  // ── SKILLS_BY_ABILITY order matches web app ─────────────────────────────────
+  const SKILLS_DATA = {
+    STR: ["Athletics"],
+    DEX: ["Acrobatics","Sleight of Hand","Stealth"],
+    CON: [],
+    INT: ["Arcana","History","Investigation","Nature","Religion"],
+    WIS: ["Animal Handling","Insight","Medicine","Perception","Survival"],
+    CHA: ["Deception","Intimidation","Performance","Persuasion"],
+  };
 
-  drawSkillCol(col1, ML);
-  drawSkillCol(col2, ML + CW/2 + 1);
-  y += Math.max(col1.length, col2.length) * rowH + 5;
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 1 — PLAY SHEET
+  // ════════════════════════════════════════════════════════════════════════════
+  pageBg();
 
-  // ── Combat Stats ──────────────────────────────────────────────────────────
-  checkPage(30);
-  y = sectionHeader('Combat', y);
+  let y = MT;
 
-  const total2 = ab => scores[ab] + (asiBonus[ab]||0);
-  const mod2   = ab => Math.floor((total2(ab) - 10) / 2);
-  const dexMod2 = mod2('DEX'); const strMod2 = mod2('STR');
-  const conMod2 = mod2('CON'); const wisMod2 = mod2('WIS');
-  const fmt2 = n => (n >= 0 ? '+' : '') + n;
+  // ── Title ────────────────────────────────────────────────────────────────────
+  rf('bold', 16, CRIMSON);
+  doc.text('CHARACTER SHEET', PW/2, y + 6, { align: 'center' });
+  rf('normal', 6.5, GOLD_L);
+  doc.text('D&D 2024  ·  Character Forge', PW/2, y + 11, { align: 'center' });
+  hline(y + 13, GOLD_L, 0.4);
+  y += 15;
 
-  let ac2, acNote2;
-  if (cls === 'barbarian') { ac2 = 10 + dexMod2 + conMod2; acNote2 = '10+DEX+CON'; }
-  else if (cls === 'monk') { ac2 = 10 + dexMod2 + wisMod2; acNote2 = '10+DEX+WIS'; }
-  else { ac2 = 10 + dexMod2; acNote2 = '10+DEX (unarmored)'; }
-
-  const SPELL_AB = { wizard:'INT', sorcerer:'CHA', warlock:'CHA', cleric:'WIS', druid:'WIS', bard:'CHA', paladin:'CHA', ranger:'WIS' };
-  const spAb = SPELL_AB[cls];
-
-  const combatStats = [
-    { l:'Armor Class', v: String(ac2), n: acNote2 },
-    { l:'Initiative', v: fmt2(dexMod2), n: 'DEX mod' },
-    { l:'HP at L1', v: String(hp1), n: `${c.hpbase || 8} + CON mod` },
-    { l:'Prof Bonus', v: `+${prof}`, n: 'Levels 1–4' },
+  // ── Identity bar ─────────────────────────────────────────────────────────────
+  const idFields = [
+    ['Name', name, 3],
+    ['Class', cap(cls), 1.2],
+    ['Species', cap(species) + (selectedLineage ? ` · ${selectedLineage}` : ''), 1.6],
+    ['Background', cap(bg), 1.2],
+    ['Alignment', alignment, 1.2],
   ];
-  if (spAb) {
-    const sm = mod2(spAb);
-    combatStats.push({ l:'Spell Attack', v: fmt2(sm + prof), n: `${spAb}+Prof` });
-    combatStats.push({ l:'Spell Save DC', v: String(8 + sm + prof), n: `8+${spAb}+Prof` });
-  }
-
-  const masteries = charChoices.weaponMasteries;
-  if (masteries.length > 0) {
-    const FINESSE_W  = ['Dagger','Dart','Rapier','Scimitar','Shortsword','Whip'];
-    const RANGED_W   = ['Hand Crossbow','Heavy Crossbow','Javelin','Lance','Light Crossbow','Longbow','Shortbow'];
-    masteries.forEach(entry => {
-      const wn = entry.split(' (')[0];
-      const prop = (entry.match(/\(([^)]+)\)/)||[])[1]||'';
-      let am;
-      if (RANGED_W.includes(wn)) am = dexMod2 + prof;
-      else if (FINESSE_W.includes(wn)) am = Math.max(strMod2, dexMod2) + prof;
-      else am = strMod2 + prof;
-      combatStats.push({ l: wn, v: fmt2(am), n: `Mastery: ${prop}` });
-    });
-  } else if (['wizard','sorcerer','warlock','cleric','druid','bard'].includes(cls)) {
-    // casters with no weapon mastery — show basic
-    combatStats.push({ l:'Melee Attack', v: fmt2(strMod2+prof), n: 'STR+Prof' });
-    combatStats.push({ l:'Ranged Attack', v: fmt2(dexMod2+prof), n: 'DEX+Prof' });
-  }
-
-  const cw2 = CW / combatStats.length;
-  combatStats.forEach(({ l, v, n }, i) => {
-    const x = ML + i * cw2;
-    doc.setFillColor(...PARCH2); doc.rect(x, y, cw2-1, 13, 'F');
-    doc.setDrawColor(...LGREY); doc.setLineWidth(0.2); doc.rect(x, y, cw2-1, 13);
-    miniLabel(l, x+1.5, y+3.5);
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...CRIMSON);
-    doc.text(v, x+cw2/2, y+9.5, {align:'center'});
-    doc.setFont('helvetica','normal'); doc.setFontSize(5); doc.setTextColor(...GOLD);
-    doc.text(n, x+cw2/2, y+12.5, {align:'center'});
+  const totalW = idFields.reduce((s, f) => s + f[2], 0);
+  let ix = ML;
+  idFields.forEach(([lbl, val, wt]) => {
+    const w = (wt / totalW) * CW - 1;
+    box(ix, y, w, 10, PARCH2, LGREY);
+    miniLabel(lbl, ix + 1.5, y + 3.5);
+    rf('bold', 7.5, INK);
+    const clipped = doc.splitTextToSize(val, w - 2)[0] || val;
+    doc.text(clipped, ix + 1.5, y + 8);
+    ix += w + 1;
   });
-  y += 17;
+  y += 12;
 
-  // ── Weapon Mastery detail ─────────────────────────────────────────────────
+  // ── Core stats row: HP · AC · Initiative · Speed · Passive Perception · Prof ──
+  const coreStats = [
+    ['HP', String(hp1), `${c.hpbase||5} + CON`],
+    ['Armor Class', String(ac), acNote],
+    ['Initiative', fmt(dexMod), 'DEX mod'],
+    ['Speed', (SPECIES_BONUSES[species] && SPECIES_BONUSES[species].speed ? SPECIES_BONUSES[species].speed : '30 ft.'), ''],
+    ['Passive Perc.', String(passivePerc), isProf('Perception') ? 'WIS+Prof+10' : 'WIS+10'],
+    ['Prof Bonus', `+${prof}`, 'Levels 1–4'],
+    ...(spAb ? [
+      ['Spell Attack', fmt(mod(spAb)+prof), `${spAb}+Prof`],
+      ['Spell DC',     String(8+mod(spAb)+prof), `8+${spAb}+Prof`],
+    ] : []),
+  ];
+  const csW = CW / coreStats.length;
+  coreStats.forEach(([lbl, val, note], i) => {
+    const cx = ML + i * csW;
+    const isHp = lbl === 'HP';
+    box(cx, y, csW - 0.8, 14, isHp ? [255,240,220] : PARCH2, isHp ? CRIMSON : LGREY);
+    if (isHp) { doc.setDrawColor(...CRIMSON); doc.setLineWidth(0.6); doc.rect(cx, y, csW-0.8, 14); }
+    miniLabel(lbl, cx + 1.5, y + 3.5);
+    bigVal(val, cx + (csW-0.8)/2, y + 10, isHp ? CRIMSON : CRIMSON);
+    if (note) { rf('normal', 4.5, GOLD_L); doc.text(note, cx + (csW-0.8)/2, y + 13, { align:'center' }); }
+  });
+  y += 16;
+
+  // ── Weapon attacks row ────────────────────────────────────────────────────────
+  const masteries = charChoices.weaponMasteries;
+  const FINESSE_W = ['Dagger','Dart','Rapier','Scimitar','Shortsword','Whip'];
+  const RANGED_W  = ['Hand Crossbow','Heavy Crossbow','Javelin','Lance','Light Crossbow','Longbow','Shortbow'];
+
+  const weaponRows = [];
   if (masteries.length > 0) {
-    checkPage(8 + masteries.length * 5);
-    y = sectionHeader('Weapon Mastery Properties', y);
     masteries.forEach(entry => {
-      const wn = entry.split(' (')[0];
-      const prop = (entry.match(/\(([^)]+)\)/)||[])[1]||'';
-      const desc = MASTERY_PROPS[prop] || '';
-      doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...CRIMSON);
-      doc.text(`${entry}:`, ML+1, y+3);
-      doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-      const lines = doc.splitTextToSize(desc, CW - 35);
-      doc.text(lines, ML+1, y+7);
-      y += 5 + lines.length * 3.5;
+      const wn   = entry.split(' (')[0];
+      const prop = (entry.match(/\(([^)]+)\)/) || [])[1] || '';
+      let am;
+      if (RANGED_W.includes(wn)) am = dexMod + prof;
+      else if (FINESSE_W.includes(wn)) am = Math.max(strMod, dexMod) + prof;
+      else am = strMod + prof;
+      weaponRows.push([wn, fmt(am), prop ? `Mastery: ${prop}` : '']);
     });
+  } else {
+    weaponRows.push(['Melee Attack', fmt(strMod + prof), 'STR + Prof']);
+    weaponRows.push(['Ranged Attack', fmt(dexMod + prof), 'DEX + Prof']);
+  }
+
+  if (weaponRows.length) {
+    const wW = CW / weaponRows.length;
+    weaponRows.forEach(([wn, val, note], i) => {
+      const wx = ML + i * wW;
+      box(wx, y, wW - 0.8, 12, PARCH2, LGREY);
+      miniLabel(wn, wx + 1.5, y + 3.5);
+      bigVal(val, wx + (wW-0.8)/2, y + 9, CRIMSON);
+      if (note) { rf('normal', 4.5, GOLD_L); doc.text(note, wx + (wW-0.8)/2, y + 11.5, { align:'center' }); }
+    });
+    y += 14;
+  }
+
+  hline(y, GOLD_L, 0.3); y += 3;
+
+  // ── ABILITY SCORES + SKILLS (6 columns, PHB 2024 style) ──────────────────────
+  const ABS = ['STR','DEX','CON','INT','WIS','CHA'];
+  const colW = CW / 6;
+
+  // Measure height of each column to find tallest
+  const colHeights = ABS.map(ab => {
+    const skills = SKILLS_DATA[ab] || [];
+    return 22 + 5 + skills.length * 5 + 5 + 5; // header + save + skills + gap
+  });
+  const maxColH = Math.max(...colHeights);
+
+  ABS.forEach((ab, ci) => {
+    const cx   = ML + ci * colW;
+    const cw   = colW - 1;
+    const abMod = mod(ab);
+    const abTot = total(ab);
+    const skills = SKILLS_DATA[ab] || [];
+
+    // Column background
+    box(cx, y, cw, maxColH, PARCH2, LGREY);
+    // Crimson top bar with ability name
+    doc.setFillColor(...CRIMSON);
+    doc.rect(cx, y, cw, 6, 'F');
+    rf('bold', 7, [244, 220, 150]);
+    doc.text(ab, cx + cw/2, y + 4.2, { align: 'center' });
+
+    // Big modifier
+    rf('bold', 14, CRIMSON);
+    doc.text(fmt(abMod), cx + cw/2, y + 14, { align: 'center' });
+
+    // Score below modifier
+    const scoreLabel = (asiBonus[ab]||0) > 0
+      ? `${scores[ab]}+${asiBonus[ab]}=${abTot}`
+      : String(abTot);
+    rf('normal', 6, INK);
+    doc.text(scoreLabel, cx + cw/2, y + 18.5, { align: 'center' });
+
+    let sy = y + 21;
+
+    // Thin gold divider
+    doc.setDrawColor(...GOLD_L); doc.setLineWidth(0.2);
+    doc.line(cx + 1, sy, cx + cw - 1, sy);
+    sy += 3;
+
+    // Saving throw row
+    const saveP = isSaveProf(ab);
+    const savB  = saveBonus(ab);
+    if (saveP) { doc.setFillColor(...PROF_HL); doc.rect(cx, sy-1, cw, 5, 'F'); }
+    // dot
+    doc.setFillColor(saveP ? CRIMSON[0] : LGREY[0], saveP ? CRIMSON[1] : LGREY[1], saveP ? CRIMSON[2] : LGREY[2]);
+    doc.circle(cx + 2, sy + 1.5, 1, 'F');
+    rf(saveP ? 'bold' : 'normal', 5.5, saveP ? CRIMSON : INK);
+    doc.text('Save', cx + 4.5, sy + 2.5);
+    rf('bold', 5.5, saveP ? CRIMSON : INK);
+    doc.text(fmt(savB), cx + cw - 1.5, sy + 2.5, { align: 'right' });
+    sy += 5;
+
+    // Skills
+    skills.forEach(skill => {
+      const sp = isProf(skill);
+      const sb = skillBonus(skill, ab);
+      if (sp) { doc.setFillColor(...PROF_HL); doc.rect(cx, sy-1, cw, 5, 'F'); }
+      doc.setFillColor(sp ? CRIMSON[0] : LGREY[0], sp ? CRIMSON[1] : LGREY[1], sp ? CRIMSON[2] : LGREY[2]);
+      doc.circle(cx + 2, sy + 1.5, 1, 'F');
+      rf(sp ? 'bold' : 'normal', 5.5, sp ? CRIMSON : INK);
+      // Abbreviate long skill names to fit column
+      const skillLabel = skill.length > 11 ? skill.slice(0,10)+'.' : skill;
+      doc.text(skillLabel, cx + 4.5, sy + 2.5);
+      rf('bold', 5.5, sp ? CRIMSON : INK);
+      doc.text(fmt(sb), cx + cw - 1.5, sy + 2.5, { align: 'right' });
+      sy += 5;
+    });
+
+    // Proficiency level-up note at bottom if column has proficient skills
+    const hasProf = isSaveProf(ab) || skills.some(sk => isProf(sk));
+    if (hasProf) {
+      rf('normal', 4, GOLD_L);
+      doc.text(`Prof: +${prof} → +${prof+1} at L5`, cx + cw/2, y + maxColH - 2, { align: 'center' });
+    }
+  });
+
+  y += maxColH + 3;
+  hline(y, GOLD_L, 0.3); y += 3;
+
+  // ── Proficiencies summary ─────────────────────────────────────────────────────
+  y = secHeader('Proficiencies & Languages', y);
+
+  const profItems = [
+    `Saves: ${c.saves || '—'}`,
+    `Armor: ${c.armor || 'None'}`,
+    `Weapons: All simple${c.features && c.features.includes('Weapon Mastery') ? ' + Martial (Mastery)' : ''}`,
+    `Tools: ${charChoices.bgToolChoice || (bg && BACKGROUND_BONUSES[bg] && BACKGROUND_BONUSES[bg].tool ? BACKGROUND_BONUSES[bg].tool : '—')}`,
+    `Languages: Common${charChoices.languages.length ? ', ' + charChoices.languages.join(', ') : ' + 2 of choice'}`,
+  ];
+  const pRowsText = doc.splitTextToSize(profItems.join('   ·   '), CW - 2);
+  rf('normal', 6.5, INK);
+  doc.text(pRowsText, ML + 1, y + 3);
+  y += pRowsText.length * 4 + 5;
+
+  // ── Spells quick-reference (casters only — compact) ───────────────────────────
+  const sc2 = SPELL_COUNTS[cls];
+  const hasMI = getMagicInitiateFeat();
+  if (sc2 || hasMI) {
+    y = secHeader('Spellcasting', y);
+    if (sc2 && spAb) {
+      rf('bold', 6.5, CRIMSON);
+      doc.text(`${cap(cls)} · ${spAb} · Attack: ${fmt(mod(spAb)+prof)} · Save DC: ${8+mod(spAb)+prof} · Slots: ${sc2.l1slots||'—'}/Long Rest${cls==='warlock'?' (Short Rest)':''}`, ML+1, y+3);
+      y += 6;
+    }
+    const cantripLine = spellChoices.cantrips.length
+      ? `Cantrips: ${spellChoices.cantrips.join(', ')}`
+      : null;
+    const spellLine = spellChoices.level1.length
+      ? `L1 Spells: ${spellChoices.level1.join(', ')}`
+      : PREPARER_CLASSES.has(cls) ? `L1 Spells: [prepared each Long Rest — see PHB list]` : null;
+    [cantripLine, spellLine].filter(Boolean).forEach(line => {
+      const lines = doc.splitTextToSize(line, CW - 2);
+      rf('normal', 6.5, INK); doc.text(lines, ML+1, y+2);
+      y += lines.length * 4 + 2;
+    });
+    if (hasMI && (spellChoices.miCantrips.length || spellChoices.miSpell)) {
+      const featStr = getMagicInitiateFeat();
+      const miLine = `Magic Initiate (${featStr}): ${[...spellChoices.miCantrips, spellChoices.miSpell].filter(Boolean).join(', ')}`;
+      const miLines = doc.splitTextToSize(miLine, CW - 2);
+      rf('normal', 6.5, INK); doc.text(miLines, ML+1, y+2);
+      y += miLines.length * 4 + 2;
+    }
     y += 2;
   }
 
-  // ── Origin Feats ──────────────────────────────────────────────────────────
-  checkPage(30);
-  y = sectionHeader('Origin Feats', y);
+  // ── Notes box ────────────────────────────────────────────────────────────────
+  const notesH = Math.max(10, PH - MB - 10 - y - 4);
+  if (notesH > 8) {
+    y = secHeader('Notes', y);
+    box(ML, y, CW, notesH, WHITE, LGREY);
+    const traits = document.getElementById('traits').value;
+    if (traits) {
+      const tLines = doc.splitTextToSize(traits, CW - 4);
+      rf('normal', 6.5, INK); doc.text(tLines, ML+2, y+4);
+    }
+    y += notesH + 2;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 2 — REFERENCE SHEET
+  // ════════════════════════════════════════════════════════════════════════════
+  doc.addPage();
+  pageBg();
+  y = MT;
+
+  rf('bold', 13, CRIMSON);
+  doc.text('REFERENCE SHEET', PW/2, y + 5, { align: 'center' });
+  rf('normal', 6, GOLD_L);
+  doc.text(`${name}  ·  Level ${level} ${cap(cls)} ${cap(species)}  ·  ${cap(bg)} Background`, PW/2, y + 10, { align: 'center' });
+  hline(y + 12, GOLD_L, 0.4); y += 14;
+
+  // ── Class features ────────────────────────────────────────────────────────────
+  y = secHeader(`Class Features — ${cap(cls)} Level 1`, y);
+  rf('normal', 6.5, INK);
+  const flines = doc.splitTextToSize(c.features || '', CW - 2);
+  doc.text(flines, ML+1, y+2); y += flines.length * 3.8 + 2;
+
+  // Class-specific choices
+  const classChoiceLines = [];
+  if (charChoices.fightingStyle)   classChoiceLines.push(`Fighting Style: ${charChoices.fightingStyle} — ${FIGHTING_STYLES[charChoices.fightingStyle]||''}`);
+  if (charChoices.clericDivineOrder) classChoiceLines.push(`Divine Order: ${cap(charChoices.clericDivineOrder)} — ${charChoices.clericDivineOrder==='protector'?'Martial weapons + Heavy Armor proficiency.':'Add WIS mod to Arcana and Religion checks.'}`);
+  if (charChoices.druidPrimalOrder)  classChoiceLines.push(`Primal Order: ${cap(charChoices.druidPrimalOrder)} — ${charChoices.druidPrimalOrder==='magician'?'Extra cantrip + WIS to Arcana/Nature.':'Martial weapons + Medium Armor proficiency.'}`);
+  if (charChoices.warlockInvocation) classChoiceLines.push(`Eldritch Invocation: ${charChoices.warlockInvocation} — ${WARLOCK_INVOCATIONS_L1[charChoices.warlockInvocation]||''}`);
+  if (charChoices.rogueExpertise.length) classChoiceLines.push(`Expertise ×2 Prof: ${charChoices.rogueExpertise.join(', ')}`);
+  if (masteries.length) classChoiceLines.push(`Weapon Masteries: ${masteries.join(', ')}`);
+
+  classChoiceLines.forEach(line => {
+    const ls = doc.splitTextToSize(line, CW - 2);
+    rf('normal', 6.5, INK); doc.text(ls, ML+1, y+2); y += ls.length * 3.8 + 1.5;
+  });
+
+  // Subclass preview
+  if (c.subclasses) {
+    const subVals = c.subclasses ? Object.values(c.subclasses) : [];
+    const subLevel = subVals.length > 0 && subVals[0].when ? subVals[0].when : 'Level 3';
+    y += 1;
+    rf('bold', 6, GOLD_L);
+    doc.text(`SUBCLASSES — Choose at ${subLevel} (no decision needed now)`, ML+1, y+2); y += 5;
+    Object.entries(c.subclasses).forEach(([name2, data]) => {
+      rf('bold', 6, CRIMSON); doc.text(`${name2}:`, ML+2, y+2);
+      const sl = doc.splitTextToSize(data.summary, CW - 22);
+      rf('normal', 6, INK); doc.text(sl, ML + 22, y+2);
+      y += Math.max(4, sl.length * 3.5);
+    });
+  }
+  y += 2; hline(y, GOLD_L, 0.2); y += 3;
+
+  // ── Origin Feats ──────────────────────────────────────────────────────────────
   const featsToPrint = [];
   if (bg && BACKGROUND_BONUSES[bg]) {
     const fn = BACKGROUND_BONUSES[bg].feat;
     const fd = ORIGIN_FEATS[fn.split(' (')[0]] || ORIGIN_FEATS[fn] || 'See PHB.';
-    featsToPrint.push({ name: fn, desc: fd, source: bg.charAt(0).toUpperCase()+bg.slice(1) });
+    featsToPrint.push({ name: fn, desc: fd, source: cap(bg) });
   }
   if (species === 'human' && selectedHumanFeat) {
     featsToPrint.push({ name: selectedHumanFeat, desc: ORIGIN_FEATS[selectedHumanFeat]||'', source: 'Human: Versatile' });
   }
-  featsToPrint.forEach(f => {
-    checkPage(18);
-    doc.setFillColor(250, 240, 210);
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.3);
-    doc.rect(ML, y, CW, 3, 'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...CRIMSON);
-    doc.text(`${f.name}`, ML+2, y+2.2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(...GOLD);
-    doc.text(`Source: ${f.source}`, PW-MR-1, y+2.2, {align:'right'});
-    y += 4;
-    const lines = doc.splitTextToSize(f.desc, CW-2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-    doc.text(lines, ML+2, y+3);
-    y += lines.length * 3.5 + 5;
-  });
-
-  // ── Spells ────────────────────────────────────────────────────────────────
-  const hasCls = cls && SPELL_COUNTS[cls];
-  if (hasCls || spellChoices.cantrips.length || spellChoices.level1.length) {
-    checkPage(20);
-    y = sectionHeader('Spells & Cantrips', y);
-    const sc2 = SPELL_COUNTS[cls] || {};
-    if (sc2.l1slots) {
-      const spAbFull = { wizard:'INT', sorcerer:'CHA', warlock:'CHA', cleric:'WIS', druid:'WIS', bard:'CHA', paladin:'CHA', ranger:'WIS' };
-      const spa = spAbFull[cls]; const sm2 = mod2(spa||'INT');
-      doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...CRIMSON);
-      doc.text(`Spell Ability: ${spa}  ·  Attack: ${fmt2(sm2+prof)}  ·  Save DC: ${8+sm2+prof}  ·  Slots L1: ${sc2.l1slots}${cls==='warlock'?' (Short Rest)':' (Long Rest)'}`, ML+1, y+3);
-      y += 6;
-    }
-    if (spellChoices.cantrips.length) {
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-      doc.text('CANTRIPS (at-will):', ML+1, y+2.5);
-      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...INK);
-      const cl = doc.splitTextToSize(spellChoices.cantrips.join('  ·  '), CW-2);
-      doc.text(cl, ML+1, y+6.5);
-      y += 6 + cl.length * 4 + 3;
-    }
-    if (spellChoices.level1.length) {
-      checkPage(12);
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-      doc.text(`LEVEL 1 SPELLS (${sc2.l1slots || '?'} slots per ${cls==='warlock'?'Short':'Long'} Rest):`, ML+1, y+2.5);
-      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...INK);
-      const sl = doc.splitTextToSize(spellChoices.level1.join('  ·  '), CW-2);
-      doc.text(sl, ML+1, y+6.5);
-      y += 6 + sl.length * 4 + 3;
-    }
-    if (PREPARER_CLASSES.has(cls)) {
-      checkPage(10);
-      const spAbFull = { cleric:'WIS', druid:'WIS', paladin:'CHA' };
-      const spa = spAbFull[cls]; const sm2 = mod2(spa);
-      const prepCount = cls === 'paladin' ? Math.max(1, sm2) : Math.max(1, 1 + sm2);
-      doc.setFont('helvetica','italic'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-      const prepNote = `Prepared caster: choose up to ${prepCount} L1 spells from the full ${cls.charAt(0).toUpperCase()+cls.slice(1)} list each Long Rest.`;
-      const plines = doc.splitTextToSize(prepNote, CW-2);
-      doc.text(plines, ML+1, y+3);
-      y += plines.length * 4 + 5;
-    }
-  }
-
-  // ── Species Traits ────────────────────────────────────────────────────────
-  checkPage(25);
-  y = sectionHeader('Species Traits', y);
-  const spBonus = SPECIES_BONUSES[species];
-  if (spBonus) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...CRIMSON);
-    doc.text(`${species.charAt(0).toUpperCase()+species.slice(1)}  ·  Speed: ${spBonus.speed}  ·  Size: ${spBonus.size}`, ML+1, y+3);
-    y += 5;
-    const tlines = doc.splitTextToSize(spBonus.traits, CW-2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-    doc.text(tlines, ML+1, y+2);
-    y += tlines.length * 3.5 + 3;
-    // Lineage
-    if (selectedLineage) {
-      const lData = (species==='elf' ? ELF_LINEAGES : TIEFLING_LEGACIES)[selectedLineage];
-      if (lData) {
-        doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-        doc.text(`${lData.name}: ${lData.traits}  ·  ${lData.spells}`, ML+1, y+2);
-        y += 5;
-      }
-    }
-    if (charChoices.dragonbornAncestry) {
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-      doc.text(`Draconic Ancestry: ${charChoices.dragonbornAncestry}  ·  ${DRAGONBORN_ANCESTRIES[charChoices.dragonbornAncestry]}`, ML+1, y+2);
+  if (featsToPrint.length) {
+    y = secHeader('Origin Feats', y);
+    featsToPrint.forEach(f => {
+      doc.setFillColor(250, 242, 215);
+      doc.rect(ML, y, CW, 4, 'F');
+      rf('bold', 7, CRIMSON); doc.text(f.name, ML+2, y+2.8);
+      rf('normal', 5.5, GOLD_L); doc.text(`Source: ${f.source}`, PW-MR-1, y+2.8, { align:'right' });
       y += 5;
-    }
-    if (charChoices.gnomeLineage && GNOME_LINEAGES[charChoices.gnomeLineage]) {
-      const gl2 = GNOME_LINEAGES[charChoices.gnomeLineage];
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-      doc.text(`${gl2.name}: ${gl2.cantrips}`, ML+1, y+2);
-      y += 5;
-    }
-  }
-
-  // ── Class Features ────────────────────────────────────────────────────────
-  checkPage(30);
-  y = sectionHeader('Class Features — Level 1', y);
-  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...CRIMSON);
-  doc.text(`${cls.charAt(0).toUpperCase()+cls.slice(1)}  ·  HP: ${hp1}  ·  Hit Die: ${c.hitdie}  ·  Saves: ${c.saves}  ·  Armor: ${c.armor}`, ML+1, y+3);
-  y += 5;
-  const flines = doc.splitTextToSize(c.features || '', CW-2);
-  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-  doc.text(flines, ML+1, y+2);
-  y += flines.length * 3.5 + 3;
-  // Subclasses
-  checkPage(18);
-  doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-  doc.text('SUBCLASSES (choose at level 3):', ML+1, y+2);
-  y += 4;
-  const slines = doc.splitTextToSize(c.subclasses||'', CW-2);
-  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-  doc.text(slines, ML+1, y+2);
-  y += slines.length * 3.5 + 3;
-  // Class-specific choices
-  if (charChoices.fightingStyle) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`Fighting Style: ${charChoices.fightingStyle}`, ML+1, y+2);
-    y += 4;
-    const fslines = doc.splitTextToSize(FIGHTING_STYLES[charChoices.fightingStyle]||'', CW-2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-    doc.text(fslines, ML+1, y+2);
-    y += fslines.length * 3.5 + 3;
-  }
-  if (charChoices.clericDivineOrder) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`Divine Order: ${charChoices.clericDivineOrder.charAt(0).toUpperCase()+charChoices.clericDivineOrder.slice(1)}`, ML+1, y+2);
-    y += 5;
-  }
-  if (charChoices.druidPrimalOrder) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`Primal Order: ${charChoices.druidPrimalOrder.charAt(0).toUpperCase()+charChoices.druidPrimalOrder.slice(1)}`, ML+1, y+2);
-    y += 5;
-  }
-  if (charChoices.warlockInvocation) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`Eldritch Invocation: ${charChoices.warlockInvocation}`, ML+1, y+2);
-    y += 4;
-    const ilines = doc.splitTextToSize(WARLOCK_INVOCATIONS_L1[charChoices.warlockInvocation]||'', CW-2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-    doc.text(ilines, ML+1, y+2);
-    y += ilines.length * 3.5 + 3;
-  }
-  if (charChoices.rogueExpertise.length) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`Expertise (×2 Prof): ${charChoices.rogueExpertise.join(', ')}`, ML+1, y+2);
-    y += 5;
-  }
-
-  // ── Background ────────────────────────────────────────────────────────────
-  checkPage(20);
-  y = sectionHeader('Background', y);
-  if (BACKGROUND_BONUSES[bg]) {
-    const bb = BACKGROUND_BONUSES[bg];
-    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...CRIMSON);
-    doc.text(`${bg.charAt(0).toUpperCase()+bg.slice(1)}`, ML+1, y+3);
-    y += 5;
-    const bgLines = [
-      `Skills: ${bb.skills}`,
-      `Tool: ${charChoices.bgToolChoice || bb.tool}`,
-      `Feat: ${bb.feat}`,
-      charChoices.languages.length ? `Languages: Common + ${charChoices.languages.join(', ')}` : 'Languages: Common + 2 of your choice',
-    ];
-    bgLines.forEach(line => {
-      doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-      doc.text(line, ML+2, y+2);
-      y += 4;
+      const fl = doc.splitTextToSize(f.desc, CW - 2);
+      rf('normal', 6.5, INK); doc.text(fl, ML+2, y+2);
+      y += fl.length * 3.8 + 4;
     });
+  }
+
+  // Magic Initiate
+  if (hasMI && (spellChoices.miCantrips.length || spellChoices.miSpell)) {
+    rf('bold', 6.5, GOLD_L); doc.text(`Magic Initiate — ${getMagicInitiateFeat()}`, ML+1, y+2); y += 5;
+    if (spellChoices.miCantrips.length) {
+      const ml2 = doc.splitTextToSize(`Cantrips: ${spellChoices.miCantrips.join(', ')}`, CW-2);
+      rf('normal', 6.5, INK); doc.text(ml2, ML+2, y+2); y += ml2.length * 3.8 + 2;
+    }
+    if (spellChoices.miSpell) {
+      const ms = doc.splitTextToSize(`L1 Spell (1/Long Rest): ${spellChoices.miSpell}`, CW-2);
+      rf('normal', 6.5, INK); doc.text(ms, ML+2, y+2); y += ms.length * 3.8 + 2;
+    }
     y += 2;
   }
 
-  // ── Personality ───────────────────────────────────────────────────────────
-  const traits  = document.getElementById('traits').value;
-  const ideals  = document.getElementById('ideals').value;
-  const bonds   = document.getElementById('bonds').value;
-  const flaws   = document.getElementById('flaws').value;
-  const hasPersonality = traits||ideals||bonds||flaws;
-  if (hasPersonality) {
-    checkPage(30);
-    y = sectionHeader('Personality & Notes', y);
-    [['Traits', traits],['Ideals',ideals],['Bonds',bonds],['Flaws',flaws]].forEach(([lbl,val]) => {
+  hline(y, GOLD_L, 0.2); y += 3;
+
+  // ── Species traits ────────────────────────────────────────────────────────────
+  y = secHeader('Species Traits', y);
+  const spBonus = SPECIES_BONUSES[species];
+  if (spBonus) {
+    rf('bold', 7, CRIMSON);
+    doc.text(`${cap(species)}  ·  Speed: ${spBonus.speed}  ·  Size: ${spBonus.size}`, ML+1, y+3);
+    y += 5;
+    const tl = doc.splitTextToSize(spBonus.traits, CW-2);
+    rf('normal', 6.5, INK); doc.text(tl, ML+1, y+2); y += tl.length * 3.8 + 2;
+    if (selectedLineage) {
+      const lData = (species==='elf' ? ELF_LINEAGES : TIEFLING_LEGACIES)[selectedLineage];
+      if (lData) {
+        rf('bold', 6.5, GOLD_L); doc.text(`${lData.name}: ${lData.traits}  ·  ${lData.spells}`, ML+1, y+2); y += 5;
+        rf('normal', 6, INK); const nl = doc.splitTextToSize(lData.note, CW-2); doc.text(nl, ML+1, y+2); y += nl.length*3.5+2;
+      }
+    }
+    if (charChoices.dragonbornAncestry) {
+      rf('bold', 6.5, GOLD_L); doc.text(`Draconic Ancestry: ${charChoices.dragonbornAncestry}  ·  ${DRAGONBORN_ANCESTRIES[charChoices.dragonbornAncestry]}`, ML+1, y+2); y += 5;
+    }
+    if (charChoices.gnomeLineage && GNOME_LINEAGES[charChoices.gnomeLineage]) {
+      const gl2 = GNOME_LINEAGES[charChoices.gnomeLineage];
+      rf('bold', 6.5, GOLD_L); doc.text(`${gl2.name}: ${gl2.cantrips}  ·  ${gl2.desc}`, ML+1, y+2); y += 5;
+    }
+  }
+  hline(y, GOLD_L, 0.2); y += 3;
+
+  // ── Background ────────────────────────────────────────────────────────────────
+  y = secHeader('Background', y);
+  if (BACKGROUND_BONUSES[bg]) {
+    const bb = BACKGROUND_BONUSES[bg];
+    rf('bold', 7, CRIMSON); doc.text(cap(bg), ML+1, y+3); y += 5;
+    const bgDetail = [
+      `Skills: ${bb.skills}`,
+      `Tool: ${charChoices.bgToolChoice || bb.tool}`,
+      `Languages: Common${charChoices.languages.length ? ', ' + charChoices.languages.join(', ') : ' + 2 of choice'}`,
+      `Feat: ${bb.feat}`,
+    ];
+    bgDetail.forEach(line => {
+      const ls = doc.splitTextToSize(line, CW-2);
+      rf('normal', 6.5, INK); doc.text(ls, ML+2, y+2); y += ls.length * 3.8 + 1;
+    });
+    // ASI
+    const asiSummary = [];
+    if (asiBonus['STR']||asiBonus['DEX']||asiBonus['CON']||asiBonus['INT']||asiBonus['WIS']||asiBonus['CHA']) {
+      Object.entries(asiBonus).filter(([,v])=>v>0).forEach(([ab,v])=>asiSummary.push(`${ab} +${v}`));
+      if (asiSummary.length) { rf('normal', 6.5, INK); doc.text(`ASI: ${asiSummary.join(', ')}`, ML+2, y+2); y += 5; }
+    }
+    y += 1;
+  }
+
+  // ── Personality ───────────────────────────────────────────────────────────────
+  const ideals = document.getElementById('ideals').value;
+  const bonds  = document.getElementById('bonds').value;
+  const flaws  = document.getElementById('flaws').value;
+  const hasP2  = ideals || bonds || flaws;
+  if (hasP2) {
+    hline(y, GOLD_L, 0.2); y += 3;
+    y = secHeader('Personality', y);
+    [['Ideals', ideals], ['Bonds', bonds], ['Flaws', flaws]].forEach(([lbl, val]) => {
       if (!val) return;
-      checkPage(12);
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-      doc.text(lbl.toUpperCase(), ML+1, y+2.5);
-      y += 4;
-      const plines = doc.splitTextToSize(val, CW-2);
-      doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...INK);
-      doc.text(plines, ML+2, y+2);
-      y += plines.length * 3.5 + 3;
+      rf('bold', 6, GOLD_L); doc.text(lbl.toUpperCase(), ML+1, y+2.5); y += 4;
+      const pl = doc.splitTextToSize(val, CW-2);
+      rf('normal', 6.5, INK); doc.text(pl, ML+2, y+2); y += pl.length * 3.8 + 3;
     });
   }
 
-  // ── Starting Equipment ────────────────────────────────────────────────────
-  checkPage(30);
-  y = sectionHeader('Starting Equipment', y);
+  // ── Starting Equipment ────────────────────────────────────────────────────────
+  hline(y, GOLD_L, 0.2); y += 3;
+  y = secHeader('Starting Equipment', y);
   const clsEq = CLASS_EQUIPMENT[cls];
   const bgEq  = BG_EQUIPMENT[bg];
   if (clsEq) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...CRIMSON);
-    doc.text(`CLASS (${cls.charAt(0).toUpperCase()+cls.slice(1)}): ${clsEq.items.join(' · ')}  +  ${clsEq.gold} GP`, ML+1, y+3);
-    y += 5;
+    const cl = doc.splitTextToSize(`Class (${cap(cls)}): ${clsEq.items.join(' · ')}  +  ${clsEq.gold} GP`, CW-2);
+    rf('bold', 6.5, CRIMSON); doc.text(cl, ML+1, y+3); y += cl.length * 4 + 2;
   }
   if (bgEq) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
-    doc.text(`BACKGROUND (${bg.charAt(0).toUpperCase()+bg.slice(1)}): ${bgEq.items.join(' · ')}  +  ${bgEq.gold} GP`, ML+1, y+3);
-    y += 5;
-    if (clsEq) {
-      doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...INK);
-      doc.text(`Total Starting Gold: ${clsEq.gold + bgEq.gold} GP`, ML+1, y+3);
-      y += 6;
-    }
+    const bl = doc.splitTextToSize(`Background (${cap(bg)}): ${bgEq.items.join(' · ')}  +  ${bgEq.gold} GP`, CW-2);
+    rf('bold', 6.5, GOLD_L); doc.text(bl, ML+1, y+3); y += bl.length * 4 + 2;
+    if (clsEq) { rf('bold', 7, INK); doc.text(`Total Starting Gold: ${clsEq.gold + bgEq.gold} GP`, ML+1, y+3); y += 6; }
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
+  // ── Weapon mastery details ────────────────────────────────────────────────────
+  if (masteries.length > 0) {
+    hline(y, GOLD_L, 0.2); y += 3;
+    y = secHeader('Weapon Mastery Details', y);
+    masteries.forEach(entry => {
+      const wn   = entry.split(' (')[0];
+      const prop = (entry.match(/\(([^)]+)\)/) || [])[1] || '';
+      const desc = MASTERY_PROPS[prop] || '';
+      rf('bold', 6.5, CRIMSON); doc.text(`${entry}:`, ML+1, y+2);
+      const ml3 = doc.splitTextToSize(desc, CW - 20);
+      rf('normal', 6.5, INK); doc.text(ml3, ML+26, y+2);
+      y += Math.max(5, ml3.length * 3.8 + 1);
+    });
+  }
+
+  // ── Footers ───────────────────────────────────────────────────────────────────
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(...GOLD);
-    doc.text(`${name}  ·  Level ${level} ${cls}  ·  Page ${p} of ${totalPages}  ·  Character Forge — D&D 2024`, PW/2, PH-8, {align:'center'});
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.2);
-    doc.line(ML, PH-10, PW-MR, PH-10);
+    pageFooter(p, totalPages);
   }
 
-  doc.save(`${name.replace(/\s+/g,'_')}_L${level}_${cls}.pdf`);
+  doc.save(`${name.replace(/\s+/g,'_')}_L${level}_${cap(cls)}.pdf`);
 }
+
 
 // ── Starting Equipment Data (2024 PHB) ────────────────────────────────────────
 const ITEM_DESC = {
@@ -3691,6 +3873,7 @@ function resetChoicesForClass() {
   spellChoices.cantrips = [];
   spellChoices.level1 = [];
   spellChoices.spellAbilityChoice = null;
+  // Don't reset MI choices on class change — feat stays regardless of class
 }
 function resetChoicesForSpecies() {
   charChoices.humanSkill = null;
@@ -3702,6 +3885,9 @@ function resetChoicesForSpecies() {
 function resetChoicesForBackground() {
   charChoices.bgToolChoice = null;
   skilledChoices.length = 0;
+  spellChoices.miClass = null;
+  spellChoices.miCantrips = [];
+  spellChoices.miSpell = null;
 }
 
 // ── Spell descriptions ────────────────────────────────────────────────────────
@@ -3824,9 +4010,46 @@ const SPELL_DESC = {
 const spellChoices = {
   cantrips: [],
   level1: [],
-  spellAbilityChoice: null,   // for classes that can choose their spellcasting ability
-  innateAbilityChoice: null,  // for species (elf lineages, tiefling) innate spell ability
+  spellAbilityChoice: null,
+  innateAbilityChoice: null,
+  // Magic Initiate feat
+  miClass: null,          // 'cleric' | 'druid' | 'wizard'
+  miCantrips: [],         // up to 2 cantrips
+  miSpell: null,          // 1 level-1 spell
 };
+
+function getMagicInitiateFeat() {
+  // Returns the full feat string if Magic Initiate is active (background or human choice)
+  const bg = document.getElementById('background').value;
+  const bgFeat = bg && BACKGROUND_BONUSES[bg] ? BACKGROUND_BONUSES[bg].feat : '';
+  if (bgFeat.startsWith('Magic Initiate')) return bgFeat;
+  if (selectedHumanFeat && selectedHumanFeat.startsWith('Magic Initiate')) return selectedHumanFeat;
+  return null;
+}
+
+function getMIPresetClass(featStr) {
+  // Some backgrounds lock the MI class, e.g. "Magic Initiate (Druid)" for Guide
+  if (!featStr) return null;
+  const m = featStr.match(/\((\w+)\)/);
+  return m ? m[1].toLowerCase() : null;
+}
+
+function setMIClass(val) {
+  spellChoices.miClass = val;
+  spellChoices.miCantrips = [];
+  spellChoices.miSpell = null;
+  updateSpellsSection();
+}
+function toggleMICantrip(s) {
+  const i = spellChoices.miCantrips.indexOf(s);
+  if (i >= 0) spellChoices.miCantrips.splice(i, 1);
+  else if (spellChoices.miCantrips.length < 2) spellChoices.miCantrips.push(s);
+  updateSpellsSection();
+}
+function setMISpell(s) {
+  spellChoices.miSpell = s;
+  updateSpellsSection();
+}
 
 // How many cantrips / L1 spells known at level 1 per class
 const SPELL_COUNTS = {
@@ -3873,16 +4096,71 @@ function updateSpellsSection() {
   const inner   = document.getElementById('spells-section');
 
   const isCaster = cls && SPELL_COUNTS[cls];
-  // Also show for species with innate spells
   const hasInnateSpells = (species === 'elf' && lineage) || (species === 'tiefling' && lineage);
+  const miFeat = getMagicInitiateFeat();
 
-  if (!isCaster && !hasInnateSpells) {
+  if (!isCaster && !hasInnateSpells && !miFeat) {
     sec.style.display = 'none';
     return;
   }
 
   let html = '';
 
+  // ── Magic Initiate block (shown for ALL characters with the feat) ────────────
+  if (miFeat) {
+    const presetCls = getMIPresetClass(miFeat);
+    const miCls     = presetCls || spellChoices.miClass;
+    const miOptions = ['cleric','druid','wizard'];
+
+    html += `<div class="spell-block">
+      <div class="spell-block-title">✨ Magic Initiate — ${miFeat}</div>
+      <div class="spell-note" style="margin-bottom:0.6rem;">You learn 2 cantrips and 1 Level 1 spell from a chosen class list. The L1 spell can be cast once per Long Rest without a spell slot${isCaster ? ', or using a spell slot if you have one' : ''}. The ability score used for these spells is your choice of INT, WIS, or CHA — pick whichever is highest.</div>`;
+
+    if (!presetCls) {
+      // Player must choose the class
+      html += `<div style="margin-bottom:0.7rem;">
+        <label style="font-size:0.65rem; font-family:'Cinzel',serif; letter-spacing:0.12em; text-transform:uppercase; color:var(--crimson); display:block; margin-bottom:0.3rem;">Choose a Class List</label>
+        <select onchange="setMIClass(this.value)" style="max-width:200px;">
+          <option value="">— Choose —</option>
+          ${miOptions.map(o => `<option value="${o}" ${spellChoices.miClass===o?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}
+        </select>
+      </div>`;
+    } else {
+      html += `<div class="spell-ability-note" style="margin-bottom:0.6rem;">Class list: <strong>${presetCls.charAt(0).toUpperCase()+presetCls.slice(1)}</strong> (set by your background)</div>`;
+    }
+
+    if (miCls && CANTRIP_LISTS[miCls]) {
+      const chosenC = spellChoices.miCantrips;
+      const doneC   = chosenC.length >= 2;
+      html += `<div class="spell-block-title" style="margin-top:0.4rem;">🕯 Choose 2 Cantrips</div>
+        <div class="spell-tally ${doneC ? 'spell-done' : ''}">${chosenC.length}/2 chosen</div>
+        <div class="spell-chips">
+          ${CANTRIP_LISTS[miCls].map(s => {
+            const isCh = chosenC.includes(s);
+            const dis  = (!isCh && doneC) ? 'disabled' : '';
+            const desc = SPELL_DESC[s] || '';
+            return `<span class="mastery-tooltip"><button class="spell-chip ${isCh ? 'spell-chosen' : ''}" ${dis} onclick="toggleMICantrip('${s.replace(/'/g,"\\'")}')">${s}</button>${desc ? `<span class="mastery-tip">${desc}</span>` : ''}</span>`;
+          }).join('')}
+        </div>`;
+
+      const miSpells = SPELL_LISTS_L1[miCls] || [];
+      html += `<div class="spell-block-title" style="margin-top:0.8rem;">📖 Choose 1 Level 1 Spell</div>
+        <div class="spell-tally ${spellChoices.miSpell ? 'spell-done' : ''}">${spellChoices.miSpell ? '1/1 chosen' : '0/1 chosen'}</div>
+        <div class="spell-chips">
+          ${miSpells.map(s => {
+            const isCh = spellChoices.miSpell === s;
+            const dis  = (!isCh && spellChoices.miSpell) ? 'disabled' : '';
+            const desc = SPELL_DESC[s] || '';
+            return `<span class="mastery-tooltip"><button class="spell-chip ${isCh ? 'spell-chosen' : ''}" ${dis} onclick="setMISpell('${s.replace(/'/g,"\\'")}')">${s}</button>${desc ? `<span class="mastery-tip">${desc}</span>` : ''}</span>`;
+          }).join('')}
+        </div>
+        <div class="spell-note" style="margin-top:0.4rem;">The L1 spell is cast once per Long Rest for free (no slot needed). Hover any spell to see what it does.</div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  // ── Class spellcasting (existing logic) ──────────────────────────────────────
   if (isCaster) {
     const sc = SPELL_COUNTS[cls];
     const clsName = cls.charAt(0).toUpperCase() + cls.slice(1);
@@ -3980,7 +4258,8 @@ function updateSpellsSection() {
 
 function toggleSpellCantrip(s) {
   const cls = document.getElementById('class').value;
-  const base = SPELL_COUNTS[cls]?.cantrips || 0;
+  const sc = SPELL_COUNTS[cls];
+  const base = sc ? (sc.cantrips || 0) : 0;
   const isMagician = cls === 'druid' && charChoices.druidPrimalOrder === 'magician';
   const max = base + (isMagician ? 1 : 0);
   toggleSpellChoice(spellChoices.cantrips, s, max);
