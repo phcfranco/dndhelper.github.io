@@ -2776,9 +2776,9 @@ async function generateSheet() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-  // ── Constants & helpers ──────────────────────────────────────────────────────
+  // ── Constants ───────────────────────────────────────────────────────────────
   const PW = 210, PH = 297;
-  const ML = 11, MR = 11, MT = 12, MB = 12;
+  const ML = 11, MR = 11, MT = 12;
   const CW = PW - ML - MR;
 
   const CRIMSON = [139, 26, 26];
@@ -2787,10 +2787,10 @@ async function generateSheet() {
   const INK     = [26,  18,  9];
   const PARCH   = [244, 232, 193];
   const PARCH2  = [235, 218, 175];
-  const PARCH3  = [228, 208, 158];
   const LGREY   = [195, 178, 145];
   const PROF_HL = [255, 245, 220];
   const WHITE   = [255, 255, 255];
+  const ALERT   = [255, 235, 210];
 
   const fmt = n => (n >= 0 ? '+' : '') + n;
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -2800,12 +2800,12 @@ async function generateSheet() {
     doc.setFontSize(size);
     doc.setTextColor(...(col || INK));
   }
-  function box(x, y, w, h, fill, stroke) {
-    if (fill) { doc.setFillColor(...fill); doc.rect(x, y, w, h, 'F'); }
-    if (stroke) { doc.setDrawColor(...stroke); doc.setLineWidth(0.25); doc.rect(x, y, w, h); }
+  function box(x, y, w, h, fill, stroke, lw) {
+    if (fill)   { doc.setFillColor(...fill);   doc.rect(x, y, w, h, 'F'); }
+    if (stroke) { doc.setDrawColor(...stroke); doc.setLineWidth(lw||0.25); doc.rect(x, y, w, h); }
   }
   function hline(y2, col, lw) {
-    doc.setDrawColor(...(col||GOLD)); doc.setLineWidth(lw||0.25);
+    doc.setDrawColor(...(col||GOLD_L)); doc.setLineWidth(lw||0.25);
     doc.line(ML, y2, PW-MR, y2);
   }
   function miniLabel(txt, x, y2, col) {
@@ -2816,12 +2816,24 @@ async function generateSheet() {
     rf('bold', 11, col || CRIMSON);
     doc.text(txt, x, y2, { align: 'center' });
   }
-  function secHeader(title, y2) {
-    doc.setFillColor(...CRIMSON);
+  function secHeader(title, y2, col) {
+    doc.setFillColor(...(col || CRIMSON));
     doc.rect(ML, y2, CW, 5, 'F');
     rf('bold', 7, [244, 220, 150]);
     doc.text(title.toUpperCase(), ML + 2, y2 + 3.5);
     return y2 + 6;
+  }
+  function circle(cx, cy, r, filled, col) {
+    doc.setFillColor(...(col || LGREY));
+    doc.setDrawColor(...(col || LGREY));
+    doc.circle(cx, cy, r, filled ? 'F' : 'S');
+  }
+  // Draw N checkboxes in a row
+  function drawBoxes(n, x, y2, size, col) {
+    for (let i = 0; i < n; i++) {
+      box(x + i * (size + 1.5), y2, size, size, null, col || CRIMSON, 0.4);
+    }
+    return x + n * (size + 1.5);
   }
   function pageBg() {
     doc.setFillColor(...PARCH); doc.rect(0, 0, PW, PH, 'F');
@@ -2838,31 +2850,21 @@ async function generateSheet() {
   // ── Derived stats ────────────────────────────────────────────────────────────
   const c    = CLASS_BONUSES[cls] || {};
   const prof = getProfBonus(level);
-
   const total  = ab => scores[ab] + (asiBonus[ab] || 0);
   const mod    = ab => Math.floor((total(ab) - 10) / 2);
-  const modStr = ab => fmt(mod(ab));
-
-  const conMod = mod('CON');
-  const dexMod = mod('DEX');
-  const strMod = mod('STR');
-  const wisMod = mod('WIS');
-
+  const conMod = mod('CON'), dexMod = mod('DEX'), strMod = mod('STR'), wisMod = mod('WIS');
   const hp1 = (c.hpbase || 5) + conMod;
 
-  let ac, acNote;
-  if (cls === 'barbarian') { ac = 10 + dexMod + conMod; acNote = '10+DEX+CON'; }
-  else if (cls === 'monk') { ac = 10 + dexMod + wisMod; acNote = '10+DEX+WIS'; }
-  else                     { ac = 10 + dexMod;          acNote = '10+DEX'; }
+  let ac, acFormula, acEquipped;
+  if (cls === 'barbarian') { ac = 10 + dexMod + conMod; acFormula = '10+DEX+CON'; acEquipped = 'Unarmored Defense'; }
+  else if (cls === 'monk') { ac = 10 + dexMod + wisMod; acFormula = '10+DEX+WIS'; acEquipped = 'Unarmored Defense'; }
+  else { ac = 10 + dexMod; acFormula = '10+DEX'; acEquipped = 'With armor: replace base'; }
 
   const SPELL_AB_MAP = { wizard:'INT', sorcerer:'CHA', warlock:'CHA', cleric:'WIS', druid:'WIS', bard:'CHA', paladin:'CHA', ranger:'WIS' };
   const spAb = SPELL_AB_MAP[cls];
+  const sc2  = SPELL_COUNTS[cls];
 
-  const bgSkillsSet = new Set(
-    bg && BACKGROUND_BONUSES[bg]
-      ? BACKGROUND_BONUSES[bg].skills.split(',').map(s => s.trim())
-      : []
-  );
+  const bgSkillsSet = new Set(bg && BACKGROUND_BONUSES[bg] ? BACKGROUND_BONUSES[bg].skills.split(',').map(s=>s.trim()) : []);
   if (species === 'human' && charChoices.humanSkill) bgSkillsSet.add(charChoices.humanSkill);
   if (isSkilledActive()) skilledChoices.forEach(s => { if (ALL_SKILLS.includes(s)) bgSkillsSet.add(s); });
   const profSaves = (c.saves || '').split(',').map(s => s.trim());
@@ -2871,449 +2873,677 @@ async function generateSheet() {
   function isSaveProf(ab) { return profSaves.includes(ab); }
   function skillBonus(skill, ab) { return isProf(skill) ? mod(ab) + prof : mod(ab); }
   function saveBonus(ab) { return isSaveProf(ab) ? mod(ab) + prof : mod(ab); }
-
   const passivePerc = 10 + (isProf('Perception') ? mod('WIS') + prof : mod('WIS'));
 
-  // ── SKILLS_BY_ABILITY order matches web app ─────────────────────────────────
-  const SKILLS_DATA = {
-    STR: ["Athletics"],
-    DEX: ["Acrobatics","Sleight of Hand","Stealth"],
-    CON: [],
-    INT: ["Arcana","History","Investigation","Nature","Religion"],
-    WIS: ["Animal Handling","Insight","Medicine","Perception","Survival"],
-    CHA: ["Deception","Intimidation","Performance","Persuasion"],
+  // ── Class feature descriptions & resource trackers ──────────────────────────
+  // Each entry: [featureName, description, resourceLabel, resourceCount, restType]
+  // restType: 'short' | 'long' | 'both' | null
+  const CLASS_FEATURE_DETAILS = {
+    fighter: [
+      ['Second Wind', 'Bonus Action: regain 1d10+' + level + ' HP. Use in combat to recover without a healer.', 'Uses', 1, 'short'],
+      ['Action Surge', 'Once per turn: take a second full Action. Doubles your attacks for one turn.', 'Uses', 1, 'short'],
+      ['Fighting Style', 'Passive bonus to your chosen combat style (see below). Always active, no action needed.', null, 0, null],
+      ['Weapon Mastery', 'Choose 3 weapons. Each grants a special effect on hit (see Mastery details on P2).', null, 0, null],
+    ],
+    paladin: [
+      ['Lay on Hands', 'Action: restore HP from a pool of ' + (level*5) + ' total HP. Or spend 5 HP to cure disease/poison.', 'Pool (HP)', level*5, 'long'],
+      ['Divine Sense', 'Action: detect Celestials, Fiends, Undead within 60 ft until end of your next turn.', 'Uses', 1+mod('CHA'), 'long'],
+      ['Divine Smite', 'After hitting, expend a spell slot to deal +2d8 Radiant (+1d8 per slot level above 1st).', 'Slots', sc2 ? sc2.l1slots : 2, 'long'],
+      ['Weapon Mastery', 'Choose 2 weapons. Each grants a special effect on hit.', null, 0, null],
+    ],
+    ranger: [
+      ['Favored Enemy', 'Always have Hunter\'s Mark prepared. Cast it once per Long Rest for free (no slot).', 'Free Cast', 1, 'long'],
+      ['Expertise', 'Double your Proficiency Bonus for 2 chosen skills.', null, 0, null],
+      ['Weapon Mastery', 'Choose 2 weapons. Each grants a special effect on hit.', null, 0, null],
+    ],
+    barbarian: [
+      ['Rage', 'Bonus Action: enter Rage for up to 1 min. +2 damage on STR attacks, resist Bludg/Pierce/Slash damage.', 'Uses', 2, 'long'],
+      ['Unarmored Defense', '10+DEX+CON AC when not wearing armor. Never equip armor — your body is your shield.', null, 0, null],
+      ['Weapon Mastery', 'Choose 2 weapons. Each grants a special effect on hit.', null, 0, null],
+    ],
+    monk: [
+      ['Martial Arts', 'Unarmed strikes deal 1d6+DEX (or STR). Can replace one Attack action attack with unarmed.', null, 0, null],
+      ['Unarmored Defense', '10+DEX+WIS AC when not wearing armor or shield.', null, 0, null],
+      ['Monk\'s Focus', 'Spend Focus Points for Flurry of Blows (2 unarmed strikes, BA, 1pt), Patient Defense (Dodge BA, 1pt), Step of Wind (Dash/Disengage BA, 1pt).', 'Points', level, 'short'],
+      ['Weapon Mastery', 'Choose 1 weapon (simple or shortsword). Grants a special effect on hit.', null, 0, null],
+    ],
+    rogue: [
+      ['Sneak Attack', 'Once per turn: +1d6 damage if you have Advantage OR an ally is adjacent to target.', null, 0, null],
+      ['Expertise', 'Double your Proficiency Bonus for 2 chosen skills (and Thieves\' Tools if chosen).', null, 0, null],
+      ['Cunning Action', 'Bonus Action: Dash, Disengage, or Hide. Your mobility tool every single turn.', null, 0, null],
+      ['Thieves\' Cant', 'Secret language of the criminal underworld. Communicate hidden messages to other rogues.', null, 0, null],
+      ['Weapon Mastery', 'Choose 2 weapons (finesse or light). Each grants a special effect on hit.', null, 0, null],
+    ],
+    wizard: [
+      ['Spellcasting', 'Prepare ' + Math.max(1,level+mod('INT')) + ' spells from your spellbook each Long Rest. Cast using INT. All spells in your book are accessible to prepare.', null, 0, null],
+      ['Arcane Recovery', 'Once per Long Rest (during Short Rest): recover spell slots totalling half your level (1 slot at L1).', 'Uses', 1, 'long'],
+      ['Ritual Adept', 'Cast any ritual spell in your spellbook without expending a spell slot (takes 10 min extra).', null, 0, null],
+    ],
+    sorcerer: [
+      ['Spellcasting', 'Cast spells using CHA. Spells are permanently known — they don\'t change each day.', null, 0, null],
+      ['Innate Sorcery', 'Activate as Bonus Action: Advantage on spell attacks, enemies have Disadv. on your spell saves for 1 min.', 'Uses', 2, 'long'],
+      ['Font of Magic', 'Sorcery Points: ' + level + ' pts. Convert slots to pts or pts to slots. Spend for Metamagic.', 'Points', level, 'long'],
+    ],
+    warlock: [
+      ['Pact Magic', 'Spell slots recharge on Short Rest. All slots are the same level (L1 at L1).', 'Slots', 1, 'short'],
+      ['Eldritch Invocations', 'Permanent supernatural boons. Each invocation grants a constant or at-will effect (no action to activate most).', null, 0, null],
+    ],
+    cleric: [
+      ['Spellcasting', 'Prepare ' + Math.max(1,level+mod('WIS')) + ' spells per Long Rest from the full Cleric list. All healing spells are great picks early.', null, 0, null],
+      ['Channel Divinity', 'Activate a divine power: Turn Undead (WIS save or flee) or your Domain ability. Recharges on Short Rest.', 'Uses', 1, 'short'],
+      ['Divine Order', charChoices.clericDivineOrder === 'protector' ? 'Protector: proficiency with Martial Weapons and Heavy Armor.' : 'Thaumaturge: add WIS mod to Arcana and Religion checks.', null, 0, null],
+    ],
+    druid: [
+      ['Spellcasting', 'Prepare ' + Math.max(1,level+mod('WIS')) + ' spells per Long Rest from the full Druid list. You always know Druidic (secret language).', null, 0, null],
+      ['Wild Shape', 'Action: transform into a CR 1/4 Beast (no fly/swim speed). Lasts 1 hr or until 0 HP. You keep your mental stats.', 'Uses', 2, 'short'],
+      ['Primal Order', charChoices.druidPrimalOrder === 'warden' ? 'Warden: proficiency with Martial Weapons and Medium Armor.' : 'Magician: +1 cantrip, add WIS mod to Arcana/Nature checks.', null, 0, null],
+    ],
+    bard: [
+      ['Spellcasting', 'Spells are permanently known. Cast using CHA. Choose your spells carefully — they don\'t change often.', null, 0, null],
+      ['Bardic Inspiration', 'Bonus Action: give a creature within 60 ft a d6 to add to one roll within 10 min. Inspired by your performance.', 'Uses', Math.max(1,mod('CHA')), 'long'],
+      ['Jack of All Trades', 'Add half your Proficiency Bonus (rounded down) to any ability check you\'re not proficient in.', null, 0, null],
+    ],
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // PAGE 1 — PLAY SHEET
-  // ════════════════════════════════════════════════════════════════════════════
-  pageBg();
+  // ── Rest recovery data ───────────────────────────────────────────────────────
+  const SHORT_REST_GAINS = {
+    fighter:   `Spend Hit Dice (d10+CON each). Regain: Second Wind [ ], Action Surge [ ]`,
+    paladin:   `Spend Hit Dice (d10+CON each). Spell slots do NOT recharge on Short Rest.`,
+    ranger:    `Spend Hit Dice (d10+CON each). Spell slots do NOT recharge on Short Rest.`,
+    barbarian: `Spend Hit Dice (d12+CON each). Rage uses do NOT recharge on Short Rest.`,
+    monk:      `Spend Hit Dice (d8+CON each). Regain: ALL Focus Points (${level} pts)`,
+    rogue:     `Spend Hit Dice (d8+CON each). No class features recharge on Short Rest.`,
+    wizard:    `Spend Hit Dice (d6+CON each). Arcane Recovery (once/day): recover 1 L1 slot`,
+    sorcerer:  `Spend Hit Dice (d6+CON each). No class features recharge on Short Rest.`,
+    warlock:   `Spend Hit Dice (d8+CON each). Regain: ALL Pact Magic slots [ ]`,
+    cleric:    `Spend Hit Dice (d8+CON each). Regain: Channel Divinity [ ]`,
+    druid:     `Spend Hit Dice (d8+CON each). Regain: Wild Shape [ ] [ ]`,
+    bard:      `Spend Hit Dice (d8+CON each). No class features recharge on Short Rest.`,
+  };
+  const LONG_REST_GAINS = {
+    fighter:   `Full HP. Regain: ALL spell slots. Second Wind [ ]. Action Surge [ ].`,
+    paladin:   `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Lay on Hands pool (${level*5}HP). Divine Sense [ ]x${Math.max(1,1+mod('CHA'))}.`,
+    ranger:    `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Favored Enemy free cast [ ].`,
+    barbarian: `Full HP. Regain: Rage uses [ ] [ ].`,
+    monk:      `Full HP. Regain: ALL Focus Points (${level} pts).`,
+    rogue:     `Full HP. No class resources to recharge.`,
+    wizard:    `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Arcane Recovery resets [ ].`,
+    sorcerer:  `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Sorcery Points (${level} pts). Innate Sorcery [ ][ ].`,
+    warlock:   `Full HP. Regain: Pact Magic slots (also on Short Rest) [ ].`,
+    cleric:    `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Channel Divinity [ ]. Change prepared spells.`,
+    druid:     `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. Wild Shape [ ][ ]. Change prepared spells.`,
+    bard:      `Full HP. Regain: ${sc2?sc2.l1slots:2} L1 slots [ ]x${sc2?sc2.l1slots:2}. ALL Bardic Inspiration [ ]x${Math.max(1,mod('CHA'))}.`,
+  };
 
-  let y = MT;
+  // ── Spells with concentration flags ─────────────────────────────────────────
+  const CONC_SPELLS = new Set([
+    'Bless','Bane','Faerie Fire','Entangle','Fog Cloud','Hunters Mark','Hunter\'s Mark','Hex',
+    'Hold Person','Guiding Bolt','Shield of Faith','Divine Favor','Searing Smite',
+    'Thunderous Smite','Wrathful Smite','Ensnaring Strike','Hail of Thorns',
+    'Compelled Duel','Heroism','Expeditious Retreat','Charm Person',
+    'Tasha\'s Hideous Laughter','Silent Image','Witch Bolt','Cause Fear',
+    'Detect Magic','Detect Poison and Disease','Speak with Animals',
+  ]);
 
-  // ── Title ────────────────────────────────────────────────────────────────────
-  rf('bold', 16, CRIMSON);
-  doc.text('CHARACTER SHEET', PW/2, y + 6, { align: 'center' });
-  rf('normal', 6.5, GOLD_L);
-  doc.text('D&D 2024  ·  Character Forge', PW/2, y + 11, { align: 'center' });
-  hline(y + 13, GOLD_L, 0.4);
-  y += 15;
+  // ── SKILLS_BY_ABILITY ──────────────────────────────────────────────────────
+  const SKILLS_DATA = {
+    STR: ['Athletics'],
+    DEX: ['Acrobatics','Sleight of Hand','Stealth'],
+    CON: [],
+    INT: ['Arcana','History','Investigation','Nature','Religion'],
+    WIS: ['Animal Handling','Insight','Medicine','Perception','Survival'],
+    CHA: ['Deception','Intimidation','Performance','Persuasion'],
+  };
 
-  // ── Identity bar ─────────────────────────────────────────────────────────────
-  const idFields = [
-    ['Name', name, 3],
-    ['Class', cap(cls), 1.2],
-    ['Species', cap(species) + (selectedLineage ? ` · ${selectedLineage}` : ''), 1.6],
-    ['Background', cap(bg), 1.2],
-    ['Alignment', alignment, 1.2],
-  ];
-  const totalW = idFields.reduce((s, f) => s + f[2], 0);
-  let ix = ML;
-  idFields.forEach(([lbl, val, wt]) => {
-    const w = (wt / totalW) * CW - 1;
-    box(ix, y, w, 10, PARCH2, LGREY);
-    miniLabel(lbl, ix + 1.5, y + 3.5);
-    rf('bold', 7.5, INK);
-    const clipped = doc.splitTextToSize(val, w - 2)[0] || val;
-    doc.text(clipped, ix + 1.5, y + 8);
-    ix += w + 1;
-  });
-  y += 12;
-
-  // ── Core stats row: HP · AC · Initiative · Speed · Passive Perception · Prof ──
-  const coreStats = [
-    ['HP', String(hp1), `${c.hpbase||5} + CON`],
-    ['Armor Class', String(ac), acNote],
-    ['Initiative', fmt(dexMod), 'DEX mod'],
-    ['Speed', (SPECIES_BONUSES[species] && SPECIES_BONUSES[species].speed ? SPECIES_BONUSES[species].speed : '30 ft.'), ''],
-    ['Passive Perc.', String(passivePerc), isProf('Perception') ? 'WIS+Prof+10' : 'WIS+10'],
-    ['Prof Bonus', `+${prof}`, 'Levels 1–4'],
-    ...(spAb ? [
-      ['Spell Attack', fmt(mod(spAb)+prof), `${spAb}+Prof`],
-      ['Spell DC',     String(8+mod(spAb)+prof), `8+${spAb}+Prof`],
-    ] : []),
-  ];
-  const csW = CW / coreStats.length;
-  coreStats.forEach(([lbl, val, note], i) => {
-    const cx = ML + i * csW;
-    const isHp = lbl === 'HP';
-    box(cx, y, csW - 0.8, 14, isHp ? [255,240,220] : PARCH2, isHp ? CRIMSON : LGREY);
-    if (isHp) { doc.setDrawColor(...CRIMSON); doc.setLineWidth(0.6); doc.rect(cx, y, csW-0.8, 14); }
-    miniLabel(lbl, cx + 1.5, y + 3.5);
-    bigVal(val, cx + (csW-0.8)/2, y + 10, isHp ? CRIMSON : CRIMSON);
-    if (note) { rf('normal', 4.5, GOLD_L); doc.text(note, cx + (csW-0.8)/2, y + 13, { align:'center' }); }
-  });
-  y += 16;
-
-  // ── Weapon attacks row ────────────────────────────────────────────────────────
   const masteries = charChoices.weaponMasteries;
   const FINESSE_W = ['Dagger','Dart','Rapier','Scimitar','Shortsword','Whip'];
   const RANGED_W  = ['Hand Crossbow','Heavy Crossbow','Javelin','Lance','Light Crossbow','Longbow','Shortbow'];
 
+  // ══════════════════════════════════════════════════════════════════════════════
+  // PAGE 1 — PLAY SHEET
+  // ══════════════════════════════════════════════════════════════════════════════
+  pageBg();
+  let y = MT;
+
+  // ── Title ──────────────────────────────────────────────────────────────────
+  rf('bold', 14, CRIMSON);
+  doc.text('CHARACTER SHEET', PW/2, y + 5.5, { align: 'center' });
+  rf('normal', 6, GOLD_L);
+  doc.text('D&D 2024  ·  Character Forge', PW/2, y + 10, { align: 'center' });
+  hline(y + 12, GOLD_L, 0.4);
+  y += 14;
+
+  // ── Identity bar ──────────────────────────────────────────────────────────
+  const idFields = [
+    ['Name', name, 3],
+    ['Class & Level', `${cap(cls)} ${level}`, 1.3],
+    ['Species', cap(species) + (selectedLineage ? ` (${selectedLineage})` : ''), 1.5],
+    ['Background', cap(bg), 1.2],
+    ['Alignment', alignment, 1.2],
+  ];
+  const totalW = idFields.reduce((s,f)=>s+f[2],0);
+  let ix = ML;
+  idFields.forEach(([lbl,val,wt]) => {
+    const w = (wt/totalW)*CW - 1;
+    box(ix, y, w, 10, PARCH2, LGREY);
+    miniLabel(lbl, ix+1.5, y+3.5);
+    rf('bold', 7, INK);
+    doc.text(doc.splitTextToSize(val, w-2)[0]||val, ix+1.5, y+8);
+    ix += w+1;
+  });
+  y += 12;
+
+  // ── HP + Death Saves block ────────────────────────────────────────────────
+  // Left: HP (current/max/temp) + Hit Die | Right: Death Saves
+  const hpBlockH = 22;
+  const hpW = CW * 0.60;
+  const dsW = CW * 0.38;
+  const dsX = ML + hpW + CW * 0.02;
+
+  // HP box
+  box(ML, y, hpW, hpBlockH, [255,240,218], CRIMSON, 0.7);
+  // HP label row
+  miniLabel('Hit Points (Max: ' + hp1 + ')', ML+2, y+3.5, CRIMSON);
+  miniLabel(c.hitdie + ' + CON  |  Hit Die: ' + c.hitdie, ML + hpW - 2, y+3.5, GOLD_L);
+  // Large write-in area for current HP
+  rf('normal', 5.5, GOLD_L);
+  doc.text('Current HP', ML+2, y+8.5);
+  box(ML+2, y+9.5, 24, 8, WHITE, LGREY, 0.3);
+  // Temp HP
+  rf('normal', 5.5, GOLD_L);
+  doc.text('Temp HP', ML+28, y+8.5);
+  box(ML+28, y+9.5, 18, 8, WHITE, LGREY, 0.3);
+  // Max HP shown
+  rf('bold', 8, CRIMSON);
+  doc.text('Max: ' + hp1, ML+50, y+14.5);
+  // AC and formula note
+  rf('normal', 5, GOLD_L);
+  doc.text('AC: ' + ac + '  (' + acFormula + ' unarmored)', ML+2, y+21);
+  doc.text(acEquipped, ML+2+45, y+21);
+
+  // Death saves box
+  box(dsX, y, dsW, hpBlockH, [255,245,230], CRIMSON, 0.5);
+  miniLabel('Death Saving Throws', dsX+2, y+3.5, CRIMSON);
+  // Successes row
+  rf('bold', 5.5, [0,130,0]);
+  doc.text('SUCCESS', dsX+2, y+9);
+  for (let i=0;i<3;i++) { circle(dsX+22+i*7, y+8, 2.5, false, LGREY); }
+  // Failures row
+  rf('bold', 5.5, CRIMSON);
+  doc.text('FAILURE', dsX+2, y+16);
+  for (let i=0;i<3;i++) { circle(dsX+22+i*7, y+15, 2.5, false, LGREY); }
+  rf('normal', 5, GOLD_L);
+  doc.text('3 successes = stable  ·  3 failures = dead', dsX+2, y+21);
+
+  y += hpBlockH + 3;
+
+  // ── Combat stats row ─────────────────────────────────────────────────────
+  const speedStr = (SPECIES_BONUSES[species] && SPECIES_BONUSES[species].speed) ? SPECIES_BONUSES[species].speed : '30 ft.';
+  const combatRow = [
+    ['Armor Class', String(ac), acFormula],
+    ['Initiative', fmt(dexMod), 'DEX mod'],
+    ['Speed', speedStr, ''],
+    ['Passive Perc.', String(passivePerc), isProf('Perception')?'WIS+Prof+10':'WIS+10'],
+    ['Prof Bonus', `+${prof}`, 'Levels 1–4'],
+    ...(spAb ? [
+      ['Spell Attack', fmt(mod(spAb)+prof), `${spAb}+Prof`],
+      ['Spell DC', String(8+mod(spAb)+prof), `8+${spAb}+Prof`],
+    ] : []),
+  ];
+  const csW = CW / combatRow.length;
+  combatRow.forEach(([lbl,val,note],i) => {
+    const cx = ML + i*csW;
+    box(cx, y, csW-0.8, 13, PARCH2, LGREY);
+    miniLabel(lbl, cx+1.5, y+3.5);
+    bigVal(val, cx+(csW-0.8)/2, y+9.5, CRIMSON);
+    if (note) { rf('normal',4.5,GOLD_L); doc.text(note, cx+(csW-0.8)/2, y+12.5, {align:'center'}); }
+  });
+  y += 15;
+
+  // ── Weapon attacks ────────────────────────────────────────────────────────
   const weaponRows = [];
   if (masteries.length > 0) {
     masteries.forEach(entry => {
-      const wn   = entry.split(' (')[0];
-      const prop = (entry.match(/\(([^)]+)\)/) || [])[1] || '';
+      const wn = entry.split(' (')[0];
+      const prop = (entry.match(/\(([^)]+)\)/)||[])[1]||'';
       let am;
-      if (RANGED_W.includes(wn)) am = dexMod + prof;
-      else if (FINESSE_W.includes(wn)) am = Math.max(strMod, dexMod) + prof;
-      else am = strMod + prof;
+      if (RANGED_W.includes(wn)) am = dexMod+prof;
+      else if (FINESSE_W.includes(wn)) am = Math.max(strMod,dexMod)+prof;
+      else am = strMod+prof;
       weaponRows.push([wn, fmt(am), prop ? `Mastery: ${prop}` : '']);
     });
   } else {
-    weaponRows.push(['Melee Attack', fmt(strMod + prof), 'STR + Prof']);
-    weaponRows.push(['Ranged Attack', fmt(dexMod + prof), 'DEX + Prof']);
+    weaponRows.push(['Melee Attack', fmt(strMod+prof), 'STR+Prof']);
+    weaponRows.push(['Ranged Attack', fmt(dexMod+prof), 'DEX+Prof']);
   }
+  const wW = CW / weaponRows.length;
+  weaponRows.forEach(([wn,val,note],i) => {
+    const wx = ML+i*wW;
+    box(wx, y, wW-0.8, 11, PARCH2, LGREY);
+    miniLabel(wn, wx+1.5, y+3);
+    bigVal(val, wx+(wW-0.8)/2, y+8, CRIMSON);
+    if (note) { rf('normal',4.5,GOLD_L); doc.text(note, wx+(wW-0.8)/2, y+10.5, {align:'center'}); }
+  });
+  y += 13;
 
-  if (weaponRows.length) {
-    const wW = CW / weaponRows.length;
-    weaponRows.forEach(([wn, val, note], i) => {
-      const wx = ML + i * wW;
-      box(wx, y, wW - 0.8, 12, PARCH2, LGREY);
-      miniLabel(wn, wx + 1.5, y + 3.5);
-      bigVal(val, wx + (wW-0.8)/2, y + 9, CRIMSON);
-      if (note) { rf('normal', 4.5, GOLD_L); doc.text(note, wx + (wW-0.8)/2, y + 11.5, { align:'center' }); }
-    });
-    y += 14;
-  }
+  // ── Short/Long Rest recovery ──────────────────────────────────────────────
+  const shortText = SHORT_REST_GAINS[cls] || 'Spend Hit Dice to recover HP.';
+  const longText  = LONG_REST_GAINS[cls]  || 'Recover all HP and class resources.';
+  const restH = 16;
+  const halfCW = (CW - 2) / 2;
 
+  // Short Rest box
+  box(ML, y, halfCW, restH, [245,235,215], GOLD, 0.4);
+  doc.setFillColor(...GOLD); doc.rect(ML, y, halfCW, 4.5, 'F');
+  rf('bold', 6.5, [255,255,255]);
+  doc.text('SHORT REST  (1+ hr, spend Hit Dice)', ML+2, y+3.2);
+  const shortLines = doc.splitTextToSize(shortText, halfCW-3);
+  rf('normal', 5.5, INK); doc.text(shortLines, ML+2, y+6.5);
+
+  // Long Rest box
+  const lrX = ML + halfCW + 2;
+  box(lrX, y, halfCW, restH, [235,220,240], CRIMSON, 0.4);
+  doc.setFillColor(...CRIMSON); doc.rect(lrX, y, halfCW, 4.5, 'F');
+  rf('bold', 6.5, [255,255,255]);
+  doc.text('LONG REST  (8 hrs, full recovery)', lrX+2, y+3.2);
+  const longLines = doc.splitTextToSize(longText, halfCW-3);
+  rf('normal', 5.5, INK); doc.text(longLines, lrX+2, y+6.5);
+
+  y += restH + 3;
+
+  // ── Thin divider ────────────────────────────────────────────────────────
   hline(y, GOLD_L, 0.3); y += 3;
 
-  // ── ABILITY SCORES + SKILLS (6 columns, PHB 2024 style) ──────────────────────
+  // ── Ability scores + skills (6 columns) ──────────────────────────────────
   const ABS = ['STR','DEX','CON','INT','WIS','CHA'];
   const colW = CW / 6;
-
-  // Measure height of each column to find tallest
-  const colHeights = ABS.map(ab => {
-    const skills = SKILLS_DATA[ab] || [];
-    return 22 + 5 + skills.length * 5 + 5 + 5; // header + save + skills + gap
-  });
+  const colHeights = ABS.map(ab => 22 + 5 + (SKILLS_DATA[ab]||[]).length*5 + 6);
   const maxColH = Math.max(...colHeights);
 
   ABS.forEach((ab, ci) => {
-    const cx   = ML + ci * colW;
-    const cw   = colW - 1;
-    const abMod = mod(ab);
-    const abTot = total(ab);
-    const skills = SKILLS_DATA[ab] || [];
+    const cx = ML + ci*colW;
+    const cw = colW - 1;
+    const abMod = mod(ab), abTot = total(ab);
+    const skills = SKILLS_DATA[ab]||[];
 
-    // Column background
     box(cx, y, cw, maxColH, PARCH2, LGREY);
-    // Crimson top bar with ability name
-    doc.setFillColor(...CRIMSON);
-    doc.rect(cx, y, cw, 6, 'F');
-    rf('bold', 7, [244, 220, 150]);
-    doc.text(ab, cx + cw/2, y + 4.2, { align: 'center' });
-
-    // Big modifier
+    doc.setFillColor(...CRIMSON); doc.rect(cx, y, cw, 6, 'F');
+    rf('bold', 7, [244,220,150]);
+    doc.text(ab, cx+cw/2, y+4.2, {align:'center'});
     rf('bold', 14, CRIMSON);
-    doc.text(fmt(abMod), cx + cw/2, y + 14, { align: 'center' });
+    doc.text(fmt(abMod), cx+cw/2, y+14, {align:'center'});
+    const scoreLabel = (asiBonus[ab]||0)>0 ? `${scores[ab]}+${asiBonus[ab]}=${abTot}` : String(abTot);
+    rf('normal', 6, INK); doc.text(scoreLabel, cx+cw/2, y+18.5, {align:'center'});
 
-    // Score below modifier
-    const scoreLabel = (asiBonus[ab]||0) > 0
-      ? `${scores[ab]}+${asiBonus[ab]}=${abTot}`
-      : String(abTot);
-    rf('normal', 6, INK);
-    doc.text(scoreLabel, cx + cw/2, y + 18.5, { align: 'center' });
-
-    let sy = y + 21;
-
-    // Thin gold divider
+    let sy = y+21;
     doc.setDrawColor(...GOLD_L); doc.setLineWidth(0.2);
-    doc.line(cx + 1, sy, cx + cw - 1, sy);
-    sy += 3;
+    doc.line(cx+1, sy, cx+cw-1, sy); sy+=3;
 
-    // Saving throw row
-    const saveP = isSaveProf(ab);
-    const savB  = saveBonus(ab);
+    // Save row
+    const saveP = isSaveProf(ab), savB = saveBonus(ab);
     if (saveP) { doc.setFillColor(...PROF_HL); doc.rect(cx, sy-1, cw, 5, 'F'); }
-    // dot
-    doc.setFillColor(saveP ? CRIMSON[0] : LGREY[0], saveP ? CRIMSON[1] : LGREY[1], saveP ? CRIMSON[2] : LGREY[2]);
-    doc.circle(cx + 2, sy + 1.5, 1, 'F');
-    rf(saveP ? 'bold' : 'normal', 5.5, saveP ? CRIMSON : INK);
-    doc.text('Save', cx + 4.5, sy + 2.5);
-    rf('bold', 5.5, saveP ? CRIMSON : INK);
-    doc.text(fmt(savB), cx + cw - 1.5, sy + 2.5, { align: 'right' });
-    sy += 5;
+    doc.setFillColor(saveP?CRIMSON[0]:LGREY[0], saveP?CRIMSON[1]:LGREY[1], saveP?CRIMSON[2]:LGREY[2]);
+    doc.circle(cx+2, sy+1.5, 1, 'F');
+    rf(saveP?'bold':'normal', 5.5, saveP?CRIMSON:INK);
+    doc.text('Save', cx+4.5, sy+2.5);
+    rf('bold', 5.5, saveP?CRIMSON:INK);
+    doc.text(fmt(savB), cx+cw-1.5, sy+2.5, {align:'right'});
+    sy+=5;
 
-    // Skills
     skills.forEach(skill => {
-      const sp = isProf(skill);
-      const sb = skillBonus(skill, ab);
+      const sp = isProf(skill), sb = skillBonus(skill, ab);
       if (sp) { doc.setFillColor(...PROF_HL); doc.rect(cx, sy-1, cw, 5, 'F'); }
-      doc.setFillColor(sp ? CRIMSON[0] : LGREY[0], sp ? CRIMSON[1] : LGREY[1], sp ? CRIMSON[2] : LGREY[2]);
-      doc.circle(cx + 2, sy + 1.5, 1, 'F');
-      rf(sp ? 'bold' : 'normal', 5.5, sp ? CRIMSON : INK);
-      // Abbreviate long skill names to fit column
-      const skillLabel = skill.length > 11 ? skill.slice(0,10)+'.' : skill;
-      doc.text(skillLabel, cx + 4.5, sy + 2.5);
-      rf('bold', 5.5, sp ? CRIMSON : INK);
-      doc.text(fmt(sb), cx + cw - 1.5, sy + 2.5, { align: 'right' });
-      sy += 5;
+      doc.setFillColor(sp?CRIMSON[0]:LGREY[0], sp?CRIMSON[1]:LGREY[1], sp?CRIMSON[2]:LGREY[2]);
+      doc.circle(cx+2, sy+1.5, 1, 'F');
+      rf(sp?'bold':'normal', 5.5, sp?CRIMSON:INK);
+      const SKILL_ABBREV = {'Sleight of Hand':'Sl.of Hand','Animal Handling':'Anml.Handl.','Investigation':'Investigat.','Intimidation':'Intimidat.','Performance':'Performanc.'};
+      const skillLabel = SKILL_ABBREV[skill] || (skill.length>11 ? skill.slice(0,10)+'.' : skill);
+      doc.text(skillLabel, cx+4.5, sy+2.5);
+      rf('bold', 5.5, sp?CRIMSON:INK);
+      doc.text(fmt(sb), cx+cw-1.5, sy+2.5, {align:'right'});
+      sy+=5;
     });
 
-    // Proficiency level-up note at bottom if column has proficient skills
-    const hasProf = isSaveProf(ab) || skills.some(sk => isProf(sk));
+    const hasProf = isSaveProf(ab)||skills.some(sk=>isProf(sk));
     if (hasProf) {
       rf('normal', 4, GOLD_L);
-      doc.text(`Prof: +${prof} → +${prof+1} at L5`, cx + cw/2, y + maxColH - 2, { align: 'center' });
+      doc.text(`+${prof} now, +${prof+1} at L5`, cx+cw/2, y+maxColH-2, {align:'center'});
     }
   });
 
   y += maxColH + 3;
   hline(y, GOLD_L, 0.3); y += 3;
 
-  // ── Proficiencies summary ─────────────────────────────────────────────────────
+  // ── Proficiencies summary ────────────────────────────────────────────────
   y = secHeader('Proficiencies & Languages', y);
-
   const profItems = [
-    `Saves: ${c.saves || '—'}`,
-    `Armor: ${c.armor || 'None'}`,
-    `Weapons: All simple${c.features && c.features.includes('Weapon Mastery') ? ' + Martial (Mastery)' : ''}`,
-    `Tools: ${charChoices.bgToolChoice || (bg && BACKGROUND_BONUSES[bg] && BACKGROUND_BONUSES[bg].tool ? BACKGROUND_BONUSES[bg].tool : '—')}`,
-    `Languages: Common${charChoices.languages.length ? ', ' + charChoices.languages.join(', ') : ' + 2 of choice'}`,
+    `Saves: ${c.saves||'—'}`,
+    `Armor: ${c.armor||'None'}`,
+    `Weapons: All simple${c.features&&c.features.includes('Weapon Mastery')?' + Martial (Mastery)':''}`,
+    `Tools: ${charChoices.bgToolChoice||(bg&&BACKGROUND_BONUSES[bg]?BACKGROUND_BONUSES[bg].tool:'—')}`,
+    `Languages: Common${charChoices.languages.length?', '+charChoices.languages.join(', '):', + 2 of choice'}`,
   ];
-  const pRowsText = doc.splitTextToSize(profItems.join('   ·   '), CW - 2);
-  rf('normal', 6.5, INK);
-  doc.text(pRowsText, ML + 1, y + 3);
-  y += pRowsText.length * 4 + 5;
+  const pText = doc.splitTextToSize(profItems.join('   ·   '), CW-2);
+  rf('normal', 6.5, INK); doc.text(pText, ML+1, y+3);
+  y += pText.length*4 + 4;
 
-  // ── Spells quick-reference (casters only — compact) ───────────────────────────
-  const sc2 = SPELL_COUNTS[cls];
+  // ── Spellcasting section (with slot tracker + conc. flags) ────────────────
   const hasMI = getMagicInitiateFeat();
   if (sc2 || hasMI) {
     y = secHeader('Spellcasting', y);
     if (sc2 && spAb) {
+      // Stats line
       rf('bold', 6.5, CRIMSON);
-      doc.text(`${cap(cls)} · ${spAb} · Attack: ${fmt(mod(spAb)+prof)} · Save DC: ${8+mod(spAb)+prof} · Slots: ${sc2.l1slots||'—'}/Long Rest${cls==='warlock'?' (Short Rest)':''}`, ML+1, y+3);
+      doc.text(`Spellcasting Ability: ${spAb}  ·  Attack: ${fmt(mod(spAb)+prof)}  ·  Save DC: ${8+mod(spAb)+prof}`, ML+1, y+3);
       y += 6;
+
+      // Spell slot tracker
+      const slots = sc2.l1slots || 0;
+      const restLabel = cls==='warlock' ? 'Short Rest' : 'Long Rest';
+      rf('bold', 6, GOLD_L);
+      doc.text(`Level 1 Spell Slots (recharge on ${restLabel}):`, ML+1, y+2.5);
+      for (let i=0;i<slots;i++) {
+        box(ML+70+i*7, y+0.5, 6, 5, WHITE, CRIMSON, 0.5);
+      }
+      y += 8;
+
+      // Cantrips
+      if (spellChoices.cantrips.length) {
+        rf('bold', 6, GOLD_L); doc.text('CANTRIPS (at-will, no slot needed):', ML+1, y+2.5); y+=5;
+        spellChoices.cantrips.forEach(s => {
+          const desc = SPELL_DESC[s] || 'At-will cantrip — no spell slot required.';
+          rf('bold', 6, INK); doc.text(`• ${s}`, ML+2, y+2);
+          const dl = doc.splitTextToSize(desc, CW-20);
+          rf('normal', 5.5, [80,60,40]); doc.text(dl, ML+22, y+2);
+          y += Math.max(4.5, dl.length*3.5);
+        });
+      }
+
+      // L1 spells
+      if (spellChoices.level1.length || PREPARER_CLASSES.has(cls)) {
+        rf('bold', 6, GOLD_L);
+        if (PREPARER_CLASSES.has(cls)) {
+          const prepAb = {cleric:'WIS',druid:'WIS',paladin:'CHA'}[cls];
+          const prepMod = mod(prepAb);
+          const prepCount = cls==='paladin' ? Math.max(1,prepMod) : Math.max(1,1+prepMod);
+          doc.text(`LEVEL 1 SPELLS — Prepare up to ${prepCount} per Long Rest (${prepAb} mod${cls!=='paladin'?' + level':''}):`, ML+1, y+2.5);
+        } else {
+          doc.text('LEVEL 1 SPELLS (use a slot to cast):', ML+1, y+2.5);
+        }
+        y += 5;
+        const spellsToList = spellChoices.level1.length ? spellChoices.level1 : [];
+        spellsToList.forEach(s => {
+          const desc = SPELL_DESC[s] || '';
+          const isConc = CONC_SPELLS.has(s);
+          rf('bold', 6, INK); doc.text(`• ${s}${isConc ? ' [C]' : ''}`, ML+2, y+2);
+          if (isConc) { rf('bold', 5.5, CRIMSON); doc.text('CONCENTRATION', ML+CW-20, y+2); }
+          if (desc) {
+            const dl = doc.splitTextToSize(desc, CW-20);
+            rf('normal', 5.5, [80,60,40]); doc.text(dl, ML+22, y+2);
+            y += Math.max(4.5, dl.length*3.5);
+          } else { y += 4.5; }
+        });
+        if (PREPARER_CLASSES.has(cls) && spellsToList.length === 0) {
+          rf('italic', 6, INK); doc.text('Choose your prepared spells from the full class list each Long Rest.', ML+2, y+2); y+=5;
+        }
+      }
     }
-    const cantripLine = spellChoices.cantrips.length
-      ? `Cantrips: ${spellChoices.cantrips.join(', ')}`
-      : null;
-    const spellLine = spellChoices.level1.length
-      ? `L1 Spells: ${spellChoices.level1.join(', ')}`
-      : PREPARER_CLASSES.has(cls) ? `L1 Spells: [prepared each Long Rest — see PHB list]` : null;
-    [cantripLine, spellLine].filter(Boolean).forEach(line => {
-      const lines = doc.splitTextToSize(line, CW - 2);
-      rf('normal', 6.5, INK); doc.text(lines, ML+1, y+2);
-      y += lines.length * 4 + 2;
-    });
+
+    // Magic Initiate
     if (hasMI && (spellChoices.miCantrips.length || spellChoices.miSpell)) {
-      const featStr = getMagicInitiateFeat();
-      const miLine = `Magic Initiate (${featStr}): ${[...spellChoices.miCantrips, spellChoices.miSpell].filter(Boolean).join(', ')}`;
-      const miLines = doc.splitTextToSize(miLine, CW - 2);
-      rf('normal', 6.5, INK); doc.text(miLines, ML+1, y+2);
-      y += miLines.length * 4 + 2;
+      rf('bold', 6.5, GOLD_L); doc.text(`Magic Initiate (${getMagicInitiateFeat()}):`, ML+1, y+2.5); y+=5;
+      spellChoices.miCantrips.forEach(s => {
+        const desc = SPELL_DESC[s]||'At-will cantrip from Magic Initiate.';
+        rf('bold',6,INK); doc.text(`• ${s} (cantrip)`, ML+2, y+2);
+        const dl=doc.splitTextToSize(desc,CW-22); rf('normal',5.5,[80,60,40]); doc.text(dl,ML+24,y+2);
+        y+=Math.max(4.5,dl.length*3.5);
+      });
+      if (spellChoices.miSpell) {
+        const s=spellChoices.miSpell, desc=SPELL_DESC[s]||'';
+        rf('bold',6,INK); doc.text(`• ${s} (1/Long Rest, no slot)`, ML+2, y+2);
+        if (desc) { const dl=doc.splitTextToSize(desc,CW-32); rf('normal',5.5,[80,60,40]); doc.text(dl,ML+34,y+2); y+=Math.max(4.5,dl.length*3.5); } else y+=4.5;
+      }
+      y+=2;
     }
     y += 2;
   }
 
-  // ── Notes box ────────────────────────────────────────────────────────────────
-  const notesH = Math.max(10, PH - MB - 10 - y - 4);
-  if (notesH > 8) {
-    y = secHeader('Notes', y);
-    box(ML, y, CW, notesH, WHITE, LGREY);
-    const traits = document.getElementById('traits').value;
-    if (traits) {
-      const tLines = doc.splitTextToSize(traits, CW - 4);
-      rf('normal', 6.5, INK); doc.text(tLines, ML+2, y+4);
-    }
-    y += notesH + 2;
+  // ── Notes/conditions box filling remaining space ──────────────────────────
+  const notesH = Math.max(8, PH - 20 - y);
+  if (notesH > 6) {
+    y = secHeader('Session Notes / Conditions / Concentration', y);
+    box(ML, y, CW, notesH, WHITE, LGREY, 0.3);
+    const traits0 = document.getElementById('traits').value;
+    if (traits0) { const tl=doc.splitTextToSize(traits0,CW-4); rf('normal',6.5,INK); doc.text(tl,ML+2,y+4); }
   }
 
-  // ════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
   // PAGE 2 — REFERENCE SHEET
-  // ════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
   doc.addPage();
   pageBg();
   y = MT;
 
-  rf('bold', 13, CRIMSON);
-  doc.text('REFERENCE SHEET', PW/2, y + 5, { align: 'center' });
+  rf('bold', 12, CRIMSON);
+  doc.text('REFERENCE SHEET', PW/2, y+5, {align:'center'});
   rf('normal', 6, GOLD_L);
-  doc.text(`${name}  ·  Level ${level} ${cap(cls)} ${cap(species)}  ·  ${cap(bg)} Background`, PW/2, y + 10, { align: 'center' });
-  hline(y + 12, GOLD_L, 0.4); y += 14;
+  doc.text(`${name}  ·  Level ${level} ${cap(cls)} ${cap(species)}  ·  ${cap(bg)} Background`, PW/2, y+10, {align:'center'});
+  hline(y+12, GOLD_L, 0.4); y+=14;
 
-  // ── Class features ────────────────────────────────────────────────────────────
+  // ── Class features with descriptions ─────────────────────────────────────
   y = secHeader(`Class Features — ${cap(cls)} Level 1`, y);
-  rf('normal', 6.5, INK);
-  const flines = doc.splitTextToSize(c.features || '', CW - 2);
-  doc.text(flines, ML+1, y+2); y += flines.length * 3.8 + 2;
+  const featureDetails = CLASS_FEATURE_DETAILS[cls] || [];
 
-  // Class-specific choices
-  const classChoiceLines = [];
-  if (charChoices.fightingStyle)   classChoiceLines.push(`Fighting Style: ${charChoices.fightingStyle} — ${FIGHTING_STYLES[charChoices.fightingStyle]||''}`);
-  if (charChoices.clericDivineOrder) classChoiceLines.push(`Divine Order: ${cap(charChoices.clericDivineOrder)} — ${charChoices.clericDivineOrder==='protector'?'Martial weapons + Heavy Armor proficiency.':'Add WIS mod to Arcana and Religion checks.'}`);
-  if (charChoices.druidPrimalOrder)  classChoiceLines.push(`Primal Order: ${cap(charChoices.druidPrimalOrder)} — ${charChoices.druidPrimalOrder==='magician'?'Extra cantrip + WIS to Arcana/Nature.':'Martial weapons + Medium Armor proficiency.'}`);
-  if (charChoices.warlockInvocation) classChoiceLines.push(`Eldritch Invocation: ${charChoices.warlockInvocation} — ${WARLOCK_INVOCATIONS_L1[charChoices.warlockInvocation]||''}`);
-  if (charChoices.rogueExpertise.length) classChoiceLines.push(`Expertise ×2 Prof: ${charChoices.rogueExpertise.join(', ')}`);
-  if (masteries.length) classChoiceLines.push(`Weapon Masteries: ${masteries.join(', ')}`);
+  featureDetails.forEach(([fname, fdesc, resLabel, resCount, resRest]) => {
+    // Feature name row
+    doc.setFillColor(248, 238, 210);
+    doc.rect(ML, y, CW, 4, 'F');
+    rf('bold', 7, CRIMSON); doc.text(fname, ML+2, y+2.9);
 
-  classChoiceLines.forEach(line => {
-    const ls = doc.splitTextToSize(line, CW - 2);
-    rf('normal', 6.5, INK); doc.text(ls, ML+1, y+2); y += ls.length * 3.8 + 1.5;
+    // Resource tracker on the right
+    if (resLabel && resCount > 0) {
+      const restColor = resRest==='short' ? GOLD : CRIMSON;
+      rf('bold', 5.5, restColor);
+      const restStr = resRest==='short'?'Short Rest':resRest==='long'?'Long Rest':'Both';
+      doc.text(`${resLabel} (${restStr}):`, PW-MR-50, y+2.9);
+      if (fname === 'Lay on Hands') {
+        // HP pool: draw a write-in box
+        box(PW-MR-18, y+0.5, 16, 3.5, WHITE, restColor, 0.4);
+        rf('normal',5,restColor); doc.text(`/${resCount}HP pool`, PW-MR-1, y+2.9, {align:'right'});
+      } else {
+        for (let i=0;i<Math.min(resCount,6);i++) {
+          box(PW-MR-2-(i+1)*7, y+0.8, 5.5, 3, WHITE, restColor, 0.4);
+        }
+        if (resCount > 6) { rf('normal',5,restColor); doc.text(`×${resCount}`, PW-MR-1, y+2.9, {align:'right'}); }
+      }
+    }
+    y += 5;
+
+    // Description
+    const dlines = doc.splitTextToSize(fdesc, CW-3);
+    rf('normal', 6.5, INK); doc.text(dlines, ML+2, y+2);
+    y += dlines.length*3.8 + 3;
   });
 
-  // Subclass preview
-  if (c.subclasses) {
-    const subVals = c.subclasses ? Object.values(c.subclasses) : [];
-    const subLevel = subVals.length > 0 && subVals[0].when ? subVals[0].when : 'Level 3';
-    y += 1;
-    rf('bold', 6, GOLD_L);
-    doc.text(`SUBCLASSES — Choose at ${subLevel} (no decision needed now)`, ML+1, y+2); y += 5;
-    Object.entries(c.subclasses).forEach(([name2, data]) => {
-      rf('bold', 6, CRIMSON); doc.text(`${name2}:`, ML+2, y+2);
-      const sl = doc.splitTextToSize(data.summary, CW - 22);
-      rf('normal', 6, INK); doc.text(sl, ML + 22, y+2);
-      y += Math.max(4, sl.length * 3.5);
-    });
-  }
-  y += 2; hline(y, GOLD_L, 0.2); y += 3;
+  // Class-specific choices (fighting style, divine order, invocation, expertise only — masteries shown in Weapon Mastery section below)
+  const classChoices = [];
+  if (charChoices.fightingStyle) classChoices.push([`Fighting Style: ${charChoices.fightingStyle}`, FIGHTING_STYLES[charChoices.fightingStyle]||'']);
+  if (charChoices.warlockInvocation) classChoices.push([`Eldritch Invocation: ${charChoices.warlockInvocation}`, WARLOCK_INVOCATIONS_L1[charChoices.warlockInvocation]||'']);
+  if (charChoices.rogueExpertise.length) classChoices.push([`Expertise x2 Prof:`, charChoices.rogueExpertise.join(', ')]);
+  classChoices.forEach(([lbl, desc]) => {
+    rf('bold', 6.5, GOLD_L); doc.text(lbl, ML+1, y+2); y+=4;
+    if (desc) { const dl=doc.splitTextToSize(desc,CW-2); rf('normal',6.5,INK); doc.text(dl,ML+2,y+2); y+=dl.length*3.8+2; }
+  });
 
-  // ── Origin Feats ──────────────────────────────────────────────────────────────
+  hline(y+2, GOLD_L, 0.2); y+=5;
+
+  // ── Origin feats with descriptions ───────────────────────────────────────
   const featsToPrint = [];
   if (bg && BACKGROUND_BONUSES[bg]) {
-    const fn = BACKGROUND_BONUSES[bg].feat;
-    const fd = ORIGIN_FEATS[fn.split(' (')[0]] || ORIGIN_FEATS[fn] || 'See PHB.';
-    featsToPrint.push({ name: fn, desc: fd, source: cap(bg) });
+    const fn=BACKGROUND_BONUSES[bg].feat;
+    const fd=ORIGIN_FEATS[fn.split(' (')[0]]||ORIGIN_FEATS[fn]||'See PHB.';
+    featsToPrint.push({name:fn,desc:fd,source:cap(bg)});
   }
-  if (species === 'human' && selectedHumanFeat) {
-    featsToPrint.push({ name: selectedHumanFeat, desc: ORIGIN_FEATS[selectedHumanFeat]||'', source: 'Human: Versatile' });
+  if (species==='human'&&selectedHumanFeat) {
+    featsToPrint.push({name:selectedHumanFeat,desc:ORIGIN_FEATS[selectedHumanFeat]||'',source:'Human: Versatile'});
   }
   if (featsToPrint.length) {
     y = secHeader('Origin Feats', y);
     featsToPrint.forEach(f => {
-      doc.setFillColor(250, 242, 215);
-      doc.rect(ML, y, CW, 4, 'F');
-      rf('bold', 7, CRIMSON); doc.text(f.name, ML+2, y+2.8);
-      rf('normal', 5.5, GOLD_L); doc.text(`Source: ${f.source}`, PW-MR-1, y+2.8, { align:'right' });
-      y += 5;
-      const fl = doc.splitTextToSize(f.desc, CW - 2);
-      rf('normal', 6.5, INK); doc.text(fl, ML+2, y+2);
-      y += fl.length * 3.8 + 4;
+      doc.setFillColor(250,242,215); doc.rect(ML,y,CW,4,'F');
+      rf('bold',7,CRIMSON); doc.text(f.name,ML+2,y+2.8);
+      rf('normal',5.5,GOLD_L); doc.text(`Source: ${f.source}`,PW-MR-1,y+2.8,{align:'right'});
+      y+=5;
+      const fl=doc.splitTextToSize(f.desc,CW-2);
+      rf('normal',6.5,INK); doc.text(fl,ML+2,y+2); y+=fl.length*3.8+4;
     });
   }
 
-  // Magic Initiate
-  if (hasMI && (spellChoices.miCantrips.length || spellChoices.miSpell)) {
-    rf('bold', 6.5, GOLD_L); doc.text(`Magic Initiate — ${getMagicInitiateFeat()}`, ML+1, y+2); y += 5;
-    if (spellChoices.miCantrips.length) {
-      const ml2 = doc.splitTextToSize(`Cantrips: ${spellChoices.miCantrips.join(', ')}`, CW-2);
-      rf('normal', 6.5, INK); doc.text(ml2, ML+2, y+2); y += ml2.length * 3.8 + 2;
-    }
-    if (spellChoices.miSpell) {
-      const ms = doc.splitTextToSize(`L1 Spell (1/Long Rest): ${spellChoices.miSpell}`, CW-2);
-      rf('normal', 6.5, INK); doc.text(ms, ML+2, y+2); y += ms.length * 3.8 + 2;
-    }
-    y += 2;
-  }
+  hline(y, GOLD_L, 0.2); y+=3;
 
-  hline(y, GOLD_L, 0.2); y += 3;
-
-  // ── Species traits ────────────────────────────────────────────────────────────
+  // ── Species traits (with plain-English expansions) ────────────────────────
   y = secHeader('Species Traits', y);
   const spBonus = SPECIES_BONUSES[species];
   if (spBonus) {
-    rf('bold', 7, CRIMSON);
-    doc.text(`${cap(species)}  ·  Speed: ${spBonus.speed}  ·  Size: ${spBonus.size}`, ML+1, y+3);
-    y += 5;
-    const tl = doc.splitTextToSize(spBonus.traits, CW-2);
-    rf('normal', 6.5, INK); doc.text(tl, ML+1, y+2); y += tl.length * 3.8 + 2;
+    rf('bold',7,CRIMSON);
+    doc.text(`${cap(species)}  ·  Speed: ${spBonus.speed}  ·  Size: ${spBonus.size}`,ML+1,y+3); y+=5;
+    // Split traits by comma for clearer reading
+    const traitItems = spBonus.traits.split('),').map((t,i,arr)=>i<arr.length-1?t+')':t);
+    traitItems.forEach(trait => {
+      const tl=doc.splitTextToSize(trait.trim(),CW-3);
+      rf('normal',6.5,INK); doc.text(tl,ML+1,y+2); y+=tl.length*3.8+1;
+    });
+    y+=2;
+    // Lineage
     if (selectedLineage) {
-      const lData = (species==='elf' ? ELF_LINEAGES : TIEFLING_LEGACIES)[selectedLineage];
+      const lData=(species==='elf'?ELF_LINEAGES:TIEFLING_LEGACIES)[selectedLineage];
       if (lData) {
-        rf('bold', 6.5, GOLD_L); doc.text(`${lData.name}: ${lData.traits}  ·  ${lData.spells}`, ML+1, y+2); y += 5;
-        rf('normal', 6, INK); const nl = doc.splitTextToSize(lData.note, CW-2); doc.text(nl, ML+1, y+2); y += nl.length*3.5+2;
+        rf('bold',6.5,GOLD_L); doc.text(`${lData.name}: ${lData.traits}`,ML+1,y+2); y+=4;
+        rf('normal',6.5,INK); doc.text(`Innate spells: ${lData.spells}`,ML+2,y+2); y+=4;
+        rf('normal',6,GOLD_L); doc.text(lData.note,ML+2,y+2); y+=5;
       }
     }
     if (charChoices.dragonbornAncestry) {
-      rf('bold', 6.5, GOLD_L); doc.text(`Draconic Ancestry: ${charChoices.dragonbornAncestry}  ·  ${DRAGONBORN_ANCESTRIES[charChoices.dragonbornAncestry]}`, ML+1, y+2); y += 5;
+      rf('bold',6.5,GOLD_L); doc.text(`Draconic Ancestry: ${charChoices.dragonbornAncestry}`,ML+1,y+2); y+=4;
+      rf('normal',6.5,INK); doc.text(DRAGONBORN_ANCESTRIES[charChoices.dragonbornAncestry],ML+2,y+2); y+=5;
     }
-    if (charChoices.gnomeLineage && GNOME_LINEAGES[charChoices.gnomeLineage]) {
-      const gl2 = GNOME_LINEAGES[charChoices.gnomeLineage];
-      rf('bold', 6.5, GOLD_L); doc.text(`${gl2.name}: ${gl2.cantrips}  ·  ${gl2.desc}`, ML+1, y+2); y += 5;
+    if (charChoices.gnomeLineage&&GNOME_LINEAGES[charChoices.gnomeLineage]) {
+      const gl=GNOME_LINEAGES[charChoices.gnomeLineage];
+      rf('bold',6.5,GOLD_L); doc.text(`${gl.name}: ${gl.cantrips}`,ML+1,y+2); y+=4;
+      rf('normal',6.5,INK); doc.text(gl.desc,ML+2,y+2); y+=5;
     }
   }
-  hline(y, GOLD_L, 0.2); y += 3;
+  hline(y, GOLD_L, 0.2); y+=3;
 
-  // ── Background ────────────────────────────────────────────────────────────────
+  // ── Background ────────────────────────────────────────────────────────────
   y = secHeader('Background', y);
   if (BACKGROUND_BONUSES[bg]) {
-    const bb = BACKGROUND_BONUSES[bg];
-    rf('bold', 7, CRIMSON); doc.text(cap(bg), ML+1, y+3); y += 5;
+    const bb=BACKGROUND_BONUSES[bg];
+    rf('bold',7,CRIMSON); doc.text(cap(bg),ML+1,y+3); y+=5;
     const bgDetail = [
       `Skills: ${bb.skills}`,
-      `Tool: ${charChoices.bgToolChoice || bb.tool}`,
-      `Languages: Common${charChoices.languages.length ? ', ' + charChoices.languages.join(', ') : ' + 2 of choice'}`,
+      `Tool: ${charChoices.bgToolChoice||bb.tool}`,
+      `Languages: Common${charChoices.languages.length?', '+charChoices.languages.join(', '):', + 2 of choice'}`,
       `Feat: ${bb.feat}`,
     ];
+    const asiSummary=[];
+    Object.entries(asiBonus).filter(([,v])=>v>0).forEach(([ab,v])=>asiSummary.push(`${ab} +${v}`));
+    if (asiSummary.length) bgDetail.push(`Ability Score Increases: ${asiSummary.join(', ')}`);
     bgDetail.forEach(line => {
-      const ls = doc.splitTextToSize(line, CW-2);
-      rf('normal', 6.5, INK); doc.text(ls, ML+2, y+2); y += ls.length * 3.8 + 1;
+      const ls=doc.splitTextToSize(line,CW-2); rf('normal',6.5,INK); doc.text(ls,ML+2,y+2); y+=ls.length*3.8+1;
     });
-    // ASI
-    const asiSummary = [];
-    if (asiBonus['STR']||asiBonus['DEX']||asiBonus['CON']||asiBonus['INT']||asiBonus['WIS']||asiBonus['CHA']) {
-      Object.entries(asiBonus).filter(([,v])=>v>0).forEach(([ab,v])=>asiSummary.push(`${ab} +${v}`));
-      if (asiSummary.length) { rf('normal', 6.5, INK); doc.text(`ASI: ${asiSummary.join(', ')}`, ML+2, y+2); y += 5; }
-    }
-    y += 1;
+    y+=2;
   }
 
-  // ── Personality ───────────────────────────────────────────────────────────────
-  const ideals = document.getElementById('ideals').value;
-  const bonds  = document.getElementById('bonds').value;
-  const flaws  = document.getElementById('flaws').value;
-  const hasP2  = ideals || bonds || flaws;
-  if (hasP2) {
-    hline(y, GOLD_L, 0.2); y += 3;
-    y = secHeader('Personality', y);
-    [['Ideals', ideals], ['Bonds', bonds], ['Flaws', flaws]].forEach(([lbl, val]) => {
-      if (!val) return;
-      rf('bold', 6, GOLD_L); doc.text(lbl.toUpperCase(), ML+1, y+2.5); y += 4;
-      const pl = doc.splitTextToSize(val, CW-2);
-      rf('normal', 6.5, INK); doc.text(pl, ML+2, y+2); y += pl.length * 3.8 + 3;
+  // ── Personality ───────────────────────────────────────────────────────────
+  const ideals=document.getElementById('ideals').value;
+  const bonds=document.getElementById('bonds').value;
+  const flaws=document.getElementById('flaws').value;
+  const hasP=[['Traits',document.getElementById('traits').value],['Ideals',ideals],['Bonds',bonds],['Flaws',flaws]].filter(([,v])=>v);
+  if (hasP.length) {
+    hline(y,GOLD_L,0.2); y+=3;
+    y=secHeader('Personality',y);
+    hasP.forEach(([lbl,val])=>{
+      rf('bold',6,GOLD_L); doc.text(lbl.toUpperCase(),ML+1,y+2.5); y+=4;
+      const pl=doc.splitTextToSize(val,CW-2); rf('normal',6.5,INK); doc.text(pl,ML+2,y+2); y+=pl.length*3.8+3;
     });
   }
 
-  // ── Starting Equipment ────────────────────────────────────────────────────────
-  hline(y, GOLD_L, 0.2); y += 3;
-  y = secHeader('Starting Equipment', y);
-  const clsEq = CLASS_EQUIPMENT[cls];
-  const bgEq  = BG_EQUIPMENT[bg];
+  // ── Starting Equipment ────────────────────────────────────────────────────
+  hline(y,GOLD_L,0.2); y+=3;
+  y=secHeader('Starting Equipment',y);
+  const clsEq=CLASS_EQUIPMENT[cls], bgEq=BG_EQUIPMENT[bg];
+
+  // Weapon & armor quick-stats lookup
+  const EQUIP_STATS = {
+    // Weapons: [damage, properties]
+    'Greataxe':       '1d12 Slashing | Heavy, Two-Handed',
+    'Handaxe':        '1d6 Slashing | Light, Thrown (20/60ft)',
+    'Handaxes (4)':   '1d6 Slashing each | Light, Thrown (20/60ft)',
+    'Longsword':      '1d8 Slashing (1d10 versatile) | Martial',
+    'Shortsword':     '1d6 Piercing | Finesse, Light',
+    'Rapier':         '1d8 Piercing | Finesse',
+    'Dagger':         '1d4 Piercing | Finesse, Light, Thrown (20/60ft)',
+    'Daggers (2)':    '1d4 Piercing each | Finesse, Light, Thrown (20/60ft)',
+    'Mace':           '1d6 Bludgeoning | Simple',
+    'Quarterstaff':   '1d6 Bludgeoning (1d8 versatile) | Simple',
+    'Sickle':         '1d4 Slashing | Light',
+    'Spear':          '1d6 Piercing (1d8 versatile) | Thrown (20/60ft)',
+    'Shortbow':       '1d6 Piercing | Ammunition (80/320ft), Two-Handed',
+    'Light Crossbow': '1d8 Piercing | Ammunition (80/320ft), Loading, Two-Handed',
+    'Hand Crossbow':  '1d6 Piercing | Ammunition (30/120ft), Light, Loading',
+    // Armor: [AC formula, type, notes]
+    'Leather Armor':  'AC 11 + DEX | Light Armor',
+    'Chain Shirt':    'AC 13 + DEX (max +2) | Medium Armor',
+    'Scale Mail':     'AC 14 + DEX (max +2) | Medium Armor, Stealth Disadv.',
+    'Chain Mail':     'AC 16 | Heavy Armor, STR 13 req., Stealth Disadv.',
+    'Ring Mail':      'AC 14 | Heavy Armor, Stealth Disadv.',
+    'Shield':         '+2 AC | Requires free hand',
+  };
+
+  const allEquipItems = [
+    ...(clsEq ? clsEq.items : []),
+    ...(bgEq  ? bgEq.items  : []),
+  ];
+  const itemsWithStats = allEquipItems.filter(item => EQUIP_STATS[item]);
+
   if (clsEq) {
-    const cl = doc.splitTextToSize(`Class (${cap(cls)}): ${clsEq.items.join(' · ')}  +  ${clsEq.gold} GP`, CW-2);
-    rf('bold', 6.5, CRIMSON); doc.text(cl, ML+1, y+3); y += cl.length * 4 + 2;
+    const cl=doc.splitTextToSize(`Class (${cap(cls)}): ${clsEq.items.join(', ')}  +  ${clsEq.gold} GP`,CW-2);
+    rf('bold',6.5,CRIMSON); doc.text(cl,ML+1,y+3); y+=cl.length*4+2;
   }
   if (bgEq) {
-    const bl = doc.splitTextToSize(`Background (${cap(bg)}): ${bgEq.items.join(' · ')}  +  ${bgEq.gold} GP`, CW-2);
-    rf('bold', 6.5, GOLD_L); doc.text(bl, ML+1, y+3); y += bl.length * 4 + 2;
-    if (clsEq) { rf('bold', 7, INK); doc.text(`Total Starting Gold: ${clsEq.gold + bgEq.gold} GP`, ML+1, y+3); y += 6; }
+    const bl=doc.splitTextToSize(`Background (${cap(bg)}): ${bgEq.items.join(', ')}  +  ${bgEq.gold} GP`,CW-2);
+    rf('bold',6.5,GOLD_L); doc.text(bl,ML+1,y+3); y+=bl.length*4+2;
+    if (clsEq) { rf('bold',7,INK); doc.text(`Total Starting Gold: ${clsEq.gold+bgEq.gold} GP`,ML+1,y+3); y+=6; }
   }
 
-  // ── Weapon mastery details ────────────────────────────────────────────────────
-  if (masteries.length > 0) {
-    hline(y, GOLD_L, 0.2); y += 3;
-    y = secHeader('Weapon Mastery Details', y);
-    masteries.forEach(entry => {
-      const wn   = entry.split(' (')[0];
-      const prop = (entry.match(/\(([^)]+)\)/) || [])[1] || '';
-      const desc = MASTERY_PROPS[prop] || '';
-      rf('bold', 6.5, CRIMSON); doc.text(`${entry}:`, ML+1, y+2);
-      const ml3 = doc.splitTextToSize(desc, CW - 20);
-      rf('normal', 6.5, INK); doc.text(ml3, ML+26, y+2);
-      y += Math.max(5, ml3.length * 3.8 + 1);
+  // Weapon & armor stat block
+  if (itemsWithStats.length > 0) {
+    y+=2; rf('bold',6,GOLD_L); doc.text('WEAPON & ARMOR STATISTICS:', ML+1, y+2); y+=5;
+    itemsWithStats.forEach(item => {
+      const stats = EQUIP_STATS[item];
+      rf('bold',6.5,CRIMSON); doc.text(`${item}:`, ML+2, y+2);
+      rf('normal',6.5,INK);   doc.text(stats, ML+32, y+2);
+      y += 4.5;
     });
   }
 
-  // ── Footers ───────────────────────────────────────────────────────────────────
-  const totalPages = doc.getNumberOfPages();
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-    pageFooter(p, totalPages);
+  // ── Weapon mastery details ────────────────────────────────────────────────
+  if (masteries.length>0) {
+    hline(y,GOLD_L,0.2); y+=3;
+    y=secHeader('Weapon Mastery Properties',y);
+    masteries.forEach(entry=>{
+      const wn=entry.split(' (')[0];
+      const prop=(entry.match(/\(([^)]+)\)/)||[])[1]||'';
+      const desc=MASTERY_PROPS[prop]||'';
+      rf('bold',6.5,CRIMSON); doc.text(`${entry}:`,ML+1,y+2);
+      if (desc) { const ml3=doc.splitTextToSize(desc,CW-25); rf('normal',6.5,INK); doc.text(ml3,ML+27,y+2); y+=Math.max(5,ml3.length*3.8+1); } else y+=5;
+    });
   }
+
+  // ── Footers ───────────────────────────────────────────────────────────────
+  const totalPages=doc.getNumberOfPages();
+  for (let p=1;p<=totalPages;p++) { doc.setPage(p); pageFooter(p,totalPages); }
 
   doc.save(`${name.replace(/\s+/g,'_')}_L${level}_${cap(cls)}.pdf`);
 }
@@ -3910,7 +4140,7 @@ const SPELL_DESC = {
   "Guidance":           "Concentration, 1 min. Touch a willing creature. It can add 1d4 to one ability check of its choice before the spell ends.",
   "Gust":               "STR save or push 5 ft. Knock small objects prone or extinguish flames.",
   "Infestation":        "CON save. On fail: 1d6 Poison and creature moves 5 ft in a random direction.",
-  "Light":              "1 hr. Touch an object (≤10 ft radius). Bright light 20 ft, dim 20 ft more. Sheds light like a torch.",
+  "Light":              "1 hr. Touch an object (up to 10 ft radius). Bright light 20 ft, dim 20 ft more. Sheds light like a torch.",
   "Mage Hand":          "1 min. Spectral hand within 30 ft. Manipulate objects, open doors/containers, stow/retrieve items. Max 10 lbs.",
   "Mending":            "Instantaneous. Repair a single break or tear in an object. Does not work on magic items.",
   "Message":            "1 round. Whisper a message to a creature within 120 ft. It can reply in a whisper only you hear.",
@@ -3939,7 +4169,7 @@ const SPELL_DESC = {
   // Level 1 Spells
   "Alarm":              "Ritual/8 hr. Set a magical alarm on a door/window/area (20-ft cube). You are alerted mentally or audibly when triggered.",
   "Absorb Elements":    "Reaction when hit by Acid/Cold/Fire/Lightning/Thunder. Resistance to the damage. First melee attack next turn deals extra 1d6 of that type.",
-  "Animal Friendship":  "24 hr. A Beast with INT ≤ 3 must pass a WIS save or be Charmed by you for 24 hrs.",
+  "Animal Friendship":  "24 hr. A Beast with INT 3 or lower must pass a WIS save or be Charmed by you for 24 hrs.",
   "Guiding Bolt":       "Ranged spell attack. On hit: 4d6 Radiant + the next attack roll against the target has Advantage. One of the strongest L1 attack spells. (Scales.)",
   "Inflict Wounds":     "Melee spell attack. On hit: 3d10 Necrotic damage. Highest single-hit damage of any L1 spell — requires melee range. (Scales.)",
   "Create or Destroy Water":"Create 10 gallons of water in an open container, or destroy that volume of water or fog within 30 ft.",
@@ -3951,7 +4181,7 @@ const SPELL_DESC = {
   "Cause Fear":         "Concentration, 1 min. WIS save. One creature you can see is Frightened. It repeats save each turn.",
   "Charm Person":       "1 hr. WIS save (advantage if in combat). Target is Charmed; treats you as a friendly acquaintance.",
   "Chromatic Orb":      "Ranged spell attack. Choose a damage type: Acid/Cold/Fire/Lightning/Poison/Thunder. On hit: 3d8 damage.",
-  "Color Spray":        "Instantaneous. 6d10 in a 15-ft cone. Blind creatures with HP ≤ remaining total, starting from lowest.",
+  "Color Spray":        "Instantaneous. 6d10 in a 15-ft cone. Blind creatures with HP at or below the remaining total, starting from lowest.",
   "Command":            "1 round. WIS save. Give one creature a one-word command (Approach, Drop, Flee, Grovel, Halt).",
   "Compelled Duel":     "Concentration, 1 min. WIS save. Target must attack only you; leaving 30 ft provokes another save.",
   "Comprehend Languages":"Ritual/1 hr. Understand the literal meaning of any language you hear or read.",
