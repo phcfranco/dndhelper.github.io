@@ -3,431 +3,375 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character Forge | Level Up Guide</title>
+<title>Character Forge | Level Up Wizard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --parchment: #f4e8c1;
-    --parchment-dark: #e8d5a0;
-    --ink: #1a1209;
-    --ink-light: #3d2b1a;
-    --crimson: #8b1a1a;
-    --crimson-light: #b52a2a;
-    --gold: #c9973a;
-    --gold-light: #e8b84b;
-    --shadow: rgba(26,18,9,0.18);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --parchment: #f4e8c1;
+  --parchment-dark: #e8d5a0;
+  --ink: #1a1209;
+  --ink-light: #3d2b1a;
+  --crimson: #8b1a1a;
+  --crimson-light: #b52a2a;
+  --gold: #c9973a;
+  --gold-light: #e8b84b;
+  --shadow: rgba(26,18,9,0.18);
+  --green: #1a5c2a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: #1a1209;
+  background-image: radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%);
+  min-height: 100vh;
+  font-family: 'Crimson Pro', serif;
+  color: var(--ink);
+  padding: 2rem 1rem 4rem;
+}
+.page-header { text-align: center; margin-bottom: 2.5rem; }
+.page-header h1 { font-family: 'Cinzel', serif; font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--gold-light); letter-spacing: 0.08em; text-shadow: 0 2px 24px rgba(201,151,58,0.4); }
+.page-header p { color: var(--parchment-dark); font-style: italic; font-size: 1.1rem; margin-top: 0.4rem; opacity: 0.7; }
+.divider { width: 280px; height: 2px; margin: 0.8rem auto; background: linear-gradient(90deg, transparent, var(--gold), transparent); position: relative; }
+.divider::before { content: '⚔'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1a1209; padding: 0 0.6rem; color: var(--gold); }
+.nav-back { display: inline-block; margin-bottom: 1rem; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--gold); text-decoration: none; opacity: 0.7; transition: opacity 0.2s; }
+.nav-back:hover { opacity: 1; }
 
-  body {
-    background-color: #1a1209;
-    background-image:
-      radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%231a1209'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
-    min-height: 100vh;
-    font-family: 'Crimson Pro', serif;
-    color: var(--ink);
-    padding: 2rem 1rem 4rem;
-  }
+/* ── Main Card ── */
+.card {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--parchment);
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--crimson), 0 8px 48px rgba(0,0,0,0.7);
+  padding: 2.5rem 2.5rem 3rem;
+}
 
-  .page-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    animation: fadeDown 0.7s ease both;
-  }
-  .page-header h1 {
-    font-family: 'Cinzel', serif;
-    font-weight: 900;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    color: var(--gold-light);
-    letter-spacing: 0.08em;
-    text-shadow: 0 2px 24px rgba(201,151,58,0.4);
-  }
-  .page-header p {
-    color: var(--parchment-dark);
-    font-style: italic;
-    font-size: 1.1rem;
-    margin-top: 0.4rem;
-    opacity: 0.7;
-  }
-  .back-link {
-    display: inline-block;
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--gold);
-    text-decoration: none;
-    margin-bottom: 1rem;
-    opacity: 0.8;
-    transition: opacity 0.15s;
-  }
-  .back-link:hover { opacity: 1; }
+/* ── Upload zone ── */
+.upload-zone {
+  border: 2px dashed rgba(139,26,26,0.35);
+  border-radius: 6px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(139,26,26,0.03);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--crimson); background: rgba(139,26,26,0.07); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.upload-label { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--crimson); letter-spacing: 0.08em; }
+.upload-sub { font-size: 0.85rem; color: var(--ink-light); margin-top: 0.3rem; font-style: italic; }
 
-  .divider {
-    width: 320px; height: 2px;
-    margin: 1rem auto;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    position: relative;
-  }
-  .divider::before {
-    content: '⚔'; position: absolute;
-    left: 50%; top: 50%; transform: translate(-50%,-50%);
-    background: #1a1209; padding: 0 0.6rem;
-    color: var(--gold); font-size: 1rem;
-  }
+.or-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: var(--ink-light); font-size: 0.85rem; font-style: italic; }
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: rgba(139,26,26,0.2); }
 
-  /* ── Sheet ── */
-  .sheet {
-    max-width: 960px;
-    margin: 0 auto;
-    background: var(--parchment);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    border-radius: 4px;
-    box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--crimson), 0 8px 48px rgba(0,0,0,0.7), inset 0 0 60px rgba(201,151,58,0.07);
-    padding: 2.5rem 2.5rem 3rem;
-    animation: fadeUp 0.7s 0.2s ease both;
-  }
+/* ── Section titles ── */
+.section-title { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--crimson); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.7rem; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--crimson), transparent); opacity: 0.4; }
+.rule { border: none; border-top: 1px solid rgba(139,26,26,0.2); margin: 1.8rem 0; }
 
-  /* ── Controls ── */
-  .controls-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
-    gap: 1rem;
-    align-items: end;
-    margin-bottom: 2rem;
-  }
-  label {
-    display: block;
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--crimson);
-    margin-bottom: 0.3rem;
-  }
-  input[type="number"], select {
-    width: 100%;
-    background: rgba(255,255,255,0.45);
-    border: 1px solid var(--gold);
-    border-bottom: 2px solid var(--crimson);
-    border-radius: 2px 2px 0 0;
-    padding: 0.5rem 0.7rem;
-    font-family: 'Crimson Pro', serif;
-    font-size: 1.05rem;
-    color: var(--ink);
-    outline: none;
-    transition: background 0.2s;
-  }
-  input:focus, select:focus { background: rgba(255,255,255,0.75); }
-  select {
-    cursor: pointer; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b1a1a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 0.8rem center;
-    padding-right: 2rem;
-  }
-  .btn {
-    background: var(--crimson);
-    color: var(--gold-light);
-    border: none;
-    padding: 0.6rem 1.4rem;
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 2px;
-    white-space: nowrap;
-    transition: background 0.15s;
-    height: fit-content;
-  }
-  .btn:hover { background: var(--crimson-light); }
+/* ── Character summary bar ── */
+.char-bar {
+  background: rgba(139,26,26,0.06);
+  border: 1px solid rgba(139,26,26,0.2);
+  border-radius: 5px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.char-bar-name { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; color: var(--ink); flex: 1; min-width: 160px; }
+.char-bar-stat { display: flex; flex-direction: column; }
+.char-bar-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--crimson); font-family: 'Cinzel', serif; }
+.char-bar-val { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
 
-  /* ── Section title ── */
-  .section-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--crimson);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-  }
-  .section-title::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, var(--crimson), transparent);
-    opacity: 0.4;
-  }
+/* ── Level picker ── */
+.level-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
+.level-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  width: 2.4rem; height: 2.4rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(139,26,26,0.25);
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.level-btn:hover { border-color: var(--crimson); background: rgba(139,26,26,0.07); color: var(--crimson); }
+.level-btn.current { background: rgba(139,26,26,0.15); border-color: var(--crimson); color: var(--crimson); font-weight: 600; cursor: default; }
+.level-btn.target { background: var(--crimson); border-color: var(--crimson); color: var(--parchment); font-weight: 600; }
+.level-btn.disabled { opacity: 0.3; cursor: not-allowed; }
 
-  /* ── Level timeline ── */
-  .timeline {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-  .tl-pip {
-    width: 36px; height: 36px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: 1.5px solid rgba(139,26,26,0.25);
-    border-radius: 3px;
-    background: rgba(255,255,255,0.2);
-    color: var(--ink-light);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .tl-pip:hover { border-color: var(--gold); color: var(--crimson); }
-  .tl-pip.in-range {
-    background: rgba(139,26,26,0.08);
-    border-color: var(--crimson);
-    color: var(--crimson);
-  }
-  .tl-pip.asi-level { border-color: var(--gold); }
-  .tl-pip.subclass-level { border-style: dashed; }
+/* ── Level steps ── */
+.level-step {
+  border: 1px solid rgba(139,26,26,0.18);
+  border-radius: 5px;
+  margin-bottom: 1.2rem;
+  overflow: hidden;
+}
+.level-step-header {
+  background: rgba(139,26,26,0.07);
+  padding: 0.8rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--crimson);
+  letter-spacing: 0.05em;
+}
+.level-badge {
+  background: var(--crimson);
+  color: var(--parchment);
+  border-radius: 50%;
+  width: 2rem; height: 2rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.level-step-body { padding: 1rem 1.2rem; }
 
-  /* ── Level cards ── */
-  .level-cards { display: flex; flex-direction: column; gap: 1.5rem; }
+/* ── Auto-gain rows ── */
+.auto-gain {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+.auto-gain-label { color: var(--green); font-weight: 600; min-width: 130px; }
+.auto-gain-val { color: var(--ink-light); font-style: italic; }
 
-  .level-card {
-    border: 1px solid var(--gold);
-    border-top: 4px solid var(--crimson);
-    border-radius: 0 0 4px 4px;
-    background: rgba(255,255,255,0.3);
-    overflow: hidden;
-  }
-  .level-card-header {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    padding: 0.8rem 1.2rem;
-    background: rgba(139,26,26,0.07);
-    border-bottom: 1px solid rgba(201,151,58,0.3);
-    flex-wrap: wrap;
-  }
-  .level-card-title {
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--crimson);
-  }
-  .level-card-pills {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-left: auto;
-  }
-  .pill {
-    font-family: 'Cinzel', serif;
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 20px;
-    background: rgba(201,151,58,0.15);
-    border: 1px solid var(--gold);
-    color: var(--ink);
-    white-space: nowrap;
-  }
-  .pill.crimson { background: rgba(139,26,26,0.1); border-color: var(--crimson); color: var(--crimson); }
+/* ── Decision boxes ── */
+.decision-box {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: rgba(201,151,58,0.07);
+  border: 1px solid rgba(201,151,58,0.3);
+  border-radius: 4px;
+}
+.decision-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.decision-desc { font-size: 0.85rem; color: var(--ink-light); margin-bottom: 0.8rem; font-style: italic; }
 
-  .level-card-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+/* ── Option chips ── */
+.option-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.option-chip {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid rgba(139,26,26,0.28);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.option-chip:hover { border-color: var(--crimson); background: rgba(139,26,26,0.06); }
+.option-chip.selected { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
 
-  /* ── Blocks inside level card ── */
-  .block {
-    padding: 0.75rem 1rem;
-    border-radius: 3px;
-  }
-  .block-auto { background: rgba(255,255,255,0.4); border-left: 3px solid var(--gold); }
-  .block-choice { background: rgba(201,151,58,0.08); border-left: 3px solid var(--gold); border: 1px solid rgba(201,151,58,0.4); }
-  .block-spell { background: rgba(139,26,26,0.04); border-left: 3px solid var(--crimson); }
-  .block-write { background: rgba(139,26,26,0.06); border: 1.5px dashed rgba(139,26,26,0.3); }
+/* ASI picker */
+.asi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem; }
+.asi-cell {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.5rem;
+  border: 1px solid rgba(139,26,26,0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: rgba(248,237,205,0.5);
+  font-family: 'Cinzel', serif;
+}
+.asi-cell:hover { border-color: var(--crimson); background: rgba(139,26,26,0.06); }
+.asi-cell.selected { border-color: var(--crimson); background: rgba(139,26,26,0.08); }
+.asi-ab { font-size: 0.7rem; letter-spacing: 0.1em; color: var(--crimson); font-weight: 600; }
+.asi-score { font-size: 1.2rem; font-weight: 600; color: var(--ink); }
+.asi-delta { font-size: 0.65rem; color: var(--green); }
 
-  .block-title {
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-  .block-auto .block-title { color: var(--gold); }
-  .block-choice .block-title { color: var(--crimson); }
-  .block-spell .block-title { color: var(--crimson); }
-  .block-write .block-title { color: var(--crimson); }
+/* Spell picker */
+.spell-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+.spell-chip {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(139,26,26,0.22);
+  border-radius: 3px;
+  background: rgba(248,237,205,0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--ink);
+}
+.spell-chip:hover { border-color: var(--crimson); background: rgba(139,26,26,0.06); }
+.spell-chip.selected { background: rgba(139,26,26,0.1); border-color: var(--crimson); color: var(--crimson); font-weight: 600; }
+.spell-chip.conc { border-style: dashed; }
 
-  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
-  .feature-list li {
-    font-size: 0.95rem;
-    color: var(--ink);
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.5rem;
-    line-height: 1.4;
-  }
-  .feature-list li .feat-name {
-    font-weight: 600;
-    color: var(--ink);
-    white-space: nowrap;
-  }
-  .feature-list li .feat-desc {
-    color: var(--ink-light);
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
+/* Input */
+input[type=text], textarea, select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(139,26,26,0.3);
+  border-radius: 4px;
+  background: rgba(248,237,205,0.5);
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--crimson); background: rgba(248,237,205,0.8); }
+label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--crimson); display: block; margin-bottom: 0.35rem; }
 
-  .write-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
-  .write-list li {
-    font-size: 0.92rem;
-    color: var(--ink);
-    padding-left: 1.2rem;
-    position: relative;
-    line-height: 1.4;
-  }
-  .write-list li::before {
-    content: '✏';
-    position: absolute; left: 0;
-    font-size: 0.75rem;
-  }
+/* ── Generate button ── */
+.generate-btn {
+  display: block; width: 100%;
+  margin-top: 2rem;
+  padding: 1rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #8b1a1a, #c22020);
+  color: var(--parchment);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 12px rgba(139,26,26,0.3);
+}
+.generate-btn:hover { background: linear-gradient(135deg, #a02020, #d42828); box-shadow: 0 4px 20px rgba(139,26,26,0.45); }
+.generate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .choice-block-inner { display: flex; flex-direction: column; gap: 0.4rem; }
-  .choice-option {
-    font-size: 0.9rem;
-    color: var(--ink);
-    padding: 0.4rem 0.6rem;
-    background: rgba(255,255,255,0.4);
-    border: 1px solid rgba(201,151,58,0.35);
-    border-radius: 3px;
-    line-height: 1.4;
-  }
-  .choice-option strong { color: var(--crimson); font-family: 'Cinzel', serif; font-size: 0.82rem; display: block; margin-bottom: 0.15rem; }
-  .choice-note {
-    font-size: 0.82rem;
-    font-style: italic;
-    color: var(--ink-light);
-    margin-top: 0.3rem;
-  }
+.hint-box { background: rgba(139,26,26,0.05); border-left: 3px solid var(--crimson); padding: 0.6rem 1rem; border-radius: 0 4px 4px 0; font-style: italic; font-size: 0.88rem; color: var(--ink-light); margin: 1rem 0; }
+.success-badge { background: rgba(26,92,42,0.1); border: 1px solid rgba(26,92,42,0.3); color: var(--green); border-radius: 4px; padding: 0.5rem 0.9rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 1rem; }
+.error-badge { background: rgba(139,26,26,0.1); border: 1px solid rgba(139,26,26,0.3); color: var(--crimson); border-radius: 4px; padding: 0.5rem 0.9rem; font-size: 0.85rem; margin-bottom: 1rem; }
 
-  /* Spell slot table */
-  .slot-table {
-    border-collapse: collapse;
-    font-size: 0.88rem;
-    width: 100%;
-    margin-top: 0.4rem;
-  }
-  .slot-table th {
-    font-family: 'Cinzel', serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--crimson);
-    padding: 0.3rem 0.5rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(139,26,26,0.2);
-  }
-  .slot-table td {
-    padding: 0.3rem 0.5rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(201,151,58,0.15);
-    color: var(--ink);
-  }
-  .slot-table tr.current-row td { background: rgba(201,151,58,0.1); font-weight: 600; }
-  .slot-table .new-gain { color: var(--crimson); font-weight: 700; }
+/* ── Summary grid ── */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin: 1.2rem 0; }
+.summary-card { background: rgba(139,26,26,0.04); border: 1px solid rgba(139,26,26,0.15); border-radius: 4px; padding: 0.65rem 0.9rem; }
+.summary-label { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--crimson); margin-bottom: 0.2rem; }
+.summary-val { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+.summary-sub { font-size: 0.75rem; color: var(--ink-light); font-style: italic; }
 
-  /* Subclass grid */
-  .subclass-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.6rem;
-    margin-top: 0.4rem;
-  }
-  .subclass-card {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid rgba(201,151,58,0.4);
-    border-top: 3px solid var(--crimson);
-    border-radius: 0 0 3px 3px;
-    background: rgba(255,255,255,0.35);
-  }
-  .subclass-card strong {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    color: var(--crimson);
-    display: block;
-    margin-bottom: 0.2rem;
-  }
-  .subclass-card span { font-size: 0.85rem; color: var(--ink-light); line-height: 1.35; }
-
-  .rule { border: none; border-top: 1px solid rgba(201,151,58,0.3); margin: 1rem 0; }
-
-  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
-  @keyframes fadeUp   { from{opacity:0;transform:translateY(20px);}  to{opacity:1;transform:translateY(0);} }
-
-  @media(max-width:600px) {
-    .sheet { padding: 1.5rem 1.2rem 2rem; }
-    .controls-row { grid-template-columns: 1fr 1fr; }
-    .controls-row .btn { grid-column: 1/-1; }
-  }
+@media (max-width: 600px) {
+  .card { padding: 1.5rem 1.2rem 2rem; }
+  .asi-grid { grid-template-columns: repeat(3, 1fr); }
+  .summary-grid { grid-template-columns: 1fr; }
+  .char-bar { flex-direction: column; gap: 0.6rem; }
+}
 </style>
 </head>
 <body>
 
-<div style="max-width:960px; margin:0 auto; padding-bottom:1rem;">
-  <a href="index.html" class="back-link">← Back to Character Forge</a>
-</div>
-
 <header class="page-header">
-  <h1>Level Up Guide</h1>
+  <h1>Character Forge</h1>
   <div class="divider"></div>
-  <p>Dungeons &amp; Dragons 2024 · Levels 1–10</p>
+  <p>Level Up Wizard · D&amp;D 2024</p>
 </header>
 
-<div class="sheet">
+<div style="max-width:820px;margin:0 auto 1rem">
+  <a href="index.html" class="nav-back">← Back to Character Creator</a>
+</div>
 
-  <div class="controls-row">
-    <div>
-      <label for="classSelect">Class</label>
-      <select id="classSelect" onchange="renderGuide()">
-        <option value="">— Choose Class —</option>
-        <option value="barbarian">Barbarian</option>
-        <option value="bard">Bard</option>
-        <option value="cleric">Cleric</option>
-        <option value="druid">Druid</option>
-        <option value="fighter">Fighter</option>
-        <option value="monk">Monk</option>
-        <option value="paladin">Paladin</option>
-        <option value="ranger">Ranger</option>
-        <option value="rogue">Rogue</option>
-        <option value="sorcerer">Sorcerer</option>
-        <option value="warlock">Warlock</option>
-        <option value="wizard">Wizard</option>
-      </select>
+<div class="card" id="main-card">
+
+  <!-- ── Phase 1: Upload ── -->
+  <div id="phase-upload">
+    <div class="section-title">Load Your Character</div>
+    <div class="hint-box">Upload a PDF generated by Character Forge — your character data is embedded invisibly and will be read automatically.</div>
+
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" accept=".pdf" id="pdf-input" onchange="handlePDF(this.files[0])">
+      <span class="upload-icon">📄</span>
+      <div class="upload-label">Drop your character PDF here</div>
+      <div class="upload-sub">or click to browse</div>
     </div>
-    <div>
-      <label for="fromLevel">From Level</label>
-      <input type="number" id="fromLevel" min="1" max="9" value="1" onchange="renderGuide()">
+
+    <div class="or-divider">or enter manually</div>
+
+    <!-- Manual entry fallback -->
+    <div id="manual-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div><label>Character Name</label><input type="text" id="m-name" placeholder="Elara Moonwhisper"></div>
+        <div><label>Current Level</label>
+          <select id="m-level">
+            <option value="">— choose —</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div><label>Class</label>
+          <select id="m-class">
+            <option value="">— choose —</option>
+            <option value="barbarian">Barbarian</option><option value="bard">Bard</option>
+            <option value="cleric">Cleric</option><option value="druid">Druid</option>
+            <option value="fighter">Fighter</option><option value="monk">Monk</option>
+            <option value="paladin">Paladin</option><option value="ranger">Ranger</option>
+            <option value="rogue">Rogue</option><option value="sorcerer">Sorcerer</option>
+            <option value="warlock">Warlock</option><option value="wizard">Wizard</option>
+          </select>
+        </div>
+        <div><label>Species</label><input type="text" id="m-species" placeholder="Human, Elf…"></div>
+        <div><label>Background</label><input type="text" id="m-bg" placeholder="Criminal, Guard…"></div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.5rem">
+          <div><label>STR</label><input type="number" id="m-str" value="10" min="1" max="20"></div>
+          <div><label>DEX</label><input type="number" id="m-dex" value="10" min="1" max="20"></div>
+          <div><label>CON</label><input type="number" id="m-con" value="10" min="1" max="20"></div>
+          <div><label>INT</label><input type="number" id="m-int" value="10" min="1" max="20"></div>
+          <div><label>WIS</label><input type="number" id="m-wis" value="10" min="1" max="20"></div>
+          <div><label>CHA</label><input type="number" id="m-cha" value="10" min="1" max="20"></div>
+        </div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <label>Current Subclass (if Level 3+)</label>
+        <input type="text" id="m-subclass" placeholder="e.g. Battle Master, Circle of the Moon…">
+      </div>
+      <button class="generate-btn" onclick="loadManual()" style="margin-top:0.5rem">Load Character →</button>
     </div>
-    <div>
-      <label for="toLevel">To Level</label>
-      <input type="number" id="toLevel" min="2" max="10" value="5" onchange="renderGuide()">
-    </div>
-    <button class="btn" onclick="renderGuide()">Show Guide ⚔</button>
   </div>
 
-  <div id="timeline" class="timeline"></div>
-  <div id="results"></div>
+  <!-- ── Phase 2: Level picker ── -->
+  <div id="phase-level" style="display:none">
+    <div id="char-bar" class="char-bar"></div>
+    <div class="section-title">Choose Target Level</div>
+    <div class="hint-box" id="level-hint">Select the level you want to advance to.</div>
+    <div class="level-picker" id="level-picker"></div>
+    <button class="generate-btn" id="btn-advance" onclick="buildLevelSteps()" disabled>Show Level-Up Steps →</button>
+  </div>
+
+  <!-- ── Phase 3: Level steps ── -->
+  <div id="phase-steps" style="display:none">
+    <div id="char-bar-2" class="char-bar"></div>
+    <div class="section-title" id="steps-title">Level Up Steps</div>
+    <div id="steps-container"></div>
+    <div class="rule"></div>
+    <div class="section-title">Changes Summary</div>
+    <div id="summary-container"></div>
+    <button class="generate-btn" id="btn-generate" onclick="generateLevelledSheet()">⚔ Generate Updated Character Sheet PDF ⚔</button>
+  </div>
 
 </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════════════════════
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+// ── Level progression data (from PHB 2024) ────────────────────────────────
 const PROF_BONUS = {1:2,2:2,3:2,4:2,5:3,6:3,7:3,8:3,9:4,10:4};
 
 // PHB 2024 fixed HP per level (not die average — the new fixed values)
@@ -944,274 +888,632 @@ wizard: {
 
 }; // end CLASSES
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// RENDERING
-// ═══════════════════════════════════════════════════════════════════════════════
 
-function renderGuide() {
-  const cls   = document.getElementById('classSelect').value;
-  const from  = Math.max(1, parseInt(document.getElementById('fromLevel').value) || 1);
-  const to    = Math.min(10, parseInt(document.getElementById('toLevel').value) || 5);
-  const tl    = document.getElementById('timeline');
-  const res   = document.getElementById('results');
+// ── App Logic ────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────
+var char = null;         // loaded character state
+var targetLevel = null;
+var decisions = {};      // { level: { type: value } }
 
-  if (!cls) { res.innerHTML = '<p style="font-style:italic;color:var(--ink-light);text-align:center;padding:2rem;">Select a class to begin.</p>'; tl.innerHTML=''; return; }
-
-  const data  = CLASSES[cls];
-  const prof  = PROF_BONUS;
-  const hpPer = HP_PER_LEVEL[cls];
-
-  // ── Timeline ────────────────────────────────────────────────────────────────
-  tl.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
-    const pip = document.createElement('div');
-    pip.className = 'tl-pip';
-    if (i > from && i <= to) pip.classList.add('in-range');
-    if (i === data.subclassLevel) pip.classList.add('subclass-level');
-    if ([4,8].includes(i)) pip.classList.add('asi-level');
-    pip.textContent = i;
-    pip.title = `Level ${i}${i === data.subclassLevel ? ' — Subclass' : ''}${[4,8].includes(i) ? ' — ASI/Feat' : ''}`;
-    pip.onclick = () => {
-      document.getElementById('fromLevel').value = i - 1;
-      document.getElementById('toLevel').value = i;
-      renderGuide();
-    };
-    tl.appendChild(pip);
-  }
-
-  // ── Cards ───────────────────────────────────────────────────────────────────
-  res.innerHTML = '';
-
-  if (from >= to) {
-    res.innerHTML = '<p style="font-style:italic;color:var(--ink-light);text-align:center;padding:1rem;">Set \'From Level\' below \'To Level\'.</p>';
-    return;
-  }
-
-  const container = document.createElement('div');
-  container.className = 'level-cards';
-
-  for (let lvl = from + 1; lvl <= to; lvl++) {
-    const levelData  = data.levels[lvl] || {};
-    const prevSlots  = SPELL_SLOTS[cls]?.[lvl - 1];
-    const currSlots  = SPELL_SLOTS[cls]?.[lvl];
-    const prevProf   = prof[lvl - 1];
-    const currProf   = prof[lvl];
-    const profChange = currProf > prevProf;
-    const prevCantrips = CANTRIPS_KNOWN[cls]?.[lvl - 1] ?? 0;
-    const currCantrips = CANTRIPS_KNOWN[cls]?.[lvl] ?? 0;
-    const cantripsTotal = Object.entries(CANTRIPS_KNOWN[cls] || {})
-      .filter(([l]) => parseInt(l) <= lvl)
-      .reduce((t, [l, v]) => v > 0 ? v : t, 0);
-    const spellsGained = SPELLS_KNOWN_GAINED[cls]?.[lvl] ?? 0;
-
-    const card = document.createElement('div');
-    card.className = 'level-card';
-
-    // ── Header ──
-    let pillsHtml = `<div class="level-card-pills">`;
-    pillsHtml += `<span class="pill">HP +${hpPer} + CON mod</span>`;
-    if (profChange) pillsHtml += `<span class="pill crimson">Prof Bonus → +${currProf}</span>`;
-    if (levelData.asi) pillsHtml += `<span class="pill crimson">ASI / Feat</span>`;
-    if (levelData.subclass) pillsHtml += `<span class="pill crimson">Subclass Choice</span>`;
-    pillsHtml += '</div>';
-
-    card.innerHTML = `
-      <div class="level-card-header">
-        <div class="level-card-title">Level ${lvl}</div>
-        ${pillsHtml}
-      </div>
-      <div class="level-card-body" id="body-${lvl}"></div>
-    `;
-    container.appendChild(card);
-    const body = card.querySelector(`#body-${lvl}`);
-
-    // ── Write on Sheet block ──────────────────────────────────────────────────
-    const writeItems = [];
-    writeItems.push(`Update HP: add ${hpPer} + CON mod to your Maximum HP`);
-    if (profChange) writeItems.push(`Update Proficiency Bonus to +${currProf} — this affects all proficient attacks, skills, saves, and spell DC/attack automatically`);
-    if (levelData.asi) writeItems.push('Choose an ASI or Feat (see below) — update ability scores and any stats that depend on them (attack bonus, save DC, AC, etc.)');
-    if (currSlots && prevSlots) {
-      for (let si = 0; si < 5; si++) {
-        if (currSlots[si] > (prevSlots[si] || 0)) {
-          const gained = currSlots[si] - (prevSlots[si] || 0);
-          writeItems.push(`Spell Slots: L${si+1} slots → ${currSlots[si]} total (+${gained} new slot${gained>1?'s':''})`);
-        }
-      }
-    }
-    if (cls === 'warlock' && currSlots) {
-      const wSlot = currSlots.findIndex(s => s > 0);
-      if (wSlot >= 0) writeItems.push(`Update Pact Magic: slots are now L${wSlot+1} (${currSlots[wSlot]} slots, regain on Short Rest)`);
-    }
-    if (currCantrips > prevCantrips && prevCantrips > 0) {
-      writeItems.push(`Learn ${currCantrips - prevCantrips} new cantrip — update cantrips known`);
-    }
-    if (spellsGained > 0) {
-      writeItems.push(`Choose ${spellsGained} new spell${spellsGained>1?'s':''} known from your class list`);
-    }
-
-    if (writeItems.length) {
-      const wb = document.createElement('div');
-      wb.className = 'block block-write';
-      wb.innerHTML = `<div class="block-title">✏ Write on your sheet</div>
-        <ul class="write-list">${writeItems.map(w=>`<li>${w}</li>`).join('')}</ul>`;
-      body.appendChild(wb);
-    }
-
-    // ── Subclass choice ───────────────────────────────────────────────────────
-    if (levelData.subclass) {
-      const sb = document.createElement('div');
-      sb.className = 'block block-choice';
-      let scHtml = `<div class="block-title">⚜ Subclass Choice — ${data.name} Level ${lvl}</div>`;
-      scHtml += `<div class="choice-note" style="margin-bottom:0.6rem;">This is a permanent choice that defines your character's specialisation. Each subclass gives different features at levels ${data.subclassLevel}, 6, and 10.</div>`;
-      scHtml += `<div class="subclass-grid">`;
-      for (const [name, desc] of Object.entries(data.subclasses)) {
-        scHtml += `<div class="subclass-card"><strong>${name}</strong><span>${desc}</span></div>`;
-      }
-      scHtml += `</div>`;
-      sb.innerHTML = scHtml;
-      body.appendChild(sb);
-    }
-
-    // ── ASI / Feat ────────────────────────────────────────────────────────────
-    if (levelData.asi) {
-      const ab = document.createElement('div');
-      ab.className = 'block block-choice';
-      ab.innerHTML = `<div class="block-title">📈 Ability Score Improvement or Feat</div>
-        <div class="choice-block-inner">
-          <div class="choice-option"><strong>Option A — Ability Score Improvement</strong>Increase one ability score by 2, or two ability scores by 1 each. No score can exceed 20. Best if a key stat (STR/DEX/CHA/WIS/INT/CON) is at an odd number, or if you're raising a primary stat to improve your modifier.</div>
-          <div class="choice-option"><strong>Option B — Take a Feat</strong>Choose any General or Fighting Style feat. Key picks by role: <em>Melee</em> — Great Weapon Master, Polearm Master, Sentinel, War Caster. <em>Ranged</em> — Sharpshooter, Crossbow Expert. <em>Caster</em> — War Caster (concentration), Resilient CON (concentration), Spell Sniper. <em>Utility</em> — Lucky, Alert, Mobile.</div>
-        </div>
-        <div class="choice-note">After choosing: update your ability score block, recalculate all modifiers, and update any stat that uses the modified ability (attack rolls, save DCs, skills, saving throws, AC if relevant, HP if CON).</div>`;
-      body.appendChild(ab);
-    }
-
-    // ── Automatic features ────────────────────────────────────────────────────
-    if (levelData.auto && levelData.auto.length) {
-      const fb = document.createElement('div');
-      fb.className = 'block block-auto';
-      fb.innerHTML = `<div class="block-title">⚔ New Features</div>`;
-      const ul = document.createElement('ul');
-      ul.className = 'feature-list';
-      for (const [name, desc] of levelData.auto) {
-        const li = document.createElement('li');
-        li.innerHTML = `<span class="feat-name">${name}</span><span class="feat-desc">${desc.replace(/\n/g,'<br>')}</span>`;
-        ul.appendChild(li);
-      }
-      fb.appendChild(ul);
-      body.appendChild(fb);
-    }
-
-    // ── Spell slots table ─────────────────────────────────────────────────────
-    if (currSlots && cls !== 'warlock') {
-      const spb = document.createElement('div');
-      spb.className = 'block block-spell';
-      let spHtml = `<div class="block-title">✨ Spell Slots</div>`;
-      spHtml += `<table class="slot-table"><thead><tr><th>Level</th><th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>L5</th></tr></thead><tbody>`;
-      for (let sl = Math.max(1, lvl - 2); sl <= Math.min(10, lvl); sl++) {
-        const slotRow = SPELL_SLOTS[cls]?.[sl];
-        if (!slotRow) continue;
-        const isCurr = sl === lvl;
-        const prevRow = SPELL_SLOTS[cls]?.[sl - 1] || [0,0,0,0,0];
-        spHtml += `<tr ${isCurr ? 'class="current-row"' : ''}>`;
-        spHtml += `<td>${isCurr ? `<strong>L${sl} ★</strong>` : `L${sl}`}</td>`;
-        for (let si = 0; si < 5; si++) {
-          const val = slotRow[si] || 0;
-          const prev = prevRow[si] || 0;
-          const isNew = isCurr && val > prev;
-          spHtml += `<td class="${isNew ? 'new-gain' : ''}">${val > 0 ? val : '—'}</td>`;
-        }
-        spHtml += '</tr>';
-      }
-      spHtml += '</tbody></table>';
-      if (SPELL_LEVEL_ACCESS[cls]?.[lvl]) {
-        const maxSL = SPELL_LEVEL_ACCESS[cls][lvl];
-        const prevMaxSL = SPELL_LEVEL_ACCESS[cls]?.[lvl-1] || 0;
-        if (maxSL > prevMaxSL) {
-          spHtml += `<div class="choice-note" style="margin-top:0.4rem; color:var(--crimson);">🆕 You can now cast ${maxSL === 1 ? '1st' : maxSL === 2 ? '2nd' : maxSL === 3 ? '3rd' : maxSL+'th'}-level spells for the first time.</div>`;
-        }
-      }
-      spb.innerHTML = spHtml;
-      body.appendChild(spb);
-    }
-
-    // Warlock pact magic special display
-    if (cls === 'warlock' && currSlots) {
-      const wSlot = currSlots.findIndex(s => s > 0);
-      if (wSlot >= 0) {
-        const wpb = document.createElement('div');
-        wpb.className = 'block block-spell';
-        wpb.innerHTML = `<div class="block-title">🔮 Pact Magic</div>
-          <div style="font-size:0.95rem;color:var(--ink);">Slot Level: <strong>L${wSlot+1}</strong> &nbsp;·&nbsp; Slots: <strong>${currSlots[wSlot]}</strong> &nbsp;·&nbsp; Recharge on: <strong>Short or Long Rest</strong></div>
-          <div class="choice-note" style="margin-top:0.3rem;">All Warlock slots are the same level — always the highest level available to you. You can upcast any spell into your slot level automatically.</div>`;
-        body.appendChild(wpb);
-      }
-    }
-
-    // ── Spell note (level-specific) ───────────────────────────────────────────
-    if (levelData.spellNote) {
-      const snb = document.createElement('div');
-      snb.className = 'block block-spell';
-      snb.innerHTML = `<div class="block-title">📖 Spells</div><div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">${levelData.spellNote}</div>`;
-      body.appendChild(snb);
-    }
-
-    // Cantrip gain
-    if (currCantrips > prevCantrips && prevCantrips > 0) {
-      const cb = document.createElement('div');
-      cb.className = 'block block-spell';
-      cb.innerHTML = `<div class="block-title">🕯 Cantrips</div>
-        <div style="font-size:0.95rem;color:var(--ink);">You now know <strong>${cantripsTotal}</strong> cantrips total. Learn <strong>${currCantrips - prevCantrips}</strong> new cantrip${currCantrips-prevCantrips>1?'s':''} — choose from your class cantrip list.</div>`;
-      body.appendChild(cb);
-    }
-
-    // Spells gained (non-preparer classes)
-    if (spellsGained > 0 && !['cleric','druid','paladin','wizard'].includes(cls)) {
-      const sgb = document.createElement('div');
-      sgb.className = 'block block-spell';
-      sgb.innerHTML = `<div class="block-title">📖 Spells Known</div>
-        <div style="font-size:0.95rem;color:var(--ink);">You learn <strong>${spellsGained}</strong> new spell${spellsGained>1?'s':''} from your class list. ${cls === 'sorcerer' || cls === 'bard' ? 'You may also replace 1 known spell with a new one.' : ''}</div>`;
-      body.appendChild(sgb);
-    }
-
-    // Wizard spellbook note
-    if (cls === 'wizard') {
-      const wzb = document.createElement('div');
-      wzb.className = 'block block-spell';
-      const maxSL = SPELL_LEVEL_ACCESS['wizard'][lvl];
-      wzb.innerHTML = `<div class="block-title">📖 Spellbook</div>
-        <div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">
-          Add <strong>2 new Wizard spells</strong> of any level you can cast (up to L${maxSL}) to your spellbook — free from leveling up.<br>
-          <span style="font-size:0.88rem;color:var(--ink-light);">You can also copy spells from scrolls or other spellbooks during downtime (costs 50gp + 2 hrs per spell level). 
-          Each day, prepare <strong>INT mod + ${lvl}</strong> spells from your book.</span>
-        </div>`;
-      body.appendChild(wzb);
-    }
-
-    // Preparer spell preparation count update
-    if (['cleric','druid','paladin'].includes(cls) && !levelData.spellNote) {
-      const prepb = document.createElement('div');
-      prepb.className = 'block block-spell';
-      const keyAb = cls === 'paladin' ? 'CHA' : 'WIS';
-      const formula = cls === 'paladin'
-        ? `CHA mod + half Paladin level (${Math.floor(lvl/2)} at L${lvl})`
-        : `${keyAb} mod + ${lvl}`;
-      prepb.innerHTML = `<div class="block-title">📖 Prepared Spells</div>
-        <div style="font-size:0.95rem;color:var(--ink);line-height:1.5;">
-          Update your max prepared spells: <strong>${formula}</strong>. 
-          You can change your prepared list after each Long Rest. 
-          ${currSlots && SPELL_LEVEL_ACCESS[cls]?.[lvl] > (SPELL_LEVEL_ACCESS[cls]?.[lvl-1]||0) ? `<strong style="color:var(--crimson);">New spell level unlocked — add higher-level spells to your preparation options.</strong>` : ''}
-        </div>`;
-      body.appendChild(prepb);
-    }
-
-  } // end level loop
-
-  res.appendChild(container);
+// ── Upload & Parse ─────────────────────────────────────────────────────────
+var uploadZone = document.getElementById('upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('drag-over'); });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    var f = e.dataTransfer.files[0];
+    if (f && f.type === 'application/pdf') handlePDF(f);
+  });
 }
 
-// Init
-renderGuide();
-</script>
+function handlePDF(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var data = new Uint8Array(e.target.result);
+    extractCharData(data);
+  };
+  reader.readAsArrayBuffer(file);
+}
 
+function extractCharData(data) {
+  if (typeof pdfjsLib === 'undefined') {
+    showError('PDF.js failed to load. Please use manual entry below.');
+    return;
+  }
+  pdfjsLib.getDocument({ data: data }).promise.then(function(pdf) {
+    var textPromises = [];
+    for (var p = 1; p <= pdf.numPages; p++) {
+      textPromises.push(pdf.getPage(p).then(function(page) {
+        return page.getTextContent().then(function(tc) {
+          return tc.items.map(function(i) { return i.str; }).join('');
+        });
+      }));
+    }
+    return Promise.all(textPromises);
+  }).then(function(pages) {
+    var fullText = pages.join('');
+    var idx = fullText.indexOf('CHARDATA:');
+    if (idx === -1) {
+      showError('No Character Forge data found in this PDF. Please use manual entry or re-generate the PDF from Character Forge.');
+      return;
+    }
+    // Find end of JSON (matching braces)
+    var jsonStart = idx + 9;
+    var depth = 0, jsonEnd = jsonStart;
+    for (var i = jsonStart; i < fullText.length; i++) {
+      if (fullText[i] === '{') depth++;
+      else if (fullText[i] === '}') { depth--; if (depth === 0) { jsonEnd = i + 1; break; } }
+    }
+    try {
+      char = JSON.parse(fullText.slice(jsonStart, jsonEnd));
+      showSuccess('Character loaded: ' + char.name + ' — Level ' + char.level + ' ' + cap(char.cls));
+      goPhase2();
+    } catch(err) {
+      showError('Could not parse character data. Try re-generating the PDF from Character Forge.');
+    }
+  }).catch(function() {
+    showError('Could not read PDF. Ensure it is a valid Character Forge PDF and try again.');
+  });
+}
+
+function loadManual() {
+  var name = document.getElementById('m-name').value.trim();
+  var level = parseInt(document.getElementById('m-level').value);
+  var cls = document.getElementById('m-class').value;
+  if (!name || !level || !cls) { alert('Please fill in at least Name, Level, and Class.'); return; }
+  char = {
+    v: 1, name: name, level: level, cls: cls,
+    species: document.getElementById('m-species').value.trim() || 'unknown',
+    bg: document.getElementById('m-bg').value.trim() || 'unknown',
+    alignment: '',
+    scores: {
+      STR: parseInt(document.getElementById('m-str').value)||10,
+      DEX: parseInt(document.getElementById('m-dex').value)||10,
+      CON: parseInt(document.getElementById('m-con').value)||10,
+      INT: parseInt(document.getElementById('m-int').value)||10,
+      WIS: parseInt(document.getElementById('m-wis').value)||10,
+      CHA: parseInt(document.getElementById('m-cha').value)||10,
+    },
+    asiBonus: {},
+    classSkills: [], bgSkills: [], languages: [],
+    fightingStyle: null, weaponMasteries: [], subclass: document.getElementById('m-subclass').value.trim()||null,
+    cantrips: [], spellsL1: [], skilledChoices: [], rogueExpertise: [],
+  };
+  goPhase2();
+}
+
+// ── Phase navigation ───────────────────────────────────────────────────────
+function goPhase2() {
+  document.getElementById('phase-upload').style.display = 'none';
+  document.getElementById('phase-level').style.display = 'block';
+  renderCharBar('char-bar');
+  renderLevelPicker();
+}
+
+function goPhase3() {
+  document.getElementById('phase-level').style.display = 'none';
+  document.getElementById('phase-steps').style.display = 'block';
+  renderCharBar('char-bar-2');
+  document.getElementById('steps-title').textContent = char.name + ': Level ' + char.level + ' → ' + targetLevel;
+}
+
+function renderCharBar(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var c = CLASS_BONUSES_LU[char.cls] || {};
+  var prof = PROF_BONUS[char.level] || 2;
+  var sc = char.scores || {};
+  var con = Math.floor(((sc.CON||10) - 10) / 2);
+  var hp = (c.hpbase||5) + con;
+  el.innerHTML =
+    '<div class="char-bar-name">' + char.name + '</div>' +
+    pill('Class', cap(char.cls)) +
+    pill('Level', char.level) +
+    pill('Species', cap(char.species)) +
+    pill('HP at L1', hp + ' (' + (c.hitdie||'d8') + '+CON)') +
+    pill('Prof. Bonus', '+' + prof);
+}
+
+function pill(label, val) {
+  return '<div class="char-bar-stat"><span class="char-bar-label">' + label + '</span><span class="char-bar-val">' + val + '</span></div>';
+}
+
+function renderLevelPicker() {
+  var container = document.getElementById('level-picker');
+  var hint = document.getElementById('level-hint');
+  container.innerHTML = '';
+  targetLevel = null;
+  document.getElementById('btn-advance').disabled = true;
+
+  for (var lvl = 1; lvl <= 10; lvl++) {
+    var btn = document.createElement('button');
+    btn.className = 'level-btn' + (lvl === char.level ? ' current' : lvl < char.level ? ' disabled' : '');
+    btn.textContent = lvl;
+    btn.setAttribute('data-lvl', lvl);
+    if (lvl <= char.level) {
+      btn.disabled = true;
+    } else {
+      (function(l) {
+        btn.onclick = function() {
+          targetLevel = l;
+          document.querySelectorAll('.level-btn').forEach(function(b) {
+            var bl = parseInt(b.getAttribute('data-lvl'));
+            b.classList.remove('target');
+            if (bl === char.level) b.className = 'level-btn current';
+            else if (bl < char.level) b.className = 'level-btn disabled';
+            else b.className = 'level-btn';
+          });
+          btn.classList.add('target');
+          var steps = l - char.level;
+          hint.textContent = 'Advancing ' + steps + ' level' + (steps > 1 ? 's' : '') + ' to Level ' + l + '.';
+          document.getElementById('btn-advance').disabled = false;
+        };
+      })(lvl);
+    }
+    container.appendChild(btn);
+  }
+}
+
+// ── Build level steps ──────────────────────────────────────────────────────
+// A working copy of scores + decisions accumulated as we step through levels
+var workingChar = null;
+
+function buildLevelSteps() {
+  decisions = {};
+  workingChar = JSON.parse(JSON.stringify(char));
+  goPhase3();
+
+  var container = document.getElementById('steps-container');
+  container.innerHTML = '';
+
+  for (var lvl = char.level + 1; lvl <= targetLevel; lvl++) {
+    container.appendChild(buildLevelBlock(lvl));
+  }
+  updateSummary();
+}
+
+function buildLevelBlock(lvl) {
+  var cls = char.cls;
+  var classData = CLASSES[cls] || {};
+  var newProf = PROF_BONUS[lvl] || 2;
+  var oldProf = PROF_BONUS[lvl - 1] || 2;
+  var hpGain = HP_PER_LEVEL[cls] || 5;
+  var con = Math.floor(((workingChar.scores ? workingChar.scores.CON : 10) - 10) / 2);
+  var hpPerLevel = hpGain + con;
+
+  decisions[lvl] = decisions[lvl] || {};
+
+  var block = document.createElement('div');
+  block.className = 'level-step';
+  block.id = 'step-lvl-' + lvl;
+
+  var header = '<div class="level-step-header"><span class="level-badge">' + lvl + '</span>Level ' + lvl + ' — ' + cap(cls) + '</div>';
+  var body = '<div class="level-step-body">';
+
+  // Auto-gains
+  body += '<div class="auto-gain"><span class="auto-gain-label">+ ' + hpPerLevel + ' HP</span><span class="auto-gain-val">(' + hpGain + ' fixed + CON ' + (con >= 0 ? '+' : '') + con + ')</span></div>';
+  if (newProf > oldProf) {
+    body += '<div class="auto-gain"><span class="auto-gain-label">Proficiency Bonus</span><span class="auto-gain-val">+' + oldProf + ' → +' + newProf + '</span></div>';
+  }
+
+  // Spell slots
+  var slots = SPELL_SLOTS[cls];
+  if (slots && slots[lvl]) {
+    var newSlots = slots[lvl];
+    var oldSlots = (lvl > 1 && slots[lvl-1]) ? slots[lvl-1] : [0,0,0,0,0];
+    var slotChanges = [];
+    for (var s = 0; s < 5; s++) {
+      if (newSlots[s] > oldSlots[s]) slotChanges.push('L'+(s+1)+': '+oldSlots[s]+'→'+newSlots[s]);
+    }
+    if (slotChanges.length) {
+      body += '<div class="auto-gain"><span class="auto-gain-label">Spell Slots</span><span class="auto-gain-val">' + slotChanges.join(', ') + '</span></div>';
+    }
+  }
+
+  // Cantrips known increase
+  var cantripGain = (CANTRIPS_KNOWN[cls] || {})[lvl];
+  if (cantripGain) {
+    body += '<div class="auto-gain"><span class="auto-gain-label">Cantrips Known</span><span class="auto-gain-val">now ' + cantripGain + ' total — choose a new one</span></div>';
+  }
+
+  // Auto features from CLASSES data
+  var levelData = (classData.levels || {})[lvl] || {};
+  var autoFeats = levelData.auto || [];
+  autoFeats.forEach(function(f) {
+    body += '<div class="auto-gain"><span class="auto-gain-label">+ ' + f[0] + '</span><span class="auto-gain-val">' + f[1] + '</span></div>';
+  });
+
+  // === DECISIONS ===
+
+  // Level 3: Subclass choice (if not already chosen from manual entry)
+  if (lvl === classData.subclassLevel && !workingChar.subclass) {
+    var subs = classData.subclasses || {};
+    var subKeys = Object.keys(subs);
+    if (subKeys.length) {
+      body += buildDecision(lvl, 'subclass', 'Choose Your Subclass',
+        'Your subclass defines specialised features. This choice is permanent.',
+        subKeys.map(function(k) {
+          return { value: k, label: k, desc: (subs[k].summary || '') };
+        }), 'chips-full');
+    }
+  }
+
+  // Level 4 / 8 / 12: ASI or Feat
+  var asiLevels = { barbarian:[4,8], fighter:[4,6,8], monk:[4,8], paladin:[4,8], ranger:[4,8], rogue:[4,8], wizard:[4,8], sorcerer:[4,8], bard:[4,8], cleric:[4,8], druid:[4,8], warlock:[4,8] };
+  var clsAsiLevels = asiLevels[cls] || [4,8];
+  if (clsAsiLevels.indexOf(lvl) !== -1) {
+    body += buildASIDecision(lvl);
+  }
+
+  // Level 5: Extra Attack note for martials
+  var extraAttackClasses = ['fighter','paladin','barbarian','ranger','monk'];
+  if (lvl === 5 && extraAttackClasses.indexOf(cls) !== -1) {
+    body += '<div class="auto-gain"><span class="auto-gain-label">Extra Attack</span><span class="auto-gain-val">You can now attack TWICE whenever you use the Attack action.</span></div>';
+  }
+
+  // Spells known gained (non-preparers)
+  var spellsGained = (SPELLS_KNOWN_GAINED[cls] || {})[lvl];
+  if (spellsGained && spellsGained > 0) {
+    var maxSpellLvl = (SPELL_LEVEL_ACCESS[cls] || {})[lvl] || 1;
+    body += buildSpellDecision(lvl, spellsGained, maxSpellLvl);
+  }
+
+  // Choice features from CLASSES data
+  var choiceFeats = levelData.choice || [];
+  choiceFeats.forEach(function(cf, ci) {
+    body += buildDecision(lvl, 'choice_' + ci, cf[0], cf[1],
+      (cf[2] || []).map(function(opt) { return { value: opt[0], label: opt[0], desc: opt[1] || '' }; }),
+      'chips');
+  });
+
+  body += '</div>'; // close body
+  block.innerHTML = header + body;
+  return block;
+}
+
+function buildDecision(lvl, key, title, desc, options, style) {
+  var html = '<div class="decision-box" id="dec-' + lvl + '-' + key + '">';
+  html += '<div class="decision-title">' + title + '</div>';
+  if (desc) html += '<div class="decision-desc">' + desc + '</div>';
+  html += '<div class="option-chips">';
+  options.forEach(function(opt) {
+    var tooltip = opt.desc ? ' title="' + opt.desc.replace(/"/g, "'") + '"' : '';
+    html += '<button class="option-chip" onclick="pickDecision(' + lvl + ',\'' + key + '\',\'' + opt.value.replace(/'/g,"\\'")+  '\',this)"' + tooltip + '>' + opt.label + '</button>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function buildASIDecision(lvl) {
+  var scores = workingChar.scores || {};
+  var ABS = ['STR','DEX','CON','INT','WIS','CHA'];
+  var html = '<div class="decision-box" id="dec-' + lvl + '-asi">';
+  html += '<div class="decision-title">Ability Score Improvement or Feat</div>';
+  html += '<div class="decision-desc">Choose: +2 to one ability, +1/+1 to two abilities, or skip ASI to pick an Origin Feat (ask your DM).</div>';
+  html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.7rem">';
+  html += '<button class="option-chip" onclick="setASIMode(' + lvl + ',\'plus2\',this)">+2 to one stat</button>';
+  html += '<button class="option-chip" onclick="setASIMode(' + lvl + ',\'plus1plus1\',this)">+1 to two stats</button>';
+  html += '</div>';
+  html += '<div id="asi-body-' + lvl + '" style="display:none">';
+  html += '<div class="asi-grid">';
+  ABS.forEach(function(ab) {
+    var cur = (scores[ab] || 10);
+    html += '<div class="asi-cell" id="asicell-' + lvl + '-' + ab + '" onclick="pickASI(' + lvl + ',\'' + ab + '\',this)">';
+    html += '<div class="asi-ab">' + ab + '</div>';
+    html += '<div class="asi-score">' + cur + '</div>';
+    html += '<div class="asi-delta" id="asidelta-' + lvl + '-' + ab + '"></div>';
+    html += '</div>';
+  });
+  html += '</div></div></div>';
+  return html;
+}
+
+function buildSpellDecision(lvl, count, maxSpellLvl) {
+  // Show a simple text input for new spell names
+  var html = '<div class="decision-box" id="dec-' + lvl + '-newspells">';
+  html += '<div class="decision-title">+ ' + count + ' New Spell' + (count > 1 ? 's' : '') + ' (up to Level ' + maxSpellLvl + ')</div>';
+  html += '<div class="decision-desc">Write in the name(s) of the spell(s) you are adding to your list. Ask your DM or check the PHB.</div>';
+  for (var i = 0; i < count; i++) {
+    html += '<input type="text" placeholder="Spell name…" style="margin-top:0.4rem" onchange="saveSpell(' + lvl + ',' + i + ',this.value)">';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── Decision handlers ──────────────────────────────────────────────────────
+var asiModes = {}; // lvl -> 'plus2' | 'plus1plus1'
+var asiPicks = {};  // lvl -> [ab1, ab2?]
+
+function pickDecision(lvl, key, value, btn) {
+  var container = btn.parentElement;
+  container.querySelectorAll('.option-chip').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  if (!decisions[lvl]) decisions[lvl] = {};
+  decisions[lvl][key] = value;
+  // If subclass chosen, store on workingChar for summary
+  if (key === 'subclass') workingChar.subclass = value;
+  updateSummary();
+}
+
+function setASIMode(lvl, mode, btn) {
+  btn.parentElement.querySelectorAll('.option-chip').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  asiModes[lvl] = mode;
+  asiPicks[lvl] = [];
+  document.getElementById('asi-body-' + lvl).style.display = 'block';
+  // Reset cell deltas
+  ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(ab) {
+    var d = document.getElementById('asidelta-' + lvl + '-' + ab);
+    var c = document.getElementById('asicell-' + lvl + '-' + ab);
+    if (d) d.textContent = '';
+    if (c) c.classList.remove('selected');
+  });
+  if (!decisions[lvl]) decisions[lvl] = {};
+  decisions[lvl]['asi'] = { mode: mode, picks: [] };
+  updateSummary();
+}
+
+function pickASI(lvl, ab, cell) {
+  var mode = asiModes[lvl];
+  if (!mode) return;
+  var picks = asiPicks[lvl] || [];
+  var maxPicks = mode === 'plus2' ? 1 : 2;
+
+  // Deselect if already picked
+  var existingIdx = picks.indexOf(ab);
+  if (existingIdx !== -1) {
+    picks.splice(existingIdx, 1);
+  } else {
+    if (picks.length >= maxPicks) picks.shift(); // replace oldest
+    picks.push(ab);
+  }
+  asiPicks[lvl] = picks;
+
+  // Update visuals
+  ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(a) {
+    var d = document.getElementById('asidelta-' + lvl + '-' + a);
+    var c = document.getElementById('asicell-' + lvl + '-' + a);
+    if (!d || !c) return;
+    var idx = picks.indexOf(a);
+    if (idx !== -1) {
+      var bonus = mode === 'plus2' ? 2 : 1;
+      d.textContent = '+' + bonus;
+      c.classList.add('selected');
+    } else {
+      d.textContent = '';
+      c.classList.remove('selected');
+    }
+  });
+
+  decisions[lvl]['asi'] = { mode: mode, picks: picks };
+  updateSummary();
+}
+
+function saveSpell(lvl, idx, value) {
+  if (!decisions[lvl]) decisions[lvl] = {};
+  if (!decisions[lvl].newSpells) decisions[lvl].newSpells = [];
+  decisions[lvl].newSpells[idx] = value;
+  updateSummary();
+}
+
+// ── Summary ─────────────────────────────────────────────────────────────────
+function updateSummary() {
+  var container = document.getElementById('summary-container');
+  if (!container) return;
+
+  // Accumulate all changes
+  var totalHP = 0;
+  var newSubclass = null;
+  var asiChanges = {};
+  var newSpells = [];
+  var autoFeatures = [];
+
+  for (var lvl = char.level + 1; lvl <= targetLevel; lvl++) {
+    var cls = char.cls;
+    var hpGain = (HP_PER_LEVEL[cls] || 5) + Math.floor(((workingChar.scores ? workingChar.scores.CON : 10) - 10) / 2);
+    totalHP += hpGain;
+
+    var d = decisions[lvl] || {};
+    if (d.subclass) newSubclass = d.subclass;
+    if (d.asi && d.asi.picks) {
+      d.asi.picks.forEach(function(ab) {
+        asiChanges[ab] = (asiChanges[ab] || 0) + (d.asi.mode === 'plus2' ? 2 : 1);
+      });
+    }
+    if (d.newSpells) {
+      d.newSpells.forEach(function(s) { if(s) newSpells.push(s); });
+    }
+
+    var classData = CLASSES[cls] || {};
+    var levelData = (classData.levels || {})[lvl] || {};
+    (levelData.auto || []).forEach(function(f) { autoFeatures.push(f[0]); });
+  }
+
+  var newProf = PROF_BONUS[targetLevel] || 2;
+  var newHP = computeCurrentHP() + totalHP;
+
+  var cards = [
+    { label: 'New Level', val: targetLevel, sub: '' },
+    { label: 'HP Gained', val: '+' + totalHP, sub: 'Total est. ' + newHP },
+    { label: 'Prof. Bonus', val: '+' + newProf, sub: '' },
+  ];
+
+  if (newSubclass) cards.push({ label: 'Subclass', val: newSubclass, sub: '' });
+
+  var asiStr = Object.entries(asiChanges).map(function(e) { return e[0]+' +'+e[1]; }).join(', ');
+  if (asiStr) cards.push({ label: 'Ability Increases', val: asiStr, sub: '' });
+  if (newSpells.length) cards.push({ label: 'New Spells', val: newSpells.join(', '), sub: '' });
+  if (autoFeatures.length) cards.push({ label: 'New Features', val: autoFeatures.join(', '), sub: '' });
+
+  container.innerHTML = '<div class="summary-grid">'
+    + cards.map(function(c) {
+        return '<div class="summary-card"><div class="summary-label">' + c.label + '</div>'
+          + '<div class="summary-val">' + c.val + '</div>'
+          + (c.sub ? '<div class="summary-sub">' + c.sub + '</div>' : '')
+          + '</div>';
+      }).join('')
+    + '</div>';
+}
+
+function computeCurrentHP() {
+  var cls = char.cls;
+  var c = CLASS_BONUSES_LU[cls] || {};
+  var con = Math.floor(((workingChar.scores ? workingChar.scores.CON : 10) - 10) / 2);
+  var base = (c.hpbase || 5) + con;
+  var extra = 0;
+  for (var l = 2; l <= char.level; l++) {
+    extra += (HP_PER_LEVEL[cls] || 5) + con;
+  }
+  return base + extra;
+}
+
+// ── Generate levelled PDF ──────────────────────────────────────────────────
+function generateLevelledSheet() {
+  // Build an updated char state combining original + decisions
+  var updated = JSON.parse(JSON.stringify(workingChar));
+  updated.level = targetLevel;
+
+  // Apply ASI bonuses
+  for (var lvl2 = char.level + 1; lvl2 <= targetLevel; lvl2++) {
+    var d2 = decisions[lvl2] || {};
+    if (d2.asi && d2.asi.picks) {
+      d2.asi.picks.forEach(function(ab) {
+        var bonus = d2.asi.mode === 'plus2' ? 2 : 1;
+        updated.asiBonus = updated.asiBonus || {};
+        updated.asiBonus[ab] = (updated.asiBonus[ab] || 0) + bonus;
+      });
+    }
+    if (d2.subclass) updated.subclass = d2.subclass;
+    if (d2.newSpells) {
+      d2.newSpells.forEach(function(s) { if(s && updated.spellsL1.indexOf(s) === -1) updated.spellsL1.push(s); });
+    }
+  }
+
+  // We cannot call the character creator's generateSheet directly here.
+  // Instead, build a summary PDF using jsPDF that shows the updated stats.
+  generateSummaryPDF(updated);
+}
+
+function generateSummaryPDF(ch) {
+  if (typeof window.jspdf === 'undefined') {
+    alert('PDF library not available. Please open the Character Forge character creator to generate PDFs.');
+    return;
+  }
+  var doc = new window.jspdf.jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  var PW=210, PH=297, ML=12, MR=12, MT=12, CW=PW-ML-MR;
+  var BK=[0,0,0], GY1=[240,240,240], GY2=[220,220,220], GY4=[100,100,100], WH=[255,255,255];
+
+  function rf(st,sz,col){ doc.setFont('helvetica',st); doc.setFontSize(sz); doc.setTextColor(...(col||BK)); }
+  function bx(x,y,w,h,fill,str,lw){ if(fill){doc.setFillColor(...fill);doc.rect(x,y,w,h,'F');} if(str){doc.setDrawColor(...str);doc.setLineWidth(lw||0.3);doc.rect(x,y,w,h);} }
+  function tx(t,x,y){ doc.text(t,x,y,{}); }
+  function ctx(t,cx,y){ doc.text(t,cx,y,{align:'center'}); }
+  function secH(title,y2){ bx(ML,y2,CW,5.5,GY2,BK,0.4); rf('bold',7,BK); tx(title.toUpperCase(),ML+2,y2+4); return y2+6; }
+
+  // Border
+  doc.setDrawColor(...BK); doc.setLineWidth(1.2); doc.rect(4,4,PW-8,PH-8);
+  doc.setDrawColor(...GY1); doc.setLineWidth(0.4); doc.rect(5.5,5.5,PW-11,PH-11);
+
+  var y=MT;
+  bx(ML,y,CW,12,GY2,BK,0.5);
+  rf('bold',13,BK); ctx('LEVEL-UP RECORD — D&D 2024',PW/2,y+8);
+  y+=14;
+  rf('normal',7,GY4);
+  ctx(ch.name+' | '+cap(ch.cls)+' | Level '+char.level+' → Level '+ch.level,PW/2,y+3);
+  y+=9;
+
+  // Updated stats
+  y=secH('UPDATED CHARACTER STATS',y);
+  var cls=ch.cls, c=CLASS_BONUSES_LU[cls]||{};
+  var con=Math.floor(((ch.scores?ch.scores.CON:10)-10)/2);
+  var newHP=computeCurrentHP()+['STR','DEX','CON','INT','WIS','CHA'].reduce(function(acc,ab){return acc;},0);
+  var newProf=PROF_BONUS[ch.level]||2;
+
+  var statRows=[
+    ['Name', ch.name],
+    ['Class & Level', cap(cls)+' — Level '+ch.level],
+    ['Proficiency Bonus', '+'+newProf],
+    ['Hit Die', c.hitdie||'d8'],
+  ];
+  if(ch.subclass) statRows.push(['Subclass',ch.subclass]);
+
+  statRows.forEach(function(row,ri){
+    bx(ML,y,CW,5.5,ri%2===0?WH:GY1,null);
+    rf('bold',7,BK); tx(row[0]+':',ML+2,y+3.8);
+    rf('normal',7,BK); tx(row[1],ML+45,y+3.8);
+    y+=5.5;
+  });
+  y+=3;
+
+  // Ability scores
+  y=secH('ABILITY SCORES',y);
+  var ABS=['STR','DEX','CON','INT','WIS','CHA'];
+  var sqW=CW/6;
+  ABS.forEach(function(ab,i){
+    var base=ch.scores?ch.scores[ab]:10;
+    var bonus=(ch.asiBonus?ch.asiBonus[ab]:0)||0;
+    var total=base+bonus;
+    var mod=Math.floor((total-10)/2);
+    var x=ML+i*sqW;
+    bx(x,y,sqW-1,18,i%2===0?WH:GY1,BK,0.3);
+    bx(x,y,sqW-1,5.5,GY2,null);
+    rf('bold',5.5,BK); ctx(ab,x+(sqW-1)/2,y+4.2);
+    rf('bold',14,BK); ctx((mod>=0?'+':'')+mod,x+(sqW-1)/2,y+13.5);
+    rf('normal',5.5,GY4); ctx(String(total),x+(sqW-1)/2,y+17.2);
+    if(bonus>0){rf('bold',5,GY4); ctx('+'+bonus+' ASI',x+(sqW-1)/2,y+16);}
+  });
+  y+=22;
+
+  // Changes summary
+  y=secH('CHANGES FROM LEVEL-UP',y);
+  var changes=[];
+  for(var l2=char.level+1;l2<=ch.level;l2++){
+    var d3=decisions[l2]||{};
+    var hpG=(HP_PER_LEVEL[cls]||5)+con;
+    changes.push('Level '+l2+': +'+hpG+' HP');
+    if(d3.subclass) changes.push('Subclass chosen: '+d3.subclass);
+    if(d3.asi&&d3.asi.picks&&d3.asi.picks.length) changes.push('ASI: '+d3.asi.picks.join(', ')+' ('+d3.asi.mode+')');
+    if(d3.newSpells) d3.newSpells.forEach(function(s){if(s)changes.push('New spell: '+s);});
+    var cd=CLASSES[cls]||{}, ld=(cd.levels||{})[l2]||{};
+    (ld.auto||[]).forEach(function(f){changes.push('Feature: '+f[0]);});
+  }
+  changes.forEach(function(ch2,ci){
+    bx(ML,y,CW,5.5,ci%2===0?WH:GY1,null);
+    rf('normal',6.5,BK); tx('• '+ch2,ML+2,y+3.8); y+=5.5;
+  });
+
+  // Footer
+  rf('normal',5.5,GY4);
+  ctx(ch.name+' | Level '+ch.level+' '+cap(cls)+' | D&D 2024 Character Forge',PW/2,PH-5);
+  doc.setDrawColor(...GY4); doc.setLineWidth(0.3); doc.line(ML,PH-7.5,PW-MR,PH-7.5);
+
+  doc.save(ch.name.replace(/\s+/g,'_')+'_L'+ch.level+'_'+cap(cls)+'_LevelUp.pdf');
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+function showError(msg){
+  var el = document.createElement('div');
+  el.className = 'error-badge';
+  el.textContent = '⚠ ' + msg;
+  document.getElementById('upload-zone').after(el);
+}
+function showSuccess(msg){
+  var el = document.createElement('div');
+  el.className = 'success-badge';
+  el.textContent = '✓ ' + msg;
+  document.getElementById('upload-zone').after(el);
+}
+
+// Minimal CLASS_BONUSES_LU (hp base + hitdie) for the level-up PDF calc
+var CLASS_BONUSES_LU = {
+  barbarian:{hpbase:12,hitdie:'d12'},fighter:{hpbase:10,hitdie:'d10'},paladin:{hpbase:10,hitdie:'d10'},
+  ranger:{hpbase:10,hitdie:'d10'},monk:{hpbase:8,hitdie:'d8'},rogue:{hpbase:8,hitdie:'d8'},
+  bard:{hpbase:8,hitdie:'d8'},cleric:{hpbase:8,hitdie:'d8'},druid:{hpbase:8,hitdie:'d8'},
+  warlock:{hpbase:8,hitdie:'d8'},wizard:{hpbase:6,hitdie:'d6'},sorcerer:{hpbase:6,hitdie:'d6'},
+};
+
+</script>
 </body>
 </html>
