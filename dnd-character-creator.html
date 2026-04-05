@@ -1288,23 +1288,22 @@
 
 <!-- Wizard step navigation -->
 <nav class="wizard-nav" id="wizard-nav">
-  <button class="wizard-step-pill active" onclick="goStep(1)" id="pill-1"><span class="pill-num">1</span><span class="pill-label">Identity</span></button>
-  <button class="wizard-step-pill" onclick="goStep(2)" id="pill-2"><span class="pill-num">2</span><span class="pill-label">Species</span></button>
-  <button class="wizard-step-pill" onclick="goStep(3)" id="pill-3"><span class="pill-num">3</span><span class="pill-label">Class</span></button>
-  <button class="wizard-step-pill" onclick="goStep(4)" id="pill-4"><span class="pill-num">4</span><span class="pill-label">Background</span></button>
-  <button class="wizard-step-pill" onclick="goStep(5)" id="pill-5"><span class="pill-num">5</span><span class="pill-label">Abilities</span></button>
-  <button class="wizard-step-pill" onclick="goStep(6)" id="pill-6"><span class="pill-num">6</span><span class="pill-label">Choices</span></button>
-  <button class="wizard-step-pill" onclick="goStep(7)" id="pill-7"><span class="pill-num">7</span><span class="pill-label">Spells</span></button>
-  <button class="wizard-step-pill" onclick="goStep(8)" id="pill-8"><span class="pill-num">8</span><span class="pill-label">Personality</span></button>
-  <button class="wizard-step-pill" onclick="goStep(9)" id="pill-9"><span class="pill-num">9</span><span class="pill-label">Review</span></button>
+  <button class="wizard-step-pill active" onclick="goStep(1)" id="pill-1"><span class="pill-num">1</span><span class="pill-label">Identity &amp; Species</span></button>
+  <button class="wizard-step-pill" onclick="goStep(2)" id="pill-2"><span class="pill-num">2</span><span class="pill-label">Class</span></button>
+  <button class="wizard-step-pill" onclick="goStep(3)" id="pill-3"><span class="pill-num">3</span><span class="pill-label">Background</span></button>
+  <button class="wizard-step-pill" onclick="goStep(4)" id="pill-4"><span class="pill-num">4</span><span class="pill-label">Abilities</span></button>
+  <button class="wizard-step-pill" onclick="goStep(5)" id="pill-5"><span class="pill-num">5</span><span class="pill-label">Choices</span></button>
+  <button class="wizard-step-pill" onclick="goStep(6)" id="pill-6"><span class="pill-num">6</span><span class="pill-label">Spells</span></button>
+  <button class="wizard-step-pill" onclick="goStep(7)" id="pill-7"><span class="pill-num">7</span><span class="pill-label">Personality</span></button>
+  <button class="wizard-step-pill" onclick="goStep(8)" id="pill-8"><span class="pill-num">8</span><span class="pill-label">Review</span></button>
 </nav>
 
-<!-- ── Step 1: Identity ─────────────────────────────────────────────── -->
+<!-- ── Step 1: Identity & Species ───────────────────────────────────── -->
 <div class="wizard-section active" id="step-1">
-  <div class="step-hint">Give your hero a name and set their level.</div>
+  <div class="step-hint">Start by naming your hero and choosing their <strong>Species</strong>. Species determines your passive traits, darkvision, resistances, and any innate spells — these never change and are always active. Hover any card for full details, then click to select. Species with a lineage (Elf, Tiefling, Dragonborn, Gnome) will show a sub-choice below.</div>
 
   <!-- Name & Level -->
-  <div class="top-row">
+  <div class="top-row" style="margin-bottom:1.5rem;">
     <div>
       <label for="char-name">Character Name</label>
       <input type="text" id="char-name" placeholder="Enter your hero's name…">
@@ -1314,150 +1313,148 @@
       <input type="number" id="char-level" value="1" min="1" max="1" readonly style="opacity:0.6; cursor:not-allowed;">
     </div>
   </div>
-</div>
 
-<!-- ── Step 2: Species ─────────────────────────────────────────────── -->
-<div class="wizard-section" id="step-2">
-  <div class="step-hint">Choose your character's species — each grants unique traits, speed, and passive abilities.</div>
+  <div class="section-title">Species</div>
   <!-- Hidden select keeps existing JS working -->
   <select id="species" onchange="updateDesc('species')" style="display:none"></select>
-  <div class="pick-section-label">Common Species</div>
+
+  <div class="pick-section-label">Common Species — found throughout the world</div>
   <div class="pick-grid pick-grid-species" id="species-cards">
 
     <div class="pick-card" onclick="selectPick('species','human')">
       <span class="pick-card-icon">⚔</span>
       <div class="pick-card-name">Human</div>
-      <div class="pick-card-desc">Adaptable heroes who gain a bonus feat and heroic inspiration after every long rest.</div>
+      <div class="pick-card-desc">Gain an extra Origin Feat at creation, Heroic Inspiration after every Long Rest, and one bonus skill. The most versatile species — suits any class.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Human</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Size</span><span class="ptr-val">Medium or Small</span></div>
-        <div class="pick-tooltip-traits">Resourceful: Heroic Inspiration after each Long Rest. Skillful: one extra skill. Versatile: one extra Origin Feat at character creation.</div>
+        <div class="pick-tooltip-traits">Resourceful: Heroic Inspiration after each Long Rest. Skillful: one extra skill proficiency. Versatile: one extra Origin Feat at character creation.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','elf')">
       <span class="pick-card-icon">🌿</span>
       <div class="pick-card-name">Elf</div>
-      <div class="pick-card-desc">Graceful immortals who resist charm, sleep magic, and need only 4 hours of trance to rest.</div>
+      <div class="pick-card-desc">Immune to magic sleep, advantage vs Charmed, 60 ft. Darkvision, and only need 4 hours to Long Rest. Choose a Lineage — Drow (darkness spells), High Elf (wizard cantrip + Misty Step), or Wood Elf (35 ft. speed + Pass Without Trace).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Elf</div>
-        <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
-        <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft.</span></div>
-        <div class="pick-tooltip-traits">Fey Ancestry: advantage vs. Charmed, immune to magic sleep. Trance: 4 hrs = full Long Rest. Keen Senses: Insight, Perception, or Survival prof. Choose a Lineage (High, Wood, Dark).</div>
+        <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft. (Wood: 35 ft.)</span></div>
+        <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft. (Drow: 120 ft.)</span></div>
+        <div class="pick-tooltip-traits">Fey Ancestry: adv. vs Charmed, immune to magic sleep. Keen Senses: +1 skill. Trance: 4 hrs = Long Rest. Choose Lineage: Drow, High Elf, or Wood Elf — each grants innate spells at L3 and L5.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','dwarf')">
       <span class="pick-card-icon">⛏</span>
       <div class="pick-card-name">Dwarf</div>
-      <div class="pick-card-desc">Stout and resilient, dwarves resist poison, see 120 ft. in darkness, and sense stonework underground.</div>
+      <div class="pick-card-desc">Resistance to Poison damage, advantage on Poison saves, 120 ft. Darkvision, and Stonecunning — Tremorsense 60 ft. for 10 minutes (recharges on Long Rest, uses = Prof Bonus).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Dwarf</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">120 ft.</span></div>
-        <div class="pick-tooltip-traits">Dwarven Resilience: resistance to Poison damage, advantage on Poison saves. Stonecunning: Tremorsense 60 ft. for 10 minutes, uses = Prof Bonus per Long Rest.</div>
+        <div class="pick-tooltip-traits">Dwarven Resilience: resistance to Poison, adv. on Poison saves. Stonecunning: Tremorsense 60 ft. for 10 min (uses = Prof Bonus per Long Rest).</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','halfling')">
       <span class="pick-card-icon">🍀</span>
       <div class="pick-card-name">Halfling</div>
-      <div class="pick-card-desc">Lucky and nimble, halflings reroll any 1 rolled on a d20 and resist the frightened condition.</div>
+      <div class="pick-card-desc">Lucky: reroll any d20 Test result of 1 (once per roll). Brave: advantage vs Frightened. Naturally Stealthy: can hide behind a creature one size larger. Small size, 30 ft. speed.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Halfling</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Size</span><span class="ptr-val">Small</span></div>
-        <div class="pick-tooltip-traits">Lucky: reroll any d20 Test result of 1. Brave: advantage vs. Frightened. Naturally Stealthy: can hide behind a creature one size larger.</div>
+        <div class="pick-tooltip-traits">Lucky: reroll any d20 Test result of 1. Brave: adv. vs Frightened. Naturally Stealthy: can hide behind a creature one size larger.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','gnome')">
       <span class="pick-card-icon">⚙</span>
       <div class="pick-card-name">Gnome</div>
-      <div class="pick-card-desc">Curious tinkerers with darkvision who have advantage on mental saving throws against magic.</div>
+      <div class="pick-card-desc">Advantage on INT, WIS, and CHA saving throws vs magic. 60 ft. Darkvision. Choose a Lineage for bonus cantrips: Forest (speak with animals), Rock (Mending + Prestidigitation), or Deep Gnome (Underdark survival).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Gnome</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft.</span></div>
-        <div class="pick-tooltip-traits">Gnomish Cunning: advantage on INT, WIS, CHA saves vs. magic. Choose a Lineage: Forest (speak with animals), Rock (tinker tools), Svirfneblin (deep gnome).</div>
+        <div class="pick-tooltip-traits">Gnomish Cunning: adv. on INT, WIS, CHA saves vs. magic. Choose Lineage: Forest (speak with animals), Rock (tinker), or Deep (Underdark concealment).</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','half-orc')">
       <span class="pick-card-icon">⚡</span>
       <div class="pick-card-name">Half-Orc</div>
-      <div class="pick-card-desc">Fierce survivors who shrug off lethal blows once per rest and gain temp HP on a dash.</div>
+      <div class="pick-card-desc">Relentless Endurance: drop to 1 HP instead of 0 once per Long Rest. Adrenaline Rush: Bonus Action Dash + gain Prof Bonus temp HP. 60 ft. Darkvision. No sub-lineage — straightforward and powerful.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Half-Orc</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft.</span></div>
-        <div class="pick-tooltip-traits">Relentless Endurance: drop to 1 HP instead of 0 once per Long Rest. Adrenaline Rush: Bonus Action Dash and gain Prof Bonus temp HP.</div>
+        <div class="pick-tooltip-traits">Relentless Endurance: drop to 1 HP instead of 0 once per Long Rest. Adrenaline Rush: Bonus Action Dash + gain Prof Bonus temp HP.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','tiefling')">
       <span class="pick-card-icon">✦</span>
       <div class="pick-card-name">Tiefling</div>
-      <div class="pick-card-desc">Infernal-touched mortals with darkvision and innate spells from a fiendish legacy.</div>
+      <div class="pick-card-desc">Choose a Legacy: Infernal (Fire resist + Hellish Rebuke), Abyssal (Poison resist + Ray of Sickness), or Chthonic (Necrotic resist + False Life). All legacies grant Thaumaturgy and spells at L3 and L5. 60 ft. Darkvision.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Tiefling</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft.</span></div>
-        <div class="pick-tooltip-traits">Fiendish Legacy: choose Abyssal, Chthonic, or Infernal — each grants a resistance and a set of innate spells. Thaumaturgy cantrip at will.</div>
+        <div class="pick-tooltip-traits">Fiendish Legacy: choose Infernal (Fire resist), Abyssal (Poison resist), or Chthonic (Necrotic resist). Each grants Thaumaturgy + two innate spells at L3/L5.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','dragonborn')">
       <span class="pick-card-icon">🐉</span>
       <div class="pick-card-name">Dragonborn</div>
-      <div class="pick-card-desc">Draconic scions who breathe elemental energy and resist their ancestry's damage type.</div>
+      <div class="pick-card-desc">Breath Weapon: exhale elemental energy (2d6 at L1, scales up) as part of an Attack action. Choose from 10 ancestries for your damage type and resistance. Draconic Flight unlocks at Level 5. No Darkvision.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Dragonborn</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Size</span><span class="ptr-val">Medium</span></div>
-        <div class="pick-tooltip-traits">Breath Weapon: once per turn, exhale elemental energy (CON save, 2d6 at L1). Damage Resistance: your ancestry type. Draconic Flight at L5.</div>
+        <div class="pick-tooltip-traits">Breath Weapon: 2d6 elemental damage (CON save), once per turn. Damage Resistance: your ancestry type. Draconic Flight at L5. Ten ancestries to choose from.</div>
       </div>
     </div>
 
   </div>
 
-  <div class="pick-section-label">Uncommon Species</div>
+  <div class="pick-section-label">Uncommon Species — touched by otherworldly forces</div>
   <div class="pick-grid pick-grid-species">
 
     <div class="pick-card" onclick="selectPick('species','aasimar')">
       <span class="pick-card-icon">☀</span>
       <div class="pick-card-name">Aasimar</div>
-      <div class="pick-card-desc">Radiant celestial scions who heal with a touch, carry the light cantrip, and resist necrotic and radiant damage.</div>
+      <div class="pick-card-desc">Radiant celestial scions who heal with a touch, carry the Light cantrip, and resist necrotic and radiant damage.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Aasimar</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">60 ft.</span></div>
-        <div class="pick-tooltip-traits">Healing Hands: restore Prof Bonus HP (uses = Prof Bonus). Light Bearer: Light cantrip at will. Celestial Resistance: resist Necrotic and Radiant. Celestial Revelation at L3.</div>
+        <div class="pick-tooltip-traits">Healing Hands: restore Prof Bonus HP (uses = Prof Bonus). Light Bearer: Light cantrip. Celestial Resistance: resist Necrotic + Radiant. Celestial Revelation power at L3.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','goliath')">
       <span class="pick-card-icon">🏔</span>
       <div class="pick-card-name">Goliath</div>
-      <div class="pick-card-desc">Mountain-born giants with 35 ft. speed who survive lethal blows and can become Large once per rest.</div>
+      <div class="pick-card-desc">Mountain-born titans with 35 ft. speed who can shrug off damage and briefly become Large.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Goliath</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">35 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Size</span><span class="ptr-val">Medium</span></div>
-        <div class="pick-tooltip-traits">Giant Ancestry: choose a Giant type for a passive trait. Large Form: once per Long Rest, become Large for 10 minutes. Stone's Endurance: reduce damage once per Short Rest.</div>
+        <div class="pick-tooltip-traits">Giant Ancestry: choose a Giant type for a passive trait. Large Form: become Large for 10 min once per Long Rest. Stone's Endurance: reduce damage once per Short Rest.</div>
       </div>
     </div>
 
     <div class="pick-card" onclick="selectPick('species','orc')">
       <span class="pick-card-icon">🪓</span>
       <div class="pick-card-name">Orc</div>
-      <div class="pick-card-desc">Powerful and relentless, orcs see 120 ft. in darkness, dash for temp HP, and survive death once per rest.</div>
+      <div class="pick-card-desc">Powerful and relentless — 120 ft. darkvision, burst-dash for temp HP, and Relentless Endurance once per rest.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Orc</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Speed</span><span class="ptr-val">30 ft.</span></div>
         <div class="pick-tooltip-row"><span class="ptr-label">Darkvision</span><span class="ptr-val">120 ft.</span></div>
-        <div class="pick-tooltip-traits">Adrenaline Rush: Bonus Action Dash + gain Prof Bonus temp HP. Relentless Endurance: drop to 1 HP instead of 0 once per Long Rest. Powerful Build: count as Large for carrying.</div>
+        <div class="pick-tooltip-traits">Adrenaline Rush: Bonus Action Dash + Prof Bonus temp HP. Relentless Endurance: drop to 1 HP instead of 0 once per Long Rest. Powerful Build: count as Large for carrying capacity.</div>
       </div>
     </div>
 
@@ -1474,17 +1471,17 @@
 </div>
 
 <!-- ── Step 3: Class ───────────────────────────────────────────────── -->
-<div class="wizard-section" id="step-3">
-  <div class="step-hint">Your class shapes every combat choice — hit die, primary stat, features, and playstyle.</div>
+<div class="wizard-section" id="step-2">
+  <div class="step-hint">Your <strong>Class</strong> defines your role in combat and what you can do. It sets your <em>hit die</em> (how much HP you gain per level), <em>saving throw proficiencies</em>, <em>armor and weapon proficiencies</em>, and Level 1 features. Hover any card for your proficiency list and subclass options — subclasses are chosen at <em>Level 3</em> and are not part of this creation step.</div>
   <select id="class" onchange="updateDesc('class')" style="display:none"></select>
 
-  <div class="pick-section-label">Martial Classes</div>
+  <div class="pick-section-label">Martial Classes — strength, steel &amp; skill</div>
   <div class="pick-grid pick-grid-class">
 
     <div class="pick-card" onclick="selectPick('class','barbarian')">
       <span class="pick-card-icon">🪓</span>
       <div class="pick-card-name">Barbarian</div>
-      <div class="pick-card-desc">Primal rage fuels devastating melee — d12 hit die, unarmored toughness, physical damage resistance.</div>
+      <div class="pick-card-desc">d12 hit die. AC = 10+DEX+CON while unarmored. Rage 2×/Long Rest: resist Bludgeoning, Piercing, Slashing and deal +2 melee damage. Weapon Mastery (2 weapons). No spellcasting. Best with STR 16+ and CON 14+.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Barbarian</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d12</span></div>
@@ -1498,7 +1495,7 @@
     <div class="pick-card" onclick="selectPick('class','fighter')">
       <span class="pick-card-icon">⚔</span>
       <div class="pick-card-name">Fighter</div>
-      <div class="pick-card-desc">Disciplined warriors mastering any weapon — most attacks per round, Second Wind, and Action Surge.</div>
+      <div class="pick-card-desc">d10 hit die. Second Wind: heal 1d10+level as a Bonus Action. Action Surge: take a full extra Action once per Short Rest. Weapon Mastery (3 weapons). Any Fighting Style. Extra Attack at Level 5. Best with STR or DEX 16+.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Fighter</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d10</span></div>
@@ -1512,7 +1509,7 @@
     <div class="pick-card" onclick="selectPick('class','monk')">
       <span class="pick-card-icon">☯</span>
       <div class="pick-card-name">Monk</div>
-      <div class="pick-card-desc">Focused martial artists channeling Ki for unarmed strikes, deflection, and superhuman movement.</div>
+      <div class="pick-card-desc">d8 hit die. AC = 10+DEX+WIS with no armor or shield. Unarmed strikes deal 1d6+DEX. Focus Points (= level) for Flurry of Blows, Dodge, or Dash as Bonus Action. No spellcasting. Requires high DEX and WIS.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Monk</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1526,7 +1523,7 @@
     <div class="pick-card" onclick="selectPick('class','paladin')">
       <span class="pick-card-icon">🛡</span>
       <div class="pick-card-name">Paladin</div>
-      <div class="pick-card-desc">Oath-bound holy warriors who smite evil, heal allies, and bolster the party with divine auras.</div>
+      <div class="pick-card-desc">d10 hit die. Divine Smite: spend a spell slot after a hit for +2d8 Radiant damage. Lay on Hands healing pool (5×level HP). CHA-based spellcasting. Weapon Mastery (2 weapons). Best with STR 16+ and CHA 14+.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Paladin</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d10</span></div>
@@ -1540,7 +1537,7 @@
     <div class="pick-card" onclick="selectPick('class','ranger')">
       <span class="pick-card-icon">🏹</span>
       <div class="pick-card-name">Ranger</div>
-      <div class="pick-card-desc">Wilderness hunters who track prey, bond with beasts, and blend martial skill with nature spells.</div>
+      <div class="pick-card-desc">d10 hit die. Hunter's Mark always prepared, free cast once per Long Rest. Expertise in 2 skills. WIS-based spellcasting from Level 2. Weapon Mastery (2 weapons). 3 skill proficiencies. Best with DEX 16+ and WIS 14+.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Ranger</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d10</span></div>
@@ -1554,7 +1551,7 @@
     <div class="pick-card" onclick="selectPick('class','rogue')">
       <span class="pick-card-icon">🗡</span>
       <div class="pick-card-name">Rogue</div>
-      <div class="pick-card-desc">Shadow operatives dealing massive Sneak Attack damage with free Cunning Action every turn.</div>
+      <div class="pick-card-desc">d8 hit die. Sneak Attack: +1d6 per 2 levels when you have advantage or an ally flanks. Cunning Action: free Dash, Disengage, or Hide as a Bonus Action every turn. Expertise in 2 skills. 4 skill proficiencies. Best with DEX 16+.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Rogue</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1567,13 +1564,13 @@
 
   </div>
 
-  <div class="pick-section-label">Spellcasting Classes</div>
+  <div class="pick-section-label">Spellcasting Classes — arcane, divine &amp; natural magic</div>
   <div class="pick-grid pick-grid-class">
 
     <div class="pick-card" onclick="selectPick('class','bard')">
       <span class="pick-card-icon">🎵</span>
       <div class="pick-card-name">Bard</div>
-      <div class="pick-card-desc">Charismatic performers who inspire allies and weave spells — versatile casters with social mastery.</div>
+      <div class="pick-card-desc">d8 hit die. CHA-based full spellcaster — widest skill list in the game (3 skills + all skills proficiency). Bardic Inspiration: give allies a d6 bonus die (CHA mod uses per Long Rest). Jack of All Trades on all untrained checks.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Bard</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1587,7 +1584,7 @@
     <div class="pick-card" onclick="selectPick('class','cleric')">
       <span class="pick-card-icon">✝</span>
       <div class="pick-card-name">Cleric</div>
-      <div class="pick-card-desc">Divine channelers who heal, smite undead, and prepare from the full cleric list each day.</div>
+      <div class="pick-card-desc">d8 hit die. WIS-based full spellcaster, prepares from entire Cleric spell list. Channel Divinity: Turn Undead or Divine Order feature. Choose Divine Order at Level 1: Protector (heavy armor + martial weapons) or Thaumaturge (skill bonuses).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Cleric</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1601,7 +1598,7 @@
     <div class="pick-card" onclick="selectPick('class','druid')">
       <span class="pick-card-icon">🌿</span>
       <div class="pick-card-name">Druid</div>
-      <div class="pick-card-desc">Nature's guardians who shapeshift into beasts, command the wilds, and prepare spells daily.</div>
+      <div class="pick-card-desc">d8 hit die. WIS-based full spellcaster, prepares from entire Druid spell list. Wild Shape: transform into a beast (CR 1/4) twice per Short Rest. Choose Primal Order: Warden (martial weapons + medium armor) or Magician (+1 cantrip + skill bonuses).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Druid</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1615,7 +1612,7 @@
     <div class="pick-card" onclick="selectPick('class','sorcerer')">
       <span class="pick-card-icon">💥</span>
       <div class="pick-card-name">Sorcerer</div>
-      <div class="pick-card-desc">Innate magic bloodlines grant raw power — Sorcery Points twist and empower a smaller known spell list.</div>
+      <div class="pick-card-desc">d6 hit die. CHA-based full spellcaster with a fixed known spell list. Innate Sorcery: advantage on spell attacks, enemies have disadvantage on saves — 2× per Long Rest. Sorcery Points at Level 2 for Metamagic. Subclass at Level 3.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Sorcerer</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d6</span></div>
@@ -1629,7 +1626,7 @@
     <div class="pick-card" onclick="selectPick('class','warlock')">
       <span class="pick-card-icon">👁</span>
       <div class="pick-card-name">Warlock</div>
-      <div class="pick-card-desc">A pact with an otherworldly patron grants eldritch powers — spell slots recharge on Short Rest.</div>
+      <div class="pick-card-desc">d8 hit die. CHA-based spellcaster with Pact Magic slots that recharge on Short Rest (not Long Rest). Only 1 slot at Level 1, but every Short Rest recharges it. Eldritch Invocations: choose 1 permanent supernatural boon at Level 1. Subclass Patron at Level 1.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Warlock</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d8</span></div>
@@ -1643,7 +1640,7 @@
     <div class="pick-card" onclick="selectPick('class','wizard')">
       <span class="pick-card-icon">📜</span>
       <div class="pick-card-name">Wizard</div>
-      <div class="pick-card-desc">Scholarly arcane mastery — widest spell list, a spellbook to expand, and ritual casting without slots.</div>
+      <div class="pick-card-desc">d6 hit die. INT-based full spellcaster with the game's largest spell list. Spellbook: 6 L1 spells at creation, add more indefinitely. Ritual Adept: cast ritual spells from spellbook without a slot. Arcane Recovery: regain 1 L1 slot on Short Rest.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Wizard</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Hit Die</span><span class="ptr-val">d6</span></div>
@@ -1660,15 +1657,15 @@
 </div>
 
 <!-- ── Step 4: Background ──────────────────────────────────────────── -->
-<div class="wizard-section" id="step-4">
-  <div class="step-hint">Your background grants an origin feat, two skill proficiencies, a tool, and a +2/+1 ability score increase.</div>
+<div class="wizard-section" id="step-3">
+  <div class="step-hint">Your <strong>Background</strong> represents your life before adventuring. It grants you: two <em>skill proficiencies</em>, one <em>tool proficiency</em>, one <em>Origin Feat</em> (a passive bonus active from Level 1), and a <strong>+2/+1 Ability Score Increase</strong> you assign freely in the next step. Hover any card to see exactly what each background grants.</div>
   <select id="background" onchange="updateDesc('background')" style="display:none"></select>
   <div class="pick-grid pick-grid-bg" id="background-cards">
 
     <div class="pick-card" onclick="selectPick('background','acolyte')">
       <span class="pick-card-icon">🕊</span>
       <div class="pick-card-name">Acolyte</div>
-      <div class="pick-card-desc">Temple devotee who gains Magic Initiate and speaks the language of the divine.</div>
+      <div class="pick-card-desc">Magic Initiate (Cleric, Druid, or Wizard): learn 2 cantrips + 1 L1 spell, cast free once per Long Rest. Skills: Insight + Religion. Tool: Calligrapher's Supplies.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Acolyte</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Magic Initiate</span></div>
@@ -1681,7 +1678,7 @@
     <div class="pick-card" onclick="selectPick('background','artisan')">
       <span class="pick-card-icon">🔨</span>
       <div class="pick-card-name">Artisan</div>
-      <div class="pick-card-desc">A skilled craftsperson with the Crafter feat and deep knowledge of trade and commerce.</div>
+      <div class="pick-card-desc">Crafter: proficiency in 3 Artisan's Tools, craft items at half cost. Skills: Investigation + Persuasion. Tool: one Artisan's Tool of your choice.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Artisan</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Crafter</span></div>
@@ -1694,7 +1691,7 @@
     <div class="pick-card" onclick="selectPick('background','charlatan')">
       <span class="pick-card-icon">🎭</span>
       <div class="pick-card-name">Charlatan</div>
-      <div class="pick-card-desc">A silver-tongued deceiver with the Skilled feat and expertise in cons and forgeries.</div>
+      <div class="pick-card-desc">Skilled: proficiency in any 3 skills or tools of your choice. Skills: Deception + Sleight of Hand. Tool: Forgery Kit. Flexible pick for any build.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Charlatan</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Skilled</span></div>
@@ -1707,7 +1704,7 @@
     <div class="pick-card" onclick="selectPick('background','criminal')">
       <span class="pick-card-icon">🔓</span>
       <div class="pick-card-name">Criminal</div>
-      <div class="pick-card-desc">A life outside the law grants Alert, lock-picking tools, and stealth expertise.</div>
+      <div class="pick-card-desc">Alert: +5 Initiative, can't be surprised while conscious. Skills: Sleight of Hand + Stealth. Tool: Thieves' Tools. Excellent for Rogues, Fighters, and Rangers.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Criminal</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Alert</span></div>
@@ -1720,7 +1717,7 @@
     <div class="pick-card" onclick="selectPick('background','entertainer')">
       <span class="pick-card-icon">🎶</span>
       <div class="pick-card-name">Entertainer</div>
-      <div class="pick-card-desc">A performer of music or theatre with the Musician feat winning crowds with acrobatics and art.</div>
+      <div class="pick-card-desc">Musician: proficiency in 3 instruments; grant Bardic Inspiration to up to 5 allies after 1 minute of music. Skills: Acrobatics + Performance. Tool: Musical Instrument of your choice.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Entertainer</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Musician</span></div>
@@ -1733,7 +1730,7 @@
     <div class="pick-card" onclick="selectPick('background','farmer')">
       <span class="pick-card-icon">🌾</span>
       <div class="pick-card-name">Farmer</div>
-      <div class="pick-card-desc">Tough rural upbringing grants the Tough feat, carpentry tools, and knowledge of animals and land.</div>
+      <div class="pick-card-desc">Tough: +2 HP per character level (retroactive). Skills: Animal Handling + Nature. Tool: Carpenter's Tools. Best durability feat in the game — great for any frontliner.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Farmer</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Tough</span></div>
@@ -1746,7 +1743,7 @@
     <div class="pick-card" onclick="selectPick('background','guard')">
       <span class="pick-card-icon">🛡</span>
       <div class="pick-card-name">Guard</div>
-      <div class="pick-card-desc">Military discipline gives Alert, a sharp eye for threats, and training in athletics and perception.</div>
+      <div class="pick-card-desc">Alert: +5 Initiative, can't be surprised. Skills: Athletics + Perception. Tool: Gaming Set. Pairs exceptionally well with Fighter, Ranger, or Rogue initiative builds.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Guard</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Alert</span></div>
@@ -1759,7 +1756,7 @@
     <div class="pick-card" onclick="selectPick('background','guide')">
       <span class="pick-card-icon">🗺</span>
       <div class="pick-card-name">Guide</div>
-      <div class="pick-card-desc">An experienced wilderness scout with Magic Initiate (Druid) who never gets lost and tracks anything.</div>
+      <div class="pick-card-desc">Magic Initiate (Druid): 2 cantrips + 1 L1 Druid spell, free cast per Long Rest. Skills: Stealth + Survival. Tool: Cartographer's Tools. Natural pairing for Ranger and Druid.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Guide</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Magic Initiate (Druid)</span></div>
@@ -1772,7 +1769,7 @@
     <div class="pick-card" onclick="selectPick('background','hermit')">
       <span class="pick-card-icon">🏕</span>
       <div class="pick-card-name">Hermit</div>
-      <div class="pick-card-desc">A solitary seeker with the Healer feat, deep insight, and medicinal knowledge from years alone.</div>
+      <div class="pick-card-desc">Healer: stabilize dying creatures (they regain 1 HP), or restore 1d6+4+level HP using a Healer's Kit (once per Short Rest per creature). Skills: Medicine + Religion. Tool: Herbalism Kit.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Hermit</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Healer</span></div>
@@ -1785,7 +1782,7 @@
     <div class="pick-card" onclick="selectPick('background','merchant')">
       <span class="pick-card-icon">💰</span>
       <div class="pick-card-name">Merchant</div>
-      <div class="pick-card-desc">A trade-road veteran with the Lucky feat, persuasion skills, and connections across many settlements.</div>
+      <div class="pick-card-desc">Lucky: 3 Luck Points per Long Rest — spend to reroll any d20 Test and choose which result to use. Skills: Animal Handling + Persuasion. Tool: Navigator's Tools.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Merchant</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Lucky</span></div>
@@ -1798,7 +1795,7 @@
     <div class="pick-card" onclick="selectPick('background','noble')">
       <span class="pick-card-icon">👑</span>
       <div class="pick-card-name">Noble</div>
-      <div class="pick-card-desc">Aristocratic upbringing grants Skilled, social access, and proficiency in history and persuasion.</div>
+      <div class="pick-card-desc">Skilled: proficiency in any 3 skills or tools. Skills: History + Persuasion. Tool: Gaming Set. Best for CHA-based characters (Bard, Paladin, Warlock, Sorcerer, Rogue).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Noble</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Skilled</span></div>
@@ -1811,7 +1808,7 @@
     <div class="pick-card" onclick="selectPick('background','sailor')">
       <span class="pick-card-icon">⚓</span>
       <div class="pick-card-name">Sailor</div>
-      <div class="pick-card-desc">A seasoned mariner with Tavern Brawler who thrives in athletics and navigation.</div>
+      <div class="pick-card-desc">Tavern Brawler: unarmed strikes deal 1d4+STR, grapple as a Bonus Action after hitting. Skills: Acrobatics + Perception. Tool: Navigator's Tools. Synergizes with Monk and Barbarian.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Sailor</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Tavern Brawler</span></div>
@@ -1824,7 +1821,7 @@
     <div class="pick-card" onclick="selectPick('background','scribe')">
       <span class="pick-card-icon">✒</span>
       <div class="pick-card-name">Scribe</div>
-      <div class="pick-card-desc">A meticulous record-keeper with Skilled, investigation expertise, and calligraphy training.</div>
+      <div class="pick-card-desc">Skilled: proficiency in any 3 skills or tools. Skills: Investigation + Perception. Tool: Calligrapher's Supplies. Ideal for Intelligence-focused characters like Wizard and Arcane Trickster.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Scribe</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Skilled</span></div>
@@ -1837,7 +1834,7 @@
     <div class="pick-card" onclick="selectPick('background','soldier')">
       <span class="pick-card-icon">⚔</span>
       <div class="pick-card-name">Soldier</div>
-      <div class="pick-card-desc">Battle-hardened service grants Savage Attacker, athletics proficiency, and intimidation.</div>
+      <div class="pick-card-desc">Savage Attacker: once per turn, reroll all weapon damage dice and use either result. Skills: Athletics + Intimidation. Tool: Gaming Set. Best on high-damage martials (Barbarian, Fighter, Paladin).</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Soldier</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Savage Attacker</span></div>
@@ -1850,7 +1847,7 @@
     <div class="pick-card" onclick="selectPick('background','wayfarer')">
       <span class="pick-card-icon">🧭</span>
       <div class="pick-card-name">Wayfarer</div>
-      <div class="pick-card-desc">A wandering traveler with Lucky, keen survival instincts, and a knack for picking pockets.</div>
+      <div class="pick-card-desc">Lucky: 3 Luck Points per Long Rest to reroll any d20 Test. Skills: Insight + Sleight of Hand. Tool: Thieves' Tools. Versatile pick that suits any class that values skill breadth.</div>
       <div class="pick-tooltip">
         <div class="pick-tooltip-title">Wayfarer</div>
         <div class="pick-tooltip-row"><span class="ptr-label">Feat</span><span class="ptr-val">Lucky</span></div>
@@ -1866,7 +1863,7 @@
 </div>
 
 <!-- ── Step 5: Ability Scores ──────────────────────────────────────── -->
-<div class="wizard-section" id="step-5">
+<div class="wizard-section" id="step-4">
   <div class="step-hint">Assign your ability scores using Point Buy (27 points). Each score above 8 costs points. You'll add your Background's +2/+1 bonuses in the next step.</div>
   <div class="section">
     <div class="section-title">Ability Scores — Point Buy</div>
@@ -1886,6 +1883,28 @@
 
     <div class="abilities-grid" id="abilities-grid">
     </div>
+    <!-- Background ASI panel — shown when background is selected -->
+    <div id="bg-asi-panel" style="display:none; margin-top:1.2rem;">
+      <div class="bg-asi-bar">
+        <span class="bg-asi-title">Background Ability Score Increases</span>
+        <span class="bg-asi-hint" id="bg-asi-hint"></span>
+      </div>
+      <div class="bg-asi-row">
+        <div class="bg-asi-field">
+          <label for="asi-plus2">+2 bonus to</label>
+          <select id="asi-plus2" onchange="applyASI()">
+            <option value="">— choose ability —</option>
+          </select>
+        </div>
+        <div class="bg-asi-sep">+</div>
+        <div class="bg-asi-field">
+          <label for="asi-plus1">+1 bonus to</label>
+          <select id="asi-plus1" onchange="applyASI()">
+            <option value="">— choose ability —</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
     <!-- Background ASI panel — shown once a background is selected -->
     <div id="prof-section" style="display:none; margin-top:1.5rem;">
@@ -1902,7 +1921,7 @@
 </div>
 
 <!-- ── Step 6: Choices ─────────────────────────────────────────────── -->
-<div class="wizard-section" id="step-6">
+<div class="wizard-section" id="step-5">
   <div class="step-hint">Make your background ability score choices and any class-specific decisions (fighting style, weapon mastery, invocations, etc.).</div>
 
   <!-- Background ASI -->
@@ -1929,7 +1948,7 @@
 </div>
 
 <!-- ── Step 7: Spells ──────────────────────────────────────────────── -->
-<div class="wizard-section" id="step-7">
+<div class="wizard-section" id="step-6">
   <div class="step-hint" id="step7-hint">Choose your spells and cantrips. This step is only relevant for spellcasting classes.</div>
   <div id="spells-outer-section" style="display:block;">
     <div class="section">
@@ -1949,7 +1968,7 @@
 </div>
 
 <!-- ── Step 8: Personality ─────────────────────────────────────────── -->
-<div class="wizard-section" id="step-8">
+<div class="wizard-section" id="step-7">
   <div class="step-hint">Add personality details and choose your alignment. These are optional but help bring your character to life.</div>
   <!-- Alignment -->
   <div class="section">
@@ -1985,7 +2004,7 @@
 </div>
 
 <!-- ── Step 9: Review & Generate ──────────────────────────────────── -->
-<div class="wizard-section" id="step-9">
+<div class="wizard-section" id="step-8">
   <div class="step-hint">Review your character below. When you're happy, generate the PDF.</div>
 
   <div class="review-grid" id="review-grid">
@@ -2527,40 +2546,12 @@ const TIEFLING_LEGACIES = {
 let selectedLineage = null;
 
 function showLineagePicker(species) {
-  const picker = document.getElementById('lineage-picker');
-  const sel    = document.getElementById('lineage-select');
-  const label  = document.getElementById('lineage-label');
-  const card   = document.getElementById('lineage-card');
-
+  // The new showSpeciesSubPicker handles all lineage/legacy UI.
+  // This function is kept as a no-op so existing callers don't break.
+  // Reset selectedLineage when species changes to a non-lineage species.
   if (species !== 'elf' && species !== 'tiefling') {
-    picker.style.display = 'none';
     selectedLineage = null;
-    card.style.display = 'none';
-    return;
   }
-
-  const data   = species === 'elf' ? ELF_LINEAGES : TIEFLING_LEGACIES;
-  const isElf  = species === 'elf';
-  label.textContent = isElf ? 'Elf Lineage' : 'Fiendish Legacy';
-
-  sel.innerHTML = `<option value="">— Choose ${isElf ? 'Lineage' : 'Legacy'} —</option>`;
-  Object.entries(data).forEach(([key, val]) => {
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = val.name;
-    sel.appendChild(opt);
-  });
-
-  // Restore prior selection if same species
-  if (selectedLineage && data[selectedLineage]) {
-    sel.value = selectedLineage;
-    renderLineageCard(data[selectedLineage]);
-  } else {
-    selectedLineage = null;
-    card.style.display = 'none';
-  }
-
-  picker.style.display = 'block';
 }
 
 function updateLineage() {
@@ -3342,6 +3333,110 @@ function updateCombatSection() {
 let selectedHumanFeat = null;
 const skilledChoices = []; // up to 3 skills/tools from Skilled feat
 
+// Feat ASI bonus (for "Ability Scores" feat)
+var featAsiBonus = { mode: null, ab1: null, ab2: null };
+
+function buildAbilityScoresFeatPicker(fc, cardIdx) {
+  // Only render for the "Ability Scores" feat
+  var activeFeat = fc.choice ? selectedHumanFeat : fc.name;
+  if (!activeFeat || activeFeat.indexOf('Ability Scores') === -1) return '';
+
+  var ABS = ['STR','DEX','CON','INT','WIS','CHA'];
+  var mode = featAsiBonus.mode;
+
+  var html = '<div id="feat-asi-picker" style="margin-top:0.85rem;padding:0.75rem 1rem;background:rgba(201,151,58,0.07);border:1px solid rgba(201,151,58,0.3);border-radius:4px;">';
+  html += '<div style="font-family:\'Cinzel\',serif;font-size:0.65rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);margin-bottom:0.55rem;">Choose your +2 / +1+1 Increases</div>';
+  html += '<div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.7rem;">';
+  html += '<button class="choice-chip' + (mode === '+2' ? ' chosen' : '') + '" onclick="setFeatAsiMode(\'+2\')">+2 to one ability</button>';
+  html += '<button class="choice-chip' + (mode === '+1+1' ? ' chosen' : '') + '" onclick="setFeatAsiMode(\'+1+1\')">+1 to two abilities</button>';
+  html += '</div>';
+
+  if (mode) {
+    var maxPicks = mode === '+2' ? 1 : 2;
+    var picks = [];
+    if (featAsiBonus.ab1) picks.push(featAsiBonus.ab1);
+    if (featAsiBonus.ab2) picks.push(featAsiBonus.ab2);
+
+    html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.35rem;">';
+    ABS.forEach(function(ab) {
+      var cur = (scores[ab] || 8) + (asiBonus[ab] || 0);
+      var bonus = mode === '+2' ? 2 : 1;
+      var isPicked = picks.indexOf(ab) !== -1;
+      var displayScore = isPicked ? (cur + bonus) : cur;
+      var border = isPicked ? 'var(--crimson)' : 'rgba(139,26,26,0.2)';
+      var bg = isPicked ? 'rgba(139,26,26,0.09)' : 'rgba(248,237,205,0.6)';
+      html += '<div onclick="pickFeatAsi(\'' + ab + '\')" style="display:flex;flex-direction:column;align-items:center;padding:0.45rem 0.25rem;border:1.5px solid ' + border + ';border-radius:4px;cursor:pointer;background:' + bg + ';transition:all 0.15s;">';
+      html += '<div style="font-family:\'Cinzel\',serif;font-size:0.58rem;color:var(--crimson);font-weight:600;">' + ab + '</div>';
+      html += '<div style="font-size:1.05rem;font-weight:700;color:var(--ink);">' + displayScore + '</div>';
+      if (isPicked) html += '<div style="font-size:0.62rem;color:#1a5c2a;font-weight:600;">+' + bonus + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    if (picks.length > 0) {
+      html += '<div style="margin-top:0.5rem;font-size:0.78rem;color:var(--ink-light);font-style:italic;">Applying: ' + picks.map(function(ab) { return ab + ' +' + (mode === '+2' ? 2 : 1); }).join(', ') + '</div>';
+    }
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function setFeatAsiMode(mode) {
+  // Undo previous picks
+  applyFeatAsiToScores(false);
+  featAsiBonus.mode = mode;
+  featAsiBonus.ab1 = null;
+  featAsiBonus.ab2 = null;
+  updateFeatsSection();
+  updateProficiencySection();
+}
+
+function pickFeatAsi(ab) {
+  if (!featAsiBonus.mode) return;
+  // Undo current application
+  applyFeatAsiToScores(false);
+  var mode = featAsiBonus.mode;
+
+  if (mode === '+2') {
+    featAsiBonus.ab1 = (featAsiBonus.ab1 === ab) ? null : ab;
+    featAsiBonus.ab2 = null;
+  } else {
+    // +1+1: toggle selection, max 2
+    if (featAsiBonus.ab1 === ab) {
+      featAsiBonus.ab1 = featAsiBonus.ab2;
+      featAsiBonus.ab2 = null;
+    } else if (featAsiBonus.ab2 === ab) {
+      featAsiBonus.ab2 = null;
+    } else if (!featAsiBonus.ab1) {
+      featAsiBonus.ab1 = ab;
+    } else if (!featAsiBonus.ab2) {
+      featAsiBonus.ab2 = ab;
+    } else {
+      // Replace oldest pick
+      featAsiBonus.ab1 = featAsiBonus.ab2;
+      featAsiBonus.ab2 = ab;
+    }
+  }
+  applyFeatAsiToScores(true);
+  updateFeatsSection();
+  updateProficiencySection();
+}
+
+function applyFeatAsiToScores(add) {
+  var delta = add ? 1 : -1;
+  var bonus = featAsiBonus.mode === '+2' ? 2 : 1;
+  if (featAsiBonus.ab1) {
+    asiBonus[featAsiBonus.ab1] = (asiBonus[featAsiBonus.ab1] || 0) + delta * bonus;
+    if (asiBonus[featAsiBonus.ab1] === 0) delete asiBonus[featAsiBonus.ab1];
+  }
+  if (featAsiBonus.ab2 && featAsiBonus.mode === '+1+1') {
+    asiBonus[featAsiBonus.ab2] = (asiBonus[featAsiBonus.ab2] || 0) + delta;
+    if (asiBonus[featAsiBonus.ab2] === 0) delete asiBonus[featAsiBonus.ab2];
+  }
+  applyASI();
+}
+
 const SKILLED_OPTIONS = [
   // All skills
   "Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight",
@@ -3454,6 +3549,7 @@ function updateFeatsSection() {
       ${descHtml}
       ${choiceHtml}
       ${skilledHtml}
+      ${buildAbilityScoresFeatPicker(fc, i)}
     `;
     grid.appendChild(card);
   });
@@ -3464,6 +3560,20 @@ function updateFeatsSection() {
 function selectHumanFeat(val, cardIdx) {
   selectedHumanFeat = val;
   if (val !== 'Skilled') skilledChoices.length = 0;
+  // Reset feat ASI if switching away from Ability Scores
+  if (val !== 'Ability Scores') {
+    featAsiBonus.mode = null;
+    featAsiBonus.ab1 = null;
+    featAsiBonus.ab2 = null;
+    // Remove any feat ASI from asiBonus
+    ABILITIES.forEach(function(ab) {
+      if (featAsiBonus[ab]) {
+        asiBonus[ab] = (asiBonus[ab] || 0) - featAsiBonus[ab];
+        delete featAsiBonus[ab];
+      }
+    });
+    updateAbilityDisplay && updateAbilityDisplay();
+  }
   // Reset MI choices if switching away from Magic Initiate
   if (!val || !val.startsWith('Magic Initiate')) {
     spellChoices.miClass = null;
@@ -5407,110 +5517,217 @@ function showSpeciesSubPicker(species) {
     var lineages = ELF_LINEAGES || {};
     var keys = Object.keys(lineages);
     if (!keys.length) return;
-    container.innerHTML = '<div class="sub-picker">'
-      + '<div class="sub-picker-title">Choose your Elf Lineage</div>'
-      + '<div class="sub-pick-grid">'
-      + keys.map(function(k) {
-          return '<button class="sub-pick-btn" onclick="selectSubPick(\'elf-lineage\',\'' + k + '\',this)">' + (lineages[k].name || k) + '</button>';
-        }).join('')
-      + '</div></div>';
+    var wrapper = document.createElement('div');
+    wrapper.className = 'sub-picker';
+    wrapper.innerHTML = '<div class="sub-picker-title">Choose your Elf Lineage</div>';
+    var btnRow = document.createElement('div');
+    btnRow.className = 'sub-pick-grid';
+    var detailArea = document.createElement('div');
+    detailArea.className = 'lineage-detail-area';
+    detailArea.style.marginTop = '0.8rem';
+    keys.forEach(function(k) {
+      var btn = document.createElement('button');
+      btn.className = 'sub-pick-btn';
+      btn.textContent = lineages[k].name || k;
+      btn.onclick = function() {
+        wrapper.querySelectorAll('.sub-pick-btn').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        selectedLineage = k;
+        charChoices.highElfCantrip = null;
+        renderLineageDetailArea(detailArea, lineages[k]);
+        // Keep hidden select in sync for PDF generation
+        var sel = document.getElementById('lineage-select');
+        if (sel) { ensureOption(sel, k, lineages[k].name); sel.value = k; }
+        updateChoicesSection();
+        updateSpellsSection();
+      };
+      btnRow.appendChild(btn);
+    });
+    wrapper.appendChild(btnRow);
+    wrapper.appendChild(detailArea);
+    container.appendChild(wrapper);
     container.style.display = 'block';
 
   } else if (species === 'tiefling') {
     var legacies = TIEFLING_LEGACIES || {};
-    var keys2 = Object.keys(legacies);
-    if (!keys2.length) return;
-    container.innerHTML = '<div class="sub-picker">'
-      + '<div class="sub-picker-title">Choose your Tiefling Legacy</div>'
-      + '<div class="sub-pick-grid">'
-      + keys2.map(function(k) {
-          return '<button class="sub-pick-btn" onclick="selectSubPick(\'tiefling-legacy\',\'' + k + '\',this)">' + (legacies[k].name || k) + '</button>';
-        }).join('')
-      + '</div></div>';
+    var lKeys = Object.keys(legacies);
+    if (!lKeys.length) return;
+    var wrapper2 = document.createElement('div');
+    wrapper2.className = 'sub-picker';
+    wrapper2.innerHTML = '<div class="sub-picker-title">Choose your Tiefling Legacy</div>';
+    var btnRow2 = document.createElement('div');
+    btnRow2.className = 'sub-pick-grid';
+    var detailArea2 = document.createElement('div');
+    detailArea2.className = 'lineage-detail-area';
+    detailArea2.style.marginTop = '0.8rem';
+    lKeys.forEach(function(k) {
+      var btn2 = document.createElement('button');
+      btn2.className = 'sub-pick-btn';
+      btn2.textContent = legacies[k].name || k;
+      btn2.onclick = function() {
+        wrapper2.querySelectorAll('.sub-pick-btn').forEach(function(b) { b.classList.remove('selected'); });
+        btn2.classList.add('selected');
+        selectedLineage = k;
+        renderLineageDetailArea(detailArea2, legacies[k]);
+        var sel2 = document.getElementById('lineage-select');
+        if (sel2) { ensureOption(sel2, k, legacies[k].name); sel2.value = k; }
+        updateChoicesSection();
+        updateSpellsSection();
+      };
+      btnRow2.appendChild(btn2);
+    });
+    wrapper2.appendChild(btnRow2);
+    wrapper2.appendChild(detailArea2);
+    container.appendChild(wrapper2);
     container.style.display = 'block';
 
   } else if (species === 'dragonborn') {
     var ancestries = DRAGONBORN_ANCESTRIES || {};
     var aKeys = Object.keys(ancestries);
     if (!aKeys.length) return;
-    container.innerHTML = '<div class="sub-picker">'
-      + '<div class="sub-picker-title">Choose your Draconic Ancestry</div>'
-      + '<div class="sub-pick-grid">'
-      + aKeys.map(function(k) {
-          return '<button class="sub-pick-btn" onclick="selectSubPick(\'dragonborn-ancestry\',\'' + k + '\',this)">' + k + '</button>';
-        }).join('')
-      + '</div></div>';
+    var wrapper3 = document.createElement('div');
+    wrapper3.className = 'sub-picker';
+    wrapper3.innerHTML = '<div class="sub-picker-title">Choose your Draconic Ancestry</div>';
+    var btnRow3 = document.createElement('div');
+    btnRow3.className = 'sub-pick-grid';
+    var detailArea3 = document.createElement('div');
+    detailArea3.className = 'lineage-detail-area';
+    detailArea3.style.marginTop = '0.8rem';
+    aKeys.forEach(function(k) {
+      var btn3 = document.createElement('button');
+      btn3.className = 'sub-pick-btn';
+      btn3.textContent = k;
+      btn3.onclick = function() {
+        wrapper3.querySelectorAll('.sub-pick-btn').forEach(function(b) { b.classList.remove('selected'); });
+        btn3.classList.add('selected');
+        charChoices.dragonbornAncestry = k;
+        var desc = DRAGONBORN_ANCESTRIES[k] || '';
+        detailArea3.innerHTML = buildDetailCard(
+          k,
+          'Your breath weapon deals ' + desc + '. You also have Resistance to this damage type. At Level 5 you gain Draconic Flight — sprout wings and fly for 10 minutes (Prof Bonus uses per Long Rest).',
+          [
+            ['Breath Weapon', 'Constitution save · ' + desc],
+            ['Damage Resistance', k.split(' (')[1] ? k.split(' (')[1].replace(')','') : 'see above'],
+            ['Draconic Flight', 'Unlocks at Level 5']
+          ],
+          null
+        );
+        updateProficiencySection();
+      };
+      btnRow3.appendChild(btn3);
+    });
+    wrapper3.appendChild(btnRow3);
+    wrapper3.appendChild(detailArea3);
+    container.appendChild(wrapper3);
     container.style.display = 'block';
 
   } else if (species === 'gnome') {
     var gnomes = GNOME_LINEAGES || {};
     var gKeys = Object.keys(gnomes);
     if (!gKeys.length) return;
-    container.innerHTML = '<div class="sub-picker">'
-      + '<div class="sub-picker-title">Choose your Gnome Lineage</div>'
-      + '<div class="sub-pick-grid">'
-      + gKeys.map(function(k) {
-          return '<button class="sub-pick-btn" onclick="selectSubPick(\'gnome-lineage\',\'' + k + '\',this)">' + (gnomes[k].name || k) + '</button>';
-        }).join('')
-      + '</div></div>';
+    var wrapper4 = document.createElement('div');
+    wrapper4.className = 'sub-picker';
+    wrapper4.innerHTML = '<div class="sub-picker-title">Choose your Gnome Lineage</div>';
+    var btnRow4 = document.createElement('div');
+    btnRow4.className = 'sub-pick-grid';
+    var detailArea4 = document.createElement('div');
+    detailArea4.className = 'lineage-detail-area';
+    detailArea4.style.marginTop = '0.8rem';
+    gKeys.forEach(function(k) {
+      var btn4 = document.createElement('button');
+      btn4.className = 'sub-pick-btn';
+      btn4.textContent = gnomes[k].name || k;
+      btn4.onclick = function() {
+        wrapper4.querySelectorAll('.sub-pick-btn').forEach(function(b) { b.classList.remove('selected'); });
+        btn4.classList.add('selected');
+        charChoices.gnomeLineage = k;
+        var gd = GNOME_LINEAGES[k];
+        detailArea4.innerHTML = buildDetailCard(
+          gd.name,
+          gd.desc,
+          [['Cantrips', gd.cantrips]],
+          null
+        );
+        if (typeof updateChoicesSection === 'function') updateChoicesSection();
+        updateProficiencySection();
+      };
+      btnRow4.appendChild(btn4);
+    });
+    wrapper4.appendChild(btnRow4);
+    wrapper4.appendChild(detailArea4);
+    container.appendChild(wrapper4);
     container.style.display = 'block';
   }
 }
 
-function selectSubPick(subtype, value, btn) {
-  // Highlight button
-  var parent = btn.parentElement;
-  parent.querySelectorAll('.sub-pick-btn').forEach(function(b) { b.classList.remove('selected'); });
-  btn.classList.add('selected');
-
-  // Feed into charChoices and fire existing update hooks
-  if (subtype === 'elf-lineage' || subtype === 'tiefling-legacy') {
-    var lineageSel = document.getElementById('lineage-select');
-    if (lineageSel) {
-      var hasOpt = false;
-      for (var i = 0; i < lineageSel.options.length; i++) {
-        if (lineageSel.options[i].value === value) { hasOpt = true; break; }
-      }
-      if (!hasOpt) {
-        var o = document.createElement('option');
-        o.value = value; o.text = value;
-        lineageSel.appendChild(o);
-      }
-      lineageSel.value = value;
-      updateLineage();
-    }
-  } else if (subtype === 'dragonborn-ancestry') {
-    charChoices.dragonbornAncestry = value;
-    updateProficiencySection();
-  } else if (subtype === 'gnome-lineage') {
-    charChoices.gnomeLineage = value;
-    // Trigger gnome cantrip if needed
-    if (typeof updateChoicesSection === 'function') updateChoicesSection();
-    updateProficiencySection();
-  }
+// Render a lineage/legacy detail card into a DOM element
+function renderLineageDetailArea(el, data) {
+  el.innerHTML = buildDetailCard(
+    data.name,
+    data.desc,
+    [
+      ['Traits', data.traits],
+      ['Innate Spells', data.spells],
+      ['Spellcasting', data.note || 'Choose INT, WIS, or CHA as your spellcasting ability']
+    ],
+    null
+  );
 }
+
+// Generic detail card builder — returns HTML string
+function buildDetailCard(title, description, rows, note) {
+  var html = '<div style="padding:0.85rem 1rem;background:rgba(139,26,26,0.05);border:1px solid rgba(139,26,26,0.22);border-radius:4px;">';
+  html += '<div style="font-family:\'Cinzel\',serif;font-size:0.72rem;font-weight:600;color:var(--crimson);margin-bottom:0.4rem;letter-spacing:0.04em;">' + title + '</div>';
+  if (description) {
+    html += '<div style="font-size:0.82rem;color:var(--ink-light);font-style:italic;margin-bottom:0.5rem;line-height:1.45;">' + description + '</div>';
+  }
+  rows.forEach(function(row) {
+    html += '<div style="display:flex;gap:0.5rem;margin-bottom:0.22rem;font-size:0.78rem;">'
+      + '<span style="font-family:\'Cinzel\',serif;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--crimson);white-space:nowrap;padding-top:0.1rem;">' + row[0] + '</span>'
+      + '<span style="color:var(--ink);">' + row[1] + '</span></div>';
+  });
+  if (note) {
+    html += '<div style="font-size:0.7rem;color:var(--ink-light);font-style:italic;margin-top:0.35rem;">' + note + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// Helper: ensure a select has an option with the given value
+function ensureOption(sel, value, label) {
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === value) return;
+  }
+  var opt = document.createElement('option');
+  opt.value = value; opt.text = label || value;
+  sel.appendChild(opt);
+}
+
+// selectSubPick is now handled via inline onclick closures in showSpeciesSubPicker
 
 // ── Wizard Navigation ──────────────────────────────────────────────────────
 let currentStep = 1;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 8;
 
 // Steps that should trigger a specific refresh when entered
 const STEP_REFRESH = {
-  5: function() { updateProficiencySection(); updateCombatSection(); },
-  6: function() {
-    // Move ASI panel into step 6 if not already there
+  4: function() { updateProficiencySection(); updateCombatSection(); },
+  5: function() {
+    // Move ASI panel into step 5 if not already there (legacy support)
     var asiPanel = document.getElementById('bg-asi-panel');
     var asiTarget = document.getElementById('asi-section');
     if (asiPanel && asiTarget && asiPanel.parentElement !== asiTarget) {
       asiTarget.appendChild(asiPanel);
-      asiPanel.style.display = '';
+    }
+    if (asiPanel) {
+      var bg = document.getElementById('background').value;
+      if (bg) showASIPanel(bg);
     }
     updateProficiencySection();
-    // Show class-skill-picker in step 6
     var csp = document.getElementById('class-skill-picker');
     if (csp) csp.style.display = '';
   },
-  7: function() {
+  6: function() {
     updateFeatsSection();
     updateSpellsSection();
     var cls = document.getElementById('class').value;
@@ -5522,7 +5739,7 @@ const STEP_REFRESH = {
         : 'No spell slots for this class. Review your origin feat below.';
     }
   },
-  9: function() { updateReview(); updateEquipmentSection(); updateCombatSection(); },
+  8: function() { updateReview(); updateEquipmentSection(); updateCombatSection(); },
 };
 
 function goStep(n) {
