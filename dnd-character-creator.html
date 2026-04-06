@@ -3473,27 +3473,23 @@ function updateFeatsSection() {
   const section = document.getElementById('feats-section');
 
   if (!bg && !species) {
-    section.innerHTML = '<p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Background and Species to see your Origin Feats.</p>';
+    section.innerHTML = '<p style="font-style:italic;color:var(--ink-light);font-size:0.95rem;">Select a Background and Species to see your Origin Feats.</p>';
     return;
   }
 
   const featCards = [];
-
-  // Background feat (fixed)
   if (bg && BACKGROUND_BONUSES[bg]) {
-    const featName = BACKGROUND_BONUSES[bg].feat.split(' (')[0];
-    const featDesc = ORIGIN_FEATS[featName] || ORIGIN_FEATS[BACKGROUND_BONUSES[bg].feat] || 'See Player\'s Handbook for full details.';
-    featCards.push({ source: `Background: ${bg.charAt(0).toUpperCase()+bg.slice(1)}`, name: BACKGROUND_BONUSES[bg].feat, desc: featDesc, choice: false, isSkilled: featName === 'Skilled' });
+    const fullFeat = BACKGROUND_BONUSES[bg].feat;
+    const featKey  = fullFeat.split(' (')[0];
+    const featDesc = ORIGIN_FEATS[featKey] || ORIGIN_FEATS[fullFeat] || 'See PHB.';
+    featCards.push({ source: 'Background: ' + bg.charAt(0).toUpperCase()+bg.slice(1), name: fullFeat, desc: featDesc, choice: false, featKey: featKey });
   }
-
-  // Human extra feat (free choice)
   if (species === 'human') {
-    const featList = Object.keys(ORIGIN_FEATS).sort();
-    featCards.push({ source: 'Species: Human — Versatile', name: 'Choose an Origin Feat', desc: 'Humans gain one additional Origin Feat of their choice.', choice: true, options: featList, isSkilled: selectedHumanFeat === 'Skilled' });
+    const hKey = selectedHumanFeat || '';
+    featCards.push({ source: 'Species: Human — Versatile', name: hKey || 'Choose an Origin Feat', desc: hKey && ORIGIN_FEATS[hKey] ? ORIGIN_FEATS[hKey] : 'Humans gain one additional Origin Feat of their choice.', choice: true, featKey: hKey });
   }
-
   if (featCards.length === 0) {
-    section.innerHTML = '<p style="font-style:italic; color:var(--ink-light); font-size:0.95rem;">Select a Background to see your Origin Feat.</p>';
+    section.innerHTML = '<p style="font-style:italic;color:var(--ink-light);font-size:0.95rem;">Select a Background to see your Origin Feat.</p>';
     return;
   }
 
@@ -3501,59 +3497,213 @@ function updateFeatsSection() {
   const grid = document.createElement('div');
   grid.className = 'feats-grid';
 
-  featCards.forEach((fc, i) => {
+  featCards.forEach(function(fc) {
     const card = document.createElement('div');
     card.className = 'feat-card' + (fc.choice ? ' feat-choice' : '');
 
-    let descHtml = `<span class="feat-card-desc" id="feat-desc-${i}">${fc.desc}</span>`;
-    let choiceHtml = '';
+    // Source + name + description
+    const srcEl = document.createElement('span'); srcEl.className = 'feat-card-source'; srcEl.textContent = fc.source; card.appendChild(srcEl);
+    const nameEl = document.createElement('span'); nameEl.className = 'feat-card-name'; nameEl.textContent = fc.name; card.appendChild(nameEl);
+    const descEl = document.createElement('span'); descEl.className = 'feat-card-desc'; descEl.textContent = fc.desc; card.appendChild(descEl);
 
+    // Human feat dropdown
     if (fc.choice) {
-      const opts = fc.options.map(f =>
-        `<option value="${f}" ${f === selectedHumanFeat ? 'selected' : ''}>${f}</option>`
-      ).join('');
-      choiceHtml = `<select onchange="selectHumanFeat(this.value, ${i})">
-          <option value="">— choose a feat —</option>${opts}</select>`;
-      if (selectedHumanFeat && ORIGIN_FEATS[selectedHumanFeat]) {
-        descHtml = `<span class="feat-card-desc" id="feat-desc-${i}">${ORIGIN_FEATS[selectedHumanFeat]}</span>`;
+      const sel = document.createElement('select');
+      sel.style.marginTop = '0.5rem';
+      const blank = document.createElement('option'); blank.value = ''; blank.textContent = '— choose a feat —'; sel.appendChild(blank);
+      Object.keys(ORIGIN_FEATS).sort().forEach(function(f) {
+        const opt = document.createElement('option'); opt.value = f; opt.textContent = f;
+        if (f === selectedHumanFeat) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', function() {
+        var val = this.value;
+        if (val !== 'Ability Scores') { applyFeatAsiToScores(false); featAsiBonus.mode = null; featAsiBonus.ab1 = null; featAsiBonus.ab2 = null; }
+        if (val !== 'Skilled') skilledChoices.length = 0;
+        if (!val || val.indexOf('Magic Initiate') === -1) { spellChoices.miClass = null; spellChoices.miCantrips = []; spellChoices.miSpell = null; }
+        selectedHumanFeat = val;
+        nameEl.textContent = val || 'Choose an Origin Feat';
+        descEl.textContent = val && ORIGIN_FEATS[val] ? ORIGIN_FEATS[val] : 'Humans gain one additional Origin Feat of their choice.';
+        updateFeatsSection();
+        updateSpellsSection();
+      });
+      card.appendChild(sel);
+    }
+
+    const activeKey = fc.featKey || '';
+
+    // ── SKILLED PICKER ──────────────────────────────────────────────
+    if (activeKey === 'Skilled') {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid rgba(139,26,26,0.2);';
+      const tally = document.createElement('div');
+      tally.className = 'choice-tally' + (skilledChoices.length >= 3 ? ' complete' : '');
+      tally.textContent = skilledChoices.length + '/3 chosen — choose any skills or tools';
+      tally.style.marginBottom = '0.4rem';
+      wrap.appendChild(tally);
+      const chips = document.createElement('div'); chips.className = 'choice-chips';
+      const bgSkillSet = new Set(bg && BACKGROUND_BONUSES[bg] ? BACKGROUND_BONUSES[bg].skills.split(',').map(function(s){return s.trim();}) : []);
+      Array.from(classSkillChoices).forEach(function(s){bgSkillSet.add(s);});
+      SKILLED_OPTIONS.forEach(function(o) {
+        const isPicked = skilledChoices.includes(o);
+        const btn = document.createElement('button');
+        btn.className = 'choice-chip' + (isPicked ? ' chosen' : '');
+        btn.textContent = o + (bgSkillSet.has(o) ? ' ✓' : '');
+        if (!isPicked && skilledChoices.length >= 3) btn.disabled = true;
+        btn.addEventListener('click', function() {
+          const idx = skilledChoices.indexOf(o);
+          if (idx >= 0) skilledChoices.splice(idx, 1);
+          else if (skilledChoices.length < 3) skilledChoices.push(o);
+          updateFeatsSection();
+          updateProficiencySection();
+        });
+        chips.appendChild(btn);
+      });
+      wrap.appendChild(chips);
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:0.78rem;font-style:italic;color:var(--ink-light);margin-top:0.4rem;';
+      note.textContent = 'Items marked ✓ are already proficient — choosing them again stacks no benefit.';
+      wrap.appendChild(note);
+      card.appendChild(wrap);
+    }
+
+    // ── MAGIC INITIATE PICKER ────────────────────────────────────────
+    if (activeKey === 'Magic Initiate') {
+      const miWrap = document.createElement('div');
+      miWrap.style.cssText = 'margin-top:0.8rem;padding-top:0.7rem;border-top:1px solid rgba(139,26,26,0.2);';
+      const presetCls = getMIPresetClass(fc.name);
+      const miCls = presetCls || spellChoices.miClass;
+
+      if (!presetCls) {
+        const lbl = document.createElement('div');
+        lbl.style.cssText = "font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--crimson);margin-bottom:0.35rem;";
+        lbl.textContent = 'Choose a Class List';
+        miWrap.appendChild(lbl);
+        const clsSel = document.createElement('select');
+        clsSel.style.cssText = 'max-width:220px;margin-bottom:0.7rem;';
+        const blankC = document.createElement('option'); blankC.value = ''; blankC.textContent = '— Choose —'; clsSel.appendChild(blankC);
+        ['cleric','druid','wizard'].forEach(function(c) {
+          const opt = document.createElement('option'); opt.value = c;
+          opt.textContent = c.charAt(0).toUpperCase()+c.slice(1);
+          if (spellChoices.miClass === c) opt.selected = true;
+          clsSel.appendChild(opt);
+        });
+        clsSel.addEventListener('change', function() {
+          spellChoices.miClass = this.value; spellChoices.miCantrips = []; spellChoices.miSpell = null;
+          updateFeatsSection();
+        });
+        miWrap.appendChild(clsSel);
+      } else {
+        const note = document.createElement('div');
+        note.style.cssText = 'font-size:0.78rem;color:var(--ink-light);margin-bottom:0.5rem;';
+        note.innerHTML = 'Class list: <strong>' + presetCls.charAt(0).toUpperCase()+presetCls.slice(1) + '</strong>';
+        miWrap.appendChild(note);
       }
+
+      if (miCls && CANTRIP_LISTS[miCls]) {
+        var doneCant = spellChoices.miCantrips.length >= 2;
+        var cHead = document.createElement('div'); cHead.className = 'spell-block-title'; cHead.style.marginBottom = '0.3rem';
+        cHead.textContent = '🕯 Choose 2 Cantrips (' + spellChoices.miCantrips.length + '/2 chosen)'; miWrap.appendChild(cHead);
+        var cChips = document.createElement('div'); cChips.className = 'spell-chips'; cChips.style.marginBottom = '0.7rem';
+        CANTRIP_LISTS[miCls].forEach(function(s) {
+          var isPicked = spellChoices.miCantrips.includes(s);
+          var btn = document.createElement('button');
+          btn.className = 'spell-chip' + (isPicked ? ' spell-chosen' : '');
+          btn.textContent = s;
+          if (!isPicked && doneCant) btn.disabled = true;
+          if (SPELL_DESC[s]) btn.title = SPELL_DESC[s];
+          btn.addEventListener('click', function() {
+            var idx = spellChoices.miCantrips.indexOf(s);
+            if (idx >= 0) spellChoices.miCantrips.splice(idx, 1);
+            else if (spellChoices.miCantrips.length < 2) spellChoices.miCantrips.push(s);
+            updateFeatsSection();
+          });
+          cChips.appendChild(btn);
+        });
+        miWrap.appendChild(cChips);
+
+        var sHead = document.createElement('div'); sHead.className = 'spell-block-title'; sHead.style.marginBottom = '0.3rem';
+        sHead.textContent = '📖 Choose 1 Level 1 Spell (' + (spellChoices.miSpell ? '1' : '0') + '/1 chosen)'; miWrap.appendChild(sHead);
+        var sChips = document.createElement('div'); sChips.className = 'spell-chips';
+        (SPELL_LISTS_L1[miCls] || []).forEach(function(s) {
+          var isPicked = spellChoices.miSpell === s;
+          var btn = document.createElement('button');
+          btn.className = 'spell-chip' + (isPicked ? ' spell-chosen' : '');
+          btn.textContent = s;
+          if (spellChoices.miSpell && !isPicked) btn.disabled = true;
+          if (SPELL_DESC[s]) btn.title = SPELL_DESC[s];
+          btn.addEventListener('click', function() {
+            spellChoices.miSpell = isPicked ? null : s;
+            updateFeatsSection();
+          });
+          sChips.appendChild(btn);
+        });
+        miWrap.appendChild(sChips);
+        var snote = document.createElement('div'); snote.className = 'spell-note'; snote.style.marginTop = '0.4rem';
+        snote.textContent = 'The L1 spell casts free once per Long Rest (no slot). Hover any spell to see its description.';
+        miWrap.appendChild(snote);
+      }
+      card.appendChild(miWrap);
     }
 
-    // Skilled sub-picker
-    let skilledHtml = '';
-    if (fc.isSkilled) {
-      const done = skilledChoices.length >= 3;
-      const alreadyProficient = new Set();
-      if (bg && BACKGROUND_BONUSES[bg]) BACKGROUND_BONUSES[bg].skills.split(',').map(s=>s.trim()).forEach(s=>alreadyProficient.add(s));
-      [...classSkillChoices].forEach(s=>alreadyProficient.add(s));
-      if (document.getElementById('species').value === 'human' && charChoices.humanSkill) alreadyProficient.add(charChoices.humanSkill);
-
-      skilledHtml = `<div style="margin-top:0.6rem; padding-top:0.5rem; border-top:1px solid rgba(139,26,26,0.2);">
-        <div class="choice-tally ${done ? 'complete' : ''}" style="margin-bottom:0.4rem;">${skilledChoices.length}/3 chosen</div>
-        <div class="choice-chips">
-          ${SKILLED_OPTIONS.map(o => {
-            const isCh = skilledChoices.includes(o);
-            const dis = (!isCh && done) ? 'disabled' : '';
-            return `<button class="choice-chip ${isCh ? 'chosen' : ''}" ${dis} onclick="toggleSkilledChoice('${o.replace(/'/g,"\\'")}')">
-              ${o}${alreadyProficient.has(o) ? ' ✓' : ''}
-            </button>`;
-          }).join('')}
-        </div>
-        <div style="font-size:0.78rem; font-style:italic; color:var(--ink-light); margin-top:0.4rem;">Choose any 3 skills or tools. Items marked ✓ are already proficient — picking them again has no effect.</div>
-      </div>`;
+    // ── ABILITY SCORES FEAT PICKER ──────────────────────────────────
+    if (activeKey === 'Ability Scores') {
+      var asiWrap = document.createElement('div');
+      asiWrap.style.cssText = 'margin-top:0.85rem;padding:0.75rem 1rem;background:rgba(201,151,58,0.07);border:1px solid rgba(201,151,58,0.3);border-radius:4px;';
+      var asiTitle = document.createElement('div');
+      asiTitle.style.cssText = "font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);margin-bottom:0.55rem;";
+      asiTitle.textContent = 'Choose your Ability Score Increase'; asiWrap.appendChild(asiTitle);
+      var modeRow = document.createElement('div'); modeRow.style.cssText = 'display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.7rem;';
+      ['+2','+1+1'].forEach(function(mode) {
+        var btn = document.createElement('button');
+        btn.className = 'choice-chip' + (featAsiBonus.mode === mode ? ' chosen' : '');
+        btn.textContent = mode === '+2' ? '+2 to one ability' : '+1 to two abilities';
+        btn.addEventListener('click', function() {
+          applyFeatAsiToScores(false); featAsiBonus.mode = mode; featAsiBonus.ab1 = null; featAsiBonus.ab2 = null;
+          updateFeatsSection(); updateProficiencySection();
+        });
+        modeRow.appendChild(btn);
+      });
+      asiWrap.appendChild(modeRow);
+      if (featAsiBonus.mode) {
+        var bonus = featAsiBonus.mode === '+2' ? 2 : 1;
+        var picks = [featAsiBonus.ab1, featAsiBonus.ab2].filter(Boolean);
+        var sgrid = document.createElement('div'); sgrid.style.cssText = 'display:grid;grid-template-columns:repeat(6,1fr);gap:0.35rem;';
+        ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(ab) {
+          var cur = (scores[ab]||8) + (asiBonus[ab]||0);
+          var isPicked = picks.indexOf(ab) !== -1;
+          var cell = document.createElement('div');
+          cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding:0.45rem 0.2rem;border:1.5px solid '+(isPicked?'var(--crimson)':'rgba(139,26,26,0.2)')+';border-radius:4px;cursor:pointer;background:'+(isPicked?'rgba(139,26,26,0.09)':'rgba(248,237,205,0.6)')+';transition:all 0.15s;';
+                    var cellHtml = '';
+          cellHtml += '<div style="font-family:Cinzel,serif;font-size:0.58rem;color:var(--crimson);font-weight:600;">' + ab + '</div>';
+          cellHtml += '<div style="font-size:1.05rem;font-weight:700;color:var(--ink);">' + (isPicked ? cur+bonus : cur) + '</div>';
+          if (isPicked) cellHtml += '<div style="font-size:0.62rem;color:#1a5c2a;font-weight:600;">+' + bonus + '</div>';
+          cell.innerHTML = cellHtml;
+          cell.addEventListener('click', function() {
+            applyFeatAsiToScores(false);
+            if (featAsiBonus.mode === '+2') { featAsiBonus.ab1 = (featAsiBonus.ab1 === ab) ? null : ab; featAsiBonus.ab2 = null; }
+            else {
+              if (featAsiBonus.ab1 === ab) { featAsiBonus.ab1 = featAsiBonus.ab2; featAsiBonus.ab2 = null; }
+              else if (featAsiBonus.ab2 === ab) { featAsiBonus.ab2 = null; }
+              else if (!featAsiBonus.ab1) { featAsiBonus.ab1 = ab; }
+              else if (!featAsiBonus.ab2) { featAsiBonus.ab2 = ab; }
+              else { featAsiBonus.ab1 = featAsiBonus.ab2; featAsiBonus.ab2 = ab; }
+            }
+            applyFeatAsiToScores(true); updateFeatsSection(); updateProficiencySection();
+          });
+          sgrid.appendChild(cell);
+        });
+        asiWrap.appendChild(sgrid);
+        if (picks.length > 0) {
+          var sum = document.createElement('div'); sum.style.cssText = 'margin-top:0.5rem;font-size:0.78rem;color:var(--ink-light);font-style:italic;';
+          sum.textContent = 'Applying: ' + picks.map(function(a){return a+' +'+bonus;}).join(', '); asiWrap.appendChild(sum);
+        }
+      }
+      card.appendChild(asiWrap);
     }
 
-    card.innerHTML = `
-      <span class="feat-card-source">${fc.source}</span>
-      <span class="feat-card-name">${fc.name}</span>
-      ${descHtml}
-      ${choiceHtml}
-      ${skilledHtml}
-      ${buildAbilityScoresFeatPicker(fc, i)}
-    `;
     grid.appendChild(card);
   });
-
   section.appendChild(grid);
 }
 
