@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Forge | D&D Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f4e8c1;
+  --parchment-dark: #e8d5a0;
+  --ink: #1a1209;
+  --ink-light: #3d2b1a;
+  --crimson: #8b1a1a;
+  --crimson-light: #b52a2a;
+  --gold: #c9973a;
+  --gold-light: #e8b84b;
+  --bg: #1a1209;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 20% 20%, rgba(139,26,26,0.12) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 80%, rgba(201,151,58,0.08) 0%, transparent 60%);
+  min-height: 100vh;
+  font-family: 'Crimson Pro', serif;
+  color: var(--ink);
+  padding: 2rem 1rem 4rem;
+}
+
+/* ── Header ── */
+.page-header { text-align: center; margin-bottom: 2rem; }
+.page-header h1 { font-family: 'Cinzel', serif; font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--gold-light); letter-spacing: 0.08em; text-shadow: 0 2px 24px rgba(201,151,58,0.4); }
+.page-header p { color: var(--parchment-dark); font-style: italic; font-size: 1.05rem; margin-top: 0.3rem; opacity: 0.7; }
+.divider { width: 280px; height: 2px; margin: 0.8rem auto; background: linear-gradient(90deg, transparent, var(--gold), transparent); position: relative; }
+.divider::before { content: '⚔'; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); background: var(--bg); padding: 0 0.6rem; color: var(--gold); }
+.nav-back { display: inline-block; margin-bottom: 1rem; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--gold); text-decoration: none; opacity: 0.7; transition: opacity 0.2s; }
+.nav-back:hover { opacity: 1; }
+
+/* ── Main shell ── */
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--parchment);
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px var(--crimson), 0 8px 48px rgba(0,0,0,0.7);
+  overflow: hidden;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  background: rgba(26,18,9,0.96);
+  border-bottom: 2px solid var(--gold);
+  overflow-x: auto;
+}
+.tab-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 1rem 0.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244,232,193,0.55);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--gold-light); }
+.tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+.tab-btn .tab-icon { display: block; font-size: 1.2rem; margin-bottom: 0.3rem; }
+.tab-btn .tab-count { display: block; font-size: 0.58rem; opacity: 0.6; letter-spacing: 0.08em; margin-top: 0.2rem; }
+
+/* ── Controls bar ── */
+.controls {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(139,26,26,0.04);
+  border-bottom: 1px solid rgba(139,26,26,0.15);
+  flex-wrap: wrap;
+}
+.search-wrap { flex: 1; min-width: 200px; position: relative; }
+.search-wrap svg { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); opacity: 0.4; pointer-events: none; }
+#search-input {
+  width: 100%;
+  padding: 0.55rem 0.8rem 0.55rem 2.2rem;
+  border: 1px solid rgba(139,26,26,0.3);
+  border-radius: 4px;
+  background: rgba(248,237,205,0.7);
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+#search-input:focus { border-color: var(--crimson); background: rgba(248,237,205,0.95); }
+#search-input::placeholder { color: var(--ink-light); opacity: 0.45; }
+
+.random-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  background: var(--crimson);
+  color: var(--parchment);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.random-btn:hover { background: var(--crimson-light); }
+
+/* ── Filter pills ── */
+.filters {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.65rem 1.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(139,26,26,0.1);
+  align-items: center;
+  background: rgba(248,237,205,0.3);
+}
+.filter-label { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--crimson); margin-right: 0.2rem; white-space: nowrap; }
+.filter-chip {
+  padding: 0.22rem 0.65rem;
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.8rem;
+  border: 1px solid rgba(139,26,26,0.25);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-chip:hover { border-color: var(--crimson); background: rgba(139,26,26,0.06); }
+.filter-chip.active { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
+.filter-chip.all-chip.active { background: var(--ink); border-color: var(--ink); }
+
+/* ── Result count + pagination ── */
+.result-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  border-bottom: 1px solid rgba(139,26,26,0.08);
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.result-count { font-style: italic; }
+.pagination { display: flex; gap: 0.35rem; align-items: center; }
+.page-btn {
+  padding: 0.2rem 0.6rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  border: 1px solid rgba(139,26,26,0.25);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.page-btn:hover { background: rgba(139,26,26,0.07); border-color: var(--crimson); }
+.page-btn.active { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── List area ── */
+.list-area { min-height: 300px; }
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+  color: var(--ink-light);
+}
+.spinner {
+  width: 2rem; height: 2rem;
+  border: 3px solid rgba(139,26,26,0.2);
+  border-top-color: var(--crimson);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.12em; color: var(--crimson); }
+
+/* ── Entry rows ── */
+.entry-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.55rem 1.5rem;
+  border-bottom: 1px solid rgba(139,26,26,0.08);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.entry-row:hover { background: rgba(139,26,26,0.04); }
+.entry-row:nth-child(even) { background: rgba(139,26,26,0.025); }
+.entry-row:nth-child(even):hover { background: rgba(139,26,26,0.06); }
+
+.entry-name { font-weight: 600; font-size: 0.96rem; color: var(--ink); flex-shrink: 0; }
+.entry-name:hover { color: var(--crimson); }
+.entry-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.tag {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 99px;
+  border: 1px solid rgba(139,26,26,0.2);
+  color: var(--ink-light);
+  font-style: italic;
+  white-space: nowrap;
+}
+.tag.level  { background: rgba(26,92,42,0.08);  border-color: rgba(26,92,42,0.3);  color: #1a5c2a; }
+.tag.school { background: rgba(201,151,58,0.08); border-color: rgba(201,151,58,0.3); color: #7a5c10; }
+.tag.rarity-uncommon { background: rgba(26,92,42,0.08); border-color: rgba(26,92,42,0.3); color: #1a5c2a; }
+.tag.rarity-rare     { background: rgba(26,60,139,0.08); border-color: rgba(26,60,139,0.3); color: #1a3c8b; }
+.tag.rarity-very.rare { background: rgba(100,20,139,0.08); border-color: rgba(100,20,139,0.3); color: #64148b; }
+.tag.rarity-legendary { background: rgba(139,26,26,0.1); border-color: var(--crimson); color: var(--crimson); font-weight: 600; }
+.tag.cr   { background: rgba(139,26,26,0.07); border-color: rgba(139,26,26,0.3); color: var(--crimson); }
+.tag.type { background: rgba(139,26,26,0.04); }
+.entry-book { font-size: 0.68rem; color: var(--ink-light); opacity: 0.45; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; flex-shrink: 1; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,18,9,0.82);
+  z-index: 1000;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+.modal {
+  width: 100%;
+  max-width: 680px;
+  background: var(--parchment);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px var(--crimson), 0 12px 48px rgba(0,0,0,0.8);
+  overflow: hidden;
+  margin: auto;
+}
+.modal-header {
+  background: rgba(26,18,9,0.95);
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.modal-title { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--gold-light); font-weight: 600; }
+.modal-subtitle { font-size: 0.78rem; color: rgba(244,232,193,0.55); font-style: italic; margin-top: 0.2rem; }
+.modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(244,232,193,0.5);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.modal-close:hover { color: var(--gold-light); }
+.modal-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; padding: 0.7rem 1.5rem; background: rgba(139,26,26,0.05); border-bottom: 1px solid rgba(139,26,26,0.15); }
+.modal-body { padding: 1.2rem 1.5rem; }
+.modal-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.modal-props {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(139,26,26,0.15);
+}
+.prop-item { }
+.prop-label { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--crimson); display: block; }
+.prop-val { font-size: 0.88rem; color: var(--ink); }
+.modal-source { padding: 0.6rem 1.5rem 1rem; font-size: 0.75rem; color: var(--ink-light); font-style: italic; border-top: 1px solid rgba(139,26,26,0.1); }
+
+/* ── Random card ── */
+.random-card {
+  display: none;
+  margin: 1.2rem 1.5rem;
+  padding: 1.2rem;
+  background: rgba(201,151,58,0.06);
+  border: 1px solid rgba(201,151,58,0.3);
+  border-radius: 4px;
+}
+.random-card.visible { display: block; }
+.random-card-title { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+.random-card-name { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 600; color: var(--crimson); margin-bottom: 0.5rem; cursor: pointer; }
+.random-card-name:hover { text-decoration: underline; }
+.random-card-desc { font-size: 0.88rem; color: var(--ink-light); line-height: 1.55; max-height: 120px; overflow: hidden; position: relative; }
+.random-card-desc::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, rgba(248,237,205,0.9)); }
+
+.empty-state { text-align: center; padding: 3rem 2rem; color: var(--ink-light); font-style: italic; }
+
+@media (max-width: 600px) {
+  .controls { padding: 0.8rem 1rem; }
+  .filters { padding: 0.5rem 1rem; }
+  .entry-row { padding: 0.55rem 1rem; }
+  .entry-book { display: none; }
+  .modal { max-width: 100%; }
+  .modal-props { grid-template-columns: 1fr 1fr; }
+  .tab-btn .tab-count { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Character Forge</h1>
+  <div class="divider"></div>
+  <p>D&amp;D Reference Database</p>
+</header>
+
+<div style="max-width:1100px;margin:0 auto 1rem">
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</div>
+
+<div class="shell">
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tab-spells"   onclick="switchTab('spells')"   role="tab">
+      <span class="tab-icon">✨</span>Spells<span class="tab-count">5,849 entries</span>
+    </button>
+    <button class="tab-btn" id="tab-items"    onclick="switchTab('items')"    role="tab">
+      <span class="tab-icon">🗡</span>Items<span class="tab-count">15,749 entries</span>
+    </button>
+    <button class="tab-btn" id="tab-magic"    onclick="switchTab('magic')"    role="tab">
+      <span class="tab-icon">🔮</span>Magic Items<span class="tab-count">filtered</span>
+    </button>
+    <button class="tab-btn" id="tab-monsters" onclick="switchTab('monsters')" role="tab">
+      <span class="tab-icon">🐉</span>Monsters<span class="tab-count">11,463 entries</span>
+    </button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search by name or description…" oninput="onSearch()">
+    </div>
+    <button class="random-btn" onclick="rollRandom()">🎲 Roll Random</button>
+  </div>
+
+  <!-- Filters (injected per tab) -->
+  <div class="filters" id="filters-bar"></div>
+
+  <!-- Random result -->
+  <div class="random-card" id="random-card">
+    <div class="random-card-title">🎲 Random Roll</div>
+    <div class="random-card-name" id="rc-name" onclick="openModalById(currentRandom)"></div>
+    <div class="random-card-desc" id="rc-desc"></div>
+  </div>
+
+  <!-- Result count + pagination -->
+  <div class="result-bar">
+    <span class="result-count" id="result-count">Loading…</span>
+    <div class="pagination" id="pagination-top"></div>
+  </div>
+
+  <!-- List -->
+  <div class="list-area" id="list-area">
+    <div class="loading-state" id="initial-loader">
+      <div class="spinner"></div>
+      <div class="loading-label">Loading Spells…</div>
+      <div style="font-size:0.82rem;color:var(--ink-light);font-style:italic;">Fetching 5,849 entries from the D&amp;D database</div>
+    </div>
+  </div>
+
+  <!-- Bottom pagination -->
+  <div class="result-bar" style="border-top:1px solid rgba(139,26,26,0.1);border-bottom:none;" id="pagination-bottom-bar" style="display:none">
+    <span></span>
+    <div class="pagination" id="pagination-bottom"></div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-tags" id="modal-tags"></div>
+    <div class="modal-body">
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-props" id="modal-props"></div>
+    </div>
+    <div class="modal-source" id="modal-source"></div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+const CDN = 'https://cdn.jsdelivr.net/npm/dnd-data@1.0.0/data/';
+const DATA_URLS = {
+  spells:   CDN + 'spells.json',
+  items:    CDN + 'items.json',
+  monsters: CDN + 'monsters.json',
+};
+
+const cache = {};           // raw loaded data per source key
+let currentTab    = 'spells';
+let currentData   = [];     // filtered + searched
+let currentFilter = 'all';
+let currentSearch = '';
+let currentPage   = 1;
+const PAGE_SIZE   = 60;
+let currentRandom = null;
+let searchTimer   = null;
+
+// Tab → filter definitions
+const TAB_FILTERS = {
+  spells:   ['all','cantrip','1','2','3','4','5','6','7','8','9'],
+  items:    ['all','weapon','armor','wondrous','staff','rod','wand','ring','scroll','potion'],
+  magic:    ['all','common','uncommon','rare','very rare','legendary','artifact'],
+  monsters: ['all','cr0','cr1','cr2','cr3','cr4','cr5','cr6','cr8','cr10','cr13','cr15','cr20','cr30'],
+};
+const TAB_FILTER_LABELS = {
+  spells:   ['All', 'Cantrip', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'],
+  items:    ['All', 'Weapon', 'Armor', 'Wondrous', 'Staff', 'Rod', 'Wand', 'Ring', 'Scroll', 'Potion'],
+  magic:    ['All', 'Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Artifact'],
+  monsters: ['All', 'CR 0', 'CR 1', 'CR 2', 'CR 3', 'CR 4', 'CR 5', 'CR 6', 'CR 8', 'CR 10', 'CR 13', 'CR 15', 'CR 20', 'CR 30'],
+};
+const TAB_SOURCES = { spells: 'spells', items: 'items', magic: 'items', monsters: 'monsters' };
+const TAB_COUNTS  = { spells: '5,849', items: '15,749', magic: '~6k', monsters: '11,463' };
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab    = tab;
+  currentFilter = 'all';
+  currentSearch = '';
+  currentPage   = 1;
+  document.getElementById('search-input').value = '';
+  document.getElementById('random-card').classList.remove('visible');
+  currentRandom = null;
+
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  renderFilters();
+  const src = TAB_SOURCES[tab];
+  if (cache[src]) {
+    applyFiltersAndRender();
+  } else {
+    loadData(src);
+  }
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+function loadData(src) {
+  const area = document.getElementById('list-area');
+  const names = { spells: 'Spells', items: 'Items', monsters: 'Monsters' };
+  const counts = { spells: '5,849', items: '15,749', monsters: '11,463' };
+  area.innerHTML = '<div class="loading-state"><div class="spinner"></div>'
+    + '<div class="loading-label">Loading ' + names[src] + '…</div>'
+    + '<div style="font-size:0.82rem;color:var(--ink-light);font-style:italic;">Fetching ' + (counts[src]||'') + ' entries — this may take a moment</div></div>';
+  document.getElementById('result-count').textContent = 'Loading…';
+
+  fetch(DATA_URLS[src])
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      cache[src] = data;
+      applyFiltersAndRender();
+    })
+    .catch(function(err) {
+      area.innerHTML = '<div class="empty-state">⚠ Could not load data.<br><small style="color:var(--ink-light);">' + err.message + '<br>Check your internet connection and try reloading.</small></div>';
+      document.getElementById('result-count').textContent = 'Error loading data';
+    });
+}
+
+// ── Filter + search + render ──────────────────────────────────────────────────
+function applyFiltersAndRender() {
+  const src  = TAB_SOURCES[currentTab];
+  const raw  = cache[src] || [];
+  const tab  = currentTab;
+  const filt = currentFilter;
+  const q    = currentSearch.trim().toLowerCase();
+
+  let data = raw;
+
+  // Tab-specific pre-filter
+  if (tab === 'magic') {
+    data = data.filter(function(d) {
+      var r = ((d.properties || {})['Item Rarity'] || '').toLowerCase().trim();
+      return r && r !== 'none';
+    });
+  }
+
+  // Category filter
+  if (filt !== 'all') {
+    if (tab === 'spells') {
+      var lvl = filt === 'cantrip' ? 0 : parseInt(filt);
+      data = data.filter(function(d) { return (d.properties || {}).Level === lvl; });
+    } else if (tab === 'items' || tab === 'magic') {
+      var f = filt.toLowerCase();
+      if (tab === 'magic') {
+        // filter by rarity
+        data = data.filter(function(d) {
+          var r = ((d.properties || {})['Item Rarity'] || '').toLowerCase();
+          return r === f || r.replace(' ','') === f.replace(' ','');
+        });
+      } else {
+        // filter by item type
+        data = data.filter(function(d) {
+          var t = ((d.properties || {})['Item Type'] || '').toLowerCase();
+          return t.indexOf(f) !== -1;
+        });
+      }
+    } else if (tab === 'monsters') {
+      var cr = filt.replace('cr','');
+      var crNum = parseFloat(cr);
+      data = data.filter(function(d) {
+        var c = (d.properties || {})['Challenge Rating'] || '';
+        return parseFloat(c) === crNum;
+      });
+    }
+  }
+
+  // Search filter
+  if (q) {
+    data = data.filter(function(d) {
+      return d.name.toLowerCase().indexOf(q) !== -1 ||
+             (d.description || '').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  currentData = data;
+  currentPage = 1;
+  renderPage();
+}
+
+function onSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() {
+    currentSearch = document.getElementById('search-input').value;
+    applyFiltersAndRender();
+  }, 220);
+}
+
+function setFilter(val) {
+  currentFilter = val;
+  applyFiltersAndRender();
+  renderFilters();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderFilters() {
+  const bar = document.getElementById('filters-bar');
+  const keys   = TAB_FILTERS[currentTab]   || [];
+  const labels = TAB_FILTER_LABELS[currentTab] || [];
+  const labelMap = { spells: 'Level', items: 'Type', magic: 'Rarity', monsters: 'CR' };
+
+  let html = '<span class="filter-label">' + (labelMap[currentTab] || 'Filter') + '</span>';
+  keys.forEach(function(k, i) {
+    var isActive = currentFilter === k;
+    var cls = 'filter-chip' + (isActive ? ' active' : '') + (k === 'all' ? ' all-chip' : '');
+    html += '<button class="' + cls + '" onclick="setFilter(\'' + k + '\')">' + (labels[i] || k) + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function renderPage() {
+  const area     = document.getElementById('list-area');
+  const total    = currentData.length;
+  const start    = (currentPage - 1) * PAGE_SIZE;
+  const end      = Math.min(start + PAGE_SIZE, total);
+  const pageData = currentData.slice(start, end);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Result count
+  var countTxt = total.toLocaleString() + ' result' + (total !== 1 ? 's' : '');
+  if (currentSearch || currentFilter !== 'all') {
+    countTxt += ' (filtered)';
+  }
+  if (total > PAGE_SIZE) {
+    countTxt += ' · showing ' + (start+1) + '–' + end;
+  }
+  document.getElementById('result-count').textContent = countTxt;
+
+  // Pagination
+  renderPagination(totalPages);
+
+  if (total === 0) {
+    area.innerHTML = '<div class="empty-state">No results found.<br><small>Try a different search or filter.</small></div>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  pageData.forEach(function(entry, idx) {
+    const row = buildRow(entry, start + idx);
+    frag.appendChild(row);
+  });
+  area.innerHTML = '';
+  area.appendChild(frag);
+}
+
+function buildRow(entry, idx) {
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.setAttribute('data-idx', idx);
+  row.onclick = function() { openModalByEntry(entry); };
+
+  const name = document.createElement('div');
+  name.className = 'entry-name';
+  name.textContent = entry.name;
+
+  const tags = document.createElement('div');
+  tags.className = 'entry-tags';
+  buildTags(entry).forEach(function(t) { tags.appendChild(t); });
+
+  const book = document.createElement('div');
+  book.className = 'entry-book';
+  book.textContent = entry.book || '';
+  book.title = (entry.publisher || '') + (entry.book ? ' — ' + entry.book : '');
+
+  row.appendChild(name);
+  row.appendChild(tags);
+  row.appendChild(book);
+  return row;
+}
+
+function buildTags(entry) {
+  const p = entry.properties || {};
+  const tags = [];
+
+  function makeTag(text, cls) {
+    var el = document.createElement('span');
+    el.className = 'tag' + (cls ? ' ' + cls : '');
+    el.textContent = text;
+    return el;
+  }
+
+  if (currentTab === 'spells') {
+    var lvl = p.Level;
+    tags.push(makeTag(lvl === 0 ? 'Cantrip' : 'Level ' + lvl, 'level'));
+    if (p.School) tags.push(makeTag(p.School, 'school'));
+    if (p['Casting Time']) tags.push(makeTag(p['Casting Time'], ''));
+    if (p.Concentration === 'Yes') tags.push(makeTag('Concentration', ''));
+  } else if (currentTab === 'items' || currentTab === 'magic') {
+    if (p['Item Type']) tags.push(makeTag(p['Item Type'], 'type'));
+    var rar = (p['Item Rarity'] || '').toLowerCase().replace(' ','.');
+    if (p['Item Rarity']) tags.push(makeTag(p['Item Rarity'], 'rarity-' + rar));
+    if (p['Requires Attunement']) tags.push(makeTag('Attunement', ''));
+  } else if (currentTab === 'monsters') {
+    if (p.Type) tags.push(makeTag(p.Type, 'type'));
+    if (p.Size) tags.push(makeTag(p.Size, ''));
+    if (p['Challenge Rating'] !== undefined) tags.push(makeTag('CR ' + p['Challenge Rating'], 'cr'));
+    if (p.AC) tags.push(makeTag('AC ' + p.AC, ''));
+    if (p.HP) tags.push(makeTag(p.HP + ' HP', ''));
+  }
+
+  return tags;
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+function renderPagination(totalPages) {
+  ['pagination-top', 'pagination-bottom'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    function makePageBtn(label, page, isActive, disabled) {
+      var btn = document.createElement('button');
+      btn.className = 'page-btn' + (isActive ? ' active' : '');
+      btn.textContent = label;
+      btn.disabled = !!disabled;
+      btn.onclick = function() { goToPage(page); };
+      return btn;
+    }
+
+    el.appendChild(makePageBtn('‹', currentPage - 1, false, currentPage === 1));
+
+    // Show window of pages
+    var start = Math.max(1, currentPage - 2);
+    var end   = Math.min(totalPages, currentPage + 2);
+    if (start > 1) { el.appendChild(makePageBtn('1', 1, false, false)); if (start > 2) { var ellipsis = document.createElement('span'); ellipsis.textContent = '…'; ellipsis.style.padding = '0 0.2rem'; el.appendChild(ellipsis); } }
+    for (var p = start; p <= end; p++) el.appendChild(makePageBtn(p, p, p === currentPage, false));
+    if (end < totalPages) { if (end < totalPages - 1) { var el2 = document.createElement('span'); el2.textContent = '…'; el2.style.padding = '0 0.2rem'; el.appendChild(el2); } el.appendChild(makePageBtn(totalPages, totalPages, false, false)); }
+
+    el.appendChild(makePageBtn('›', currentPage + 1, false, currentPage === totalPages));
+  });
+}
+
+function goToPage(p) {
+  currentPage = p;
+  renderPage();
+  document.querySelector('.shell').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Random roll ───────────────────────────────────────────────────────────────
+function rollRandom() {
+  const src = TAB_SOURCES[currentTab];
+  if (!cache[src]) { loadData(src); return; }
+
+  var pool = cache[src];
+  if (currentTab === 'magic') {
+    pool = pool.filter(function(d) {
+      var r = ((d.properties || {})['Item Rarity'] || '').toLowerCase().trim();
+      return r && r !== 'none';
+    });
+  }
+  if (!pool.length) return;
+
+  var entry = pool[Math.floor(Math.random() * pool.length)];
+  currentRandom = entry;
+
+  document.getElementById('rc-name').textContent = entry.name;
+  var shortDesc = (entry.description || '').slice(0, 300);
+  document.getElementById('rc-desc').textContent = shortDesc + (entry.description && entry.description.length > 300 ? '…' : '');
+  document.getElementById('random-card').classList.add('visible');
+
+  document.querySelector('.shell').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModalByEntry(entry) {
+  const p = entry.properties || {};
+
+  document.getElementById('modal-title').textContent = entry.name;
+
+  // Subtitle
+  var sub = '';
+  if (currentTab === 'spells')   sub = (p.Level === 0 ? 'Cantrip' : 'Level ' + p.Level) + (p.School ? ' · ' + p.School : '');
+  if (currentTab === 'items' || currentTab === 'magic') sub = (p['Item Type'] || '') + (p['Item Rarity'] ? ' · ' + p['Item Rarity'] : '');
+  if (currentTab === 'monsters') sub = (p.Size || '') + ' ' + (p.Type || '') + (p['Challenge Rating'] !== undefined ? ' · CR ' + p['Challenge Rating'] : '');
+  document.getElementById('modal-subtitle').textContent = sub;
+
+  // Tags in modal
+  const tagsEl = document.getElementById('modal-tags');
+  tagsEl.innerHTML = '';
+  buildTags(entry).forEach(function(t) { tagsEl.appendChild(t); });
+
+  // Description
+  document.getElementById('modal-desc').textContent = entry.description || 'No description available.';
+
+  // Properties
+  const propsEl = document.getElementById('modal-props');
+  propsEl.innerHTML = '';
+  var SKIP = new Set(['Category', 'Expansion', 'data-List', 'data-datarecords', 'data-description',
+    'data-AcNum', 'data-HpNum', 'data-CrNum', 'data-XP', 'data-SizeNum', 'data-LANum',
+    'data-STR-mod', 'data-DEX-mod', 'data-CON-mod', 'data-INT-mod', 'data-WIS-mod', 'data-CHA-mod',
+    'data-Actions', 'data-Traits', 'data-Legendary Actions', 'data-Spells', 'data-RangeNum',
+    'data-CastNum', 'data-DurationNum', 'data-AttackType', 'data-RarityNum', 'data-Cantrip Scaling',
+    'filter-Concentration', 'filter-Components', 'filter-Duration', 'filter-Level', 'filter-Range',
+    'filter-Ritual', 'filter-Upcast', 'filter-Casting Time', 'filter-Tags', 'filter-Attunement',
+    'filter-Charges', 'filter-Damage', 'filter-Lists', 'Token', 'Token Size', 'Source', 'Name',
+    'Spell Book', 'data-Cantrip Scaling', 'Roll 0', 'Roll 1', 'Roll 2', 'Roll 3', 'Roll 4']);
+
+  Object.entries(p).forEach(function(pair) {
+    var k = pair[0], v = pair[1];
+    if (SKIP.has(k)) return;
+    if (typeof v === 'object') return;
+    if (!v && v !== 0) return;
+    var item = document.createElement('div');
+    item.className = 'prop-item';
+    item.innerHTML = '<span class="prop-label">' + k + '</span><span class="prop-val">' + v + '</span>';
+    propsEl.appendChild(item);
+  });
+
+  // Source
+  var srcStr = '';
+  if (entry.publisher) srcStr = entry.publisher;
+  if (entry.book) srcStr += (srcStr ? ' — ' : '') + entry.book;
+  document.getElementById('modal-source').textContent = srcStr ? 'Source: ' + srcStr : '';
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openModalById(entry) {
+  if (entry) openModalByEntry(entry);
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay') && !e.target.classList.contains('modal-close')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal({ target: document.getElementById('modal-overlay') });
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+renderFilters();
+loadData('spells');
+</script>
+</body>
+</html>
