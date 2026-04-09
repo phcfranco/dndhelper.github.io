@@ -494,44 +494,379 @@ var HOARD_COINS = [
   { cp:[0,0,0],   sp:[0,0,0],  gp:[12,6,1000],ep:[0,0,0], pp:[8,6,1000] }, // T4
 ];
 
-// Magic item tables simplified (names by rarity)
-var MAGIC_ITEMS = {
-  A: ['Spell Scroll (Cantrip)', 'Potion of Healing', 'Potion of Climbing', 'Bag of 1,000 Ball Bearings', 'Candle of the Deep', 'Driftglobe', 'Pipe of Smoke Monsters', 'Veteran\'s Cane'],
-  B: ['Potion of Greater Healing', 'Spell Scroll (Level 1)', 'Spell Scroll (Level 2)', 'Bag of Holding', 'Boots of Striding and Springing', 'Broom of Flying', 'Goggles of Night', 'Helm of Comprehending Languages'],
-  C: ['Potion of Superior Healing', 'Spell Scroll (Level 4)', 'Bag of Tricks', 'Boots of Elvenkind', 'Cloak of Elvenkind', 'Eyes of Charming', 'Figurine of Wondrous Power', 'Immovable Rod', 'Lantern of Revealing', 'Medallion of Thoughts', 'Necklace of Adaptation', 'Periapt of Wound Closure', 'Pipes of Haunting', 'Ring of Water Walking', 'Robe of Useful Items'],
-  D: ['Spell Scroll (Level 5)', 'Potion of Heroism', 'Elven Chain', 'Belt of Hill Giant Strength', 'Brooch of Shielding', 'Cloak of Protection', 'Eyes of the Eagle', 'Gauntlets of Ogre Power', 'Hat of Disguise', 'Headband of Intellect', 'Medallion of Thoughts', 'Necklace of Fireballs', 'Periapt of Health', 'Winged Boots'],
-  E: ['Spell Scroll (Level 6)', 'Spell Scroll (Level 7)', 'Helm of Teleportation', 'Horn of Valhalla (silver)', 'Ring of Animal Influence', 'Ring of Evasion', 'Ring of Feather Falling', 'Ring of Free Action', 'Ring of Protection', 'Ring of Resistance'],
-  F: ['Weapon +1', 'Shield +1', 'Sentinel Shield', 'Sword of Vengeance', 'Trident of Fish Command', 'Wand of Magic Missiles', 'Wand of the War Mage +1', 'Wind Fan', 'Winged Boots', 'Woodhen\'s Basket'],
-  G: ['Weapon +2', 'Shield +2', 'Ring of Invisibility', 'Ring of Spell Storing', 'Rod of Rulership', 'Rope of Entanglement', 'Manual of Health', 'Manual of Gainful Exercise', 'Tome of Understanding'],
-  H: ['Weapon +3', 'Shield +3', 'Amulet of the Planes', 'Carpet of Flying', 'Crystal Ball', 'Ring of Regeneration', 'Ring of Three Wishes', 'Robe of Stars', 'Sphere of Annihilation', 'Talisman of Pure Good'],
-  I: ['Defender', 'Hammer of Thunderbolts', 'Luck Blade', 'Sword of Answering', 'Holy Avenger', 'Ring of Djinni Summoning', 'Rod of Lordly Might', 'Staff of the Magi', 'Vorpal Sword'],
+// ── DMG Treasure Tables (2014 SRD) ─────────────────────────────────────────
+
+// Art Objects by tier (name: gp value) — DMG Table
+var ART_OBJECTS = {
+  10:  ['Small gold bracelet','Cloth-of-gold vestments','Black velvet mask stitched with silver','Copper chalice with silver filigree','Pair of engraved bone dice','Small mirror set in a painted wooden frame','Embroidered glove set with jewel chips','Gold locket with painted portrait inside','Pair of gold and topaz earrings','Statuette of a dwarf set with gems'],
+  25:  ['Gold ring set with bloodstones','Carved ivory statuette','Large gold bracelet','Silver necklace with a gemstone pendant','Bronze crown','Silk robe with gold embroidery','Large well-made tapestry','Brass mug with jade inlay','Box of turquoise animal figurines','Gold bird cage with electrum filigree'],
+  50:  ['Silver chalice set with moonstones','Silver-tipped and banded horn','Carved wooden statuette with ivory inlay','Large gold ring set with a carnelian','Crown of beaten copper set with gem chips','Silver statuette of a halfling hero','Gold crown of interlocked oak leaves','Brooch of gold and silver with moonstone','Chess set of carved ivory','Pair of gold-and-tourmaline earrings'],
+  250: ['Gold and ruby ring','Gold goblet set with fire opals','Figurine of a rearing horse cut from carnelian','Fine gold chain set with pink tourmaline','Carved ivory dancing girl figurine','Fine gold bracelet with dragon motifs','Gold scepter with electrum inlay','Carved harp of exotic wood with ivory inlay','Set of four malachite goblets','Gold medallion set with a moonstone'],
+  750: ['Silver comb with moonstones','Gold statuette of a nude goddess set with rubies','Gold dragon comb set with red garnets','Gold and topaz bottle stopper cork','Ceremonial electrum dagger with black pearl in pommel','Silver and gold brooch','Obsidian statuette with gold fittings and inlay','Painted gold war mask','Gold plate with relief sculpture','Silver statuette of a rearing dragon'],
+  2500:['Fine gold chain set with a fire opal','Old masterwork oil painting','Embroidered silk and velvet mantle set with gems','Sapphire pendant on gold chain','Embroidered and bejeweled glove','Jeweled anklet','Gold music box','Gold circlet set with four aquamarines','Eye patch with mock eye set in blue sapphire','Necklace string of pearls'],
+  7500:['Jeweled gold crown','Jeweled platinum ring','Small gold idol','Gold and ruby drinking bowl','Gilt egg with mosaic shell','Necklace of small pink pearls','Gold eye patch with mock eye of sapphire','Golden nightingale (mechanical, sings)','Jeweled anklet','Tiara of fine gold filigree set with gems'],
 };
 
-// Which item tables per tier, per hoard roll (simplified)
-var HOARD_MAGIC_CHANCE = [
-  // T1: 6% A+B
-  { rolls: [[6,100,'A'],[96,100,'B']] },
-  // T2: more frequent, higher tables
-  { rolls: [[1,4,'A'],[5,10,'B'],[11,16,'C'],[17,22,'D'],[71,75,'E'],[76,78,'F']] },
-  // T3
-  { rolls: [[1,3,'C'],[4,8,'D'],[9,14,'E'],[15,22,'F'],[23,30,'G'],[31,38,'H'],[90,95,'I']] },
-  // T4
-  { rolls: [[1,2,'E'],[3,10,'F'],[11,24,'G'],[25,45,'H'],[46,75,'I']] },
-];
+// Gem values by tier
+var GEMS = {
+  10:  ['Azurite (10 gp)','Banded agate (10 gp)','Blue quartz (10 gp)','Eye agate (10 gp)','Hematite (10 gp)','Lapis lazuli (10 gp)','Malachite (10 gp)','Moss agate (10 gp)','Obsidian (10 gp)','Rhodonite (10 gp)','Tiger eye (10 gp)','Turquoise (10 gp)'],
+  50:  ['Bloodstone (50 gp)','Carnelian (50 gp)','Chalcedony (50 gp)','Chrysoprase (50 gp)','Citrine (50 gp)','Jasper (50 gp)','Moonstone (50 gp)','Onyx (50 gp)','Quartz (50 gp)','Sardonyx (50 gp)','Star rose quartz (50 gp)','Zircon (50 gp)'],
+  100: ['Amber (100 gp)','Amethyst (100 gp)','Chrysoberyl (100 gp)','Coral (100 gp)','Garnet (100 gp)','Jade (100 gp)','Jet (100 gp)','Pearl (100 gp)','Spinel (100 gp)','Tourmaline (100 gp)'],
+  500: ['Alexandrite (500 gp)','Aquamarine (500 gp)','Black pearl (500 gp)','Blue spinel (500 gp)','Peridot (500 gp)','Topaz (500 gp)'],
+  1000:['Black opal (1,000 gp)','Blue sapphire (1,000 gp)','Emerald (1,000 gp)','Fire opal (1,000 gp)','Opal (1,000 gp)','Star ruby (1,000 gp)','Star sapphire (1,000 gp)','Yellow sapphire (1,000 gp)'],
+  5000:['Black sapphire (5,000 gp)','Diamond (5,000 gp)','Jacinth (5,000 gp)','Ruby (5,000 gp)'],
+};
 
-function rollMagicItem(table) {
-  var pool = MAGIC_ITEMS[table] || [];
-  if (!pool.length) return null;
-  return { name: pool[Math.floor(Math.random() * pool.length)], rarity: tableRarity(table) };
+// Magic Items — DMG Tables A–I (SRD & core only)
+var MAGIC_ITEMS = {
+  // Table A — Common (T1 hoards)
+  A: [
+    {n:'Potion of Healing',r:'common',d:'You regain 2d4+2 HP when you drink this potion.'},
+    {n:'Potion of Climbing',r:'common',d:'Gain a climbing speed equal to your walking speed for 1 hour.'},
+    {n:'Spell Scroll (Cantrip)',r:'common',d:'A scroll bearing a single cantrip. Usable by any class with that cantrip on their list.'},
+    {n:'Spell Scroll (1st Level)',r:'common',d:'A scroll bearing a 1st-level spell.'},
+    {n:'Bag of 1,000 Ball Bearings',r:'common',d:'Pouring these out covers a 10-ft. area; creatures must succeed DC 10 DEX or fall prone.'},
+    {n:'Candle of the Deep',r:'common',d:'Burns for 1 hour, waterproof, casts 5-ft. bright light.'},
+    {n:'Driftglobe',r:'common',d:'Command word causes it to float, emit bright light 20 ft. (dim 40 ft.) for 1 hour/day.'},
+    {n:'Ersatz Eye',r:'common',d:'Artificial eye that fits into an empty eye socket and can\'t be removed while attuned.'},
+    {n:'Hat of Wizardry',r:'common',d:'Requires attunement by a Wizard. Roll d20 when casting cantrip — on 1, cast a random cantrip instead.'},
+    {n:'Heward\'s Handy Spice Pouch',r:'common',d:'Produces a pinch of any common spice. 10 uses, recharges at dawn.'},
+    {n:'Instrument of Illusions',r:'common',d:'While playing, you can create harmless illusory effects. Requires attunement by a bard.'},
+    {n:'Pipe of Smoke Monsters',r:'common',d:'Puffing produces smoke shapes: dragons, giants, beholders, etc.'},
+    {n:'Pot of Awakening',r:'common',d:'A shrub planted in this pot for 30 days becomes an Awakened Shrub when the pot breaks.'},
+    {n:'Smoldering Armor',r:'common',d:'Wisps of harmless smoke rise from the armor when worn.'},
+    {n:'Staff of Adornment',r:'common',d:'One tiny ornament can be attached to the staff; it can\'t be removed while the staff exists.'},
+    {n:'Talking Doll',r:'common',d:'Shares up to 6 phrases (each up to 6 words) you program while holding it.'},
+    {n:'Unbreakable Arrow',r:'common',d:'This arrow can\'t be broken, except when it is within an antimagic field.'},
+  ],
+  // Table B — Uncommon (T1–T2)
+  B: [
+    {n:'Potion of Greater Healing',r:'uncommon',d:'You regain 4d4+4 HP when you drink this potion.'},
+    {n:'Spell Scroll (2nd Level)',r:'uncommon',d:'A scroll bearing a 2nd-level spell. Requires a DC 13 check if above your level.'},
+    {n:'Spell Scroll (3rd Level)',r:'uncommon',d:'A scroll bearing a 3rd-level spell. Requires a DC 15 check if above your level.'},
+    {n:'Alchemy Jug',r:'uncommon',d:'Produces various liquids on command: water, acid, ale, oil, vinegar, etc.'},
+    {n:'Bag of Holding',r:'uncommon',d:'Holds up to 500 lbs. / 64 cubic ft. Weighs 15 lbs. regardless of contents.'},
+    {n:'Boots of Elvenkind',r:'uncommon',d:'Your steps make no sound. Advantage on DEX (Stealth) checks to move silently.'},
+    {n:'Boots of Striding and Springing',r:'uncommon',d:'Speed becomes 30 ft. if below that. Jump 3× normal distance. Requires attunement.'},
+    {n:'Broom of Flying',r:'uncommon',d:'Fly at 50 ft. speed (30 ft. with rider over 200 lbs). Command word activates.'},
+    {n:'Cloak of Elvenkind',r:'uncommon',d:'Advantage on DEX (Stealth) checks. Disadvantage on Perception checks against you. Requires attunement.'},
+    {n:'Cloak of Protection',r:'uncommon',d:'+1 to AC and saving throws while wearing and attuned. Requires attunement.'},
+    {n:'Decanter of Endless Water',r:'uncommon',d:'Produces 1 gallon (still), 5 gallons (fountain), or 30 gallons (geyser) of water per round.'},
+    {n:'Dust of Disappearance',r:'uncommon',d:'A creature sprinkled becomes invisible for 2d4 minutes. No concentration needed.'},
+    {n:'Eversmoking Bottle',r:'uncommon',d:'Billows thick smoke filling a 60-ft. radius; heavily obscures the area.'},
+    {n:'Eyes of Charming',r:'uncommon',d:'3 charges. Cast Charm Person (DC 13). Regains 1d3 charges at dawn. Requires attunement.'},
+    {n:'Folding Boat',r:'uncommon',d:'Three command words: box, rowboat, or keelboat form.'},
+    {n:'Goggles of Night',r:'uncommon',d:'Darkvision 60 ft. while wearing. If already have it, adds 60 ft.'},
+    {n:'Helm of Comprehending Languages',r:'uncommon',d:'While worn, you can read and understand any written language.'},
+    {n:'Immovable Rod',r:'uncommon',d:'Press the button: the rod becomes fixed in space. Holds 8,000 lbs. before activating.'},
+    {n:'Keoghtom\'s Ointment',r:'uncommon',d:'1d4+1 doses. Each dose heals 2d8+2 HP, removes a curse, disease, or poison.'},
+    {n:'Lantern of Revealing',r:'uncommon',d:'Burns for 6 hours per flask of oil. Reveals invisible creatures within 30 ft.'},
+    {n:'Medallion of Thoughts',r:'uncommon',d:'3 charges. Cast Detect Thoughts (DC 13). Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Necklace of Adaptation',r:'uncommon',d:'Breathe in any environment. Advantage on saves vs. harmful gases. Requires attunement.'},
+    {n:'Periapt of Wound Closure',r:'uncommon',d:'Stabilise automatically at 0 HP. Maximise Hit Dice when spending during rest. Requires attunement.'},
+    {n:'Pipes of Haunting',r:'uncommon',d:'3 charges. Play to frighten creatures (DC 13 WIS save). Regains 1d3 at dawn.'},
+    {n:'Ring of Jumping',r:'uncommon',d:'Bonus action: jump up to 30 ft. (high) or 60 ft. (long) until end of turn. Requires attunement.'},
+    {n:'Ring of Mind Shielding',r:'uncommon',d:'Immune to magic to read your thoughts. Can\'t be detected by divination. Requires attunement.'},
+    {n:'Ring of Water Walking',r:'uncommon',d:'Stand on and walk across any liquid surface as if solid ground.'},
+    {n:'Robe of Useful Items',r:'uncommon',d:'8 patches (roll d100 for each). Remove a patch to produce the item depicted.'},
+    {n:'Rope of Climbing',r:'uncommon',d:'60-ft. rope. Command: animates, ties knots, holds 3,000 lbs., climbs on its own.'},
+    {n:'Sending Stones',r:'uncommon',d:'Cast Sending once per day to reach the paired stone\'s holder. 25 words max.'},
+    {n:'Winged Boots',r:'uncommon',d:'Fly at your walking speed for up to 4 hours/day (can be split). Requires attunement.'},
+    {n:'Wand of Magic Detection',r:'uncommon',d:'3 charges. Cast Detect Magic. Regains 1d3 charges at dawn.'},
+    {n:'Wand of Secrets',r:'uncommon',d:'3 charges. Action: detect secret doors within 30 ft. Regains 1d3 at dawn.'},
+  ],
+  // Table C — Uncommon (T2)
+  C: [
+    {n:'Potion of Superior Healing',r:'uncommon',d:'You regain 8d4+8 HP when you drink this potion.'},
+    {n:'Spell Scroll (4th Level)',r:'uncommon',d:'A scroll bearing a 4th-level spell. Requires a DC 15 check if above your level.'},
+    {n:'Spell Scroll (5th Level)',r:'rare',d:'A scroll bearing a 5th-level spell. Requires a DC 17 check if above your level.'},
+    {n:'Bag of Tricks (Gray)',r:'uncommon',d:'Reach in and pull out a Weasel/Giant Rat/Badger/Boar/Panther/Giant Badger/Dire Wolf/Giant Elk.'},
+    {n:'Bag of Tricks (Rust)',r:'uncommon',d:'Pull out a Rat/Owl/Mastiff/Goat/Giant Goat/Giant Boar/Lion/Brown Bear.'},
+    {n:'Bag of Tricks (Tan)',r:'uncommon',d:'Pull out a Jackal/Ape/Baboon/Axe Beak/Black Bear/Giant Weasel/Giant Hyena/Tiger.'},
+    {n:'Cape of the Mountebank',r:'rare',d:'Once per day, cast Dimension Door. Puff of smoke when using. Requires attunement.'},
+    {n:'Figurine of Wondrous Power (Silver Raven)',r:'uncommon',d:'Becomes a raven for 12 hours. Can carry messages. Recharges at next dawn.'},
+    {n:'Gauntlets of Ogre Power',r:'uncommon',d:'STR becomes 19 if lower. Requires attunement.'},
+    {n:'Hat of Disguise',r:'uncommon',d:'Cast Disguise Self at will. Requires attunement.'},
+    {n:'Headband of Intellect',r:'uncommon',d:'INT becomes 19 if lower. Requires attunement.'},
+    {n:'Horseshoes of Speed',r:'rare',d:'A horse wearing all four increases speed by 30 ft. Requires attunement.'},
+    {n:'Necklace of Fireballs',r:'rare',d:'1d6+3 beads. Throw a bead: explodes in 20-ft. radius fireball (DC 15). Multiple beads = bigger blast.'},
+    {n:'Periapt of Health',r:'uncommon',d:'Immune to disease while wearing. If diseased, disease is suppressed.'},
+    {n:'Pipes of the Sewers',r:'uncommon',d:'Summon 1d4 swarms of rats while playing. Requires attunement.'},
+    {n:'Ring of Animal Influence',r:'rare',d:'3 charges: Animal Friendship (DC 13), Fear (DC 13), or Speak with Animals. Regains 1d3 at dawn.'},
+    {n:'Ring of the Ram',r:'rare',d:'3 charges: 2d10 force damage + push 5 ft., or 3 charges: 6d10 + push 15 ft. Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Wand of Enemy Detection',r:'rare',d:'7 charges. Sense nearest hostile creature in 60 ft. for 1 minute. Regains 1d6+1 at dawn. Requires attunement.'},
+  ],
+  // Table D — Rare (T2)
+  D: [
+    {n:'Spell Scroll (6th Level)',r:'rare',d:'A scroll bearing a 6th-level spell. Requires a DC 17 check if above your level.'},
+    {n:'Spell Scroll (7th Level)',r:'rare',d:'A scroll bearing a 7th-level spell. Requires a DC 18 check if above your level.'},
+    {n:'Potion of Heroism',r:'rare',d:'Gain 10 temp HP; under Bless effect for 1 hour.'},
+    {n:'Potion of Invulnerability',r:'rare',d:'Resistance to all damage for 1 minute.'},
+    {n:'Belt of Hill Giant Strength',r:'rare',d:'STR becomes 21 while wearing. Requires attunement.'},
+    {n:'Belt of Dwarvenkind',r:'rare',d:'+2 CON, darkvision 60 ft., adv. on CHA checks vs. dwarves. Requires attunement.'},
+    {n:'Brooch of Shielding',r:'uncommon',d:'Immune to Magic Missile. Resistance to force damage. Requires attunement.'},
+    {n:'Broom of Flying',r:'uncommon',d:'Fly at 50 ft. Command word activates. Carries up to 400 lbs.'},
+    {n:'Elven Chain',r:'rare',d:'AC 13 + DEX mod. Counts as light armor while attuned. Proficiency granted. Requires attunement.'},
+    {n:'Eyes of the Eagle',r:'uncommon',d:'Advantage on WIS (Perception) checks relying on sight. See clearly up to 1 mile. Requires attunement.'},
+    {n:'Gem of Seeing',r:'rare',d:'3 charges. See invisible/ethereal creatures for 10 min. Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Mantle of Spell Resistance',r:'rare',d:'Advantage on saves vs. spells. Requires attunement.'},
+    {n:'Necklace of Fireballs',r:'rare',d:'1d6+3 beads; explode as 3rd-level Fireball (DC 15 DEX). Requires attunement.'},
+    {n:'Periapt of Proof Against Poison',r:'rare',d:'Immune to poison, magical or otherwise. Requires attunement.'},
+    {n:'Ring of Evasion',r:'rare',d:'3 charges. Reaction when failing DEX save: succeed instead. Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Ring of Feather Falling',r:'rare',d:'Fall at 60 ft./round; take no falling damage. Requires attunement.'},
+    {n:'Ring of Free Action',r:'rare',d:'Ignore difficult terrain; immune to Paralyzed/Restrained by nonmagical means. Requires attunement.'},
+    {n:'Ring of Protection',r:'rare',d:'+1 to AC and saves. Requires attunement.'},
+    {n:'Ring of Resistance',r:'rare',d:'Resistance to one damage type (roll d10). Requires attunement.'},
+    {n:'Ring of Spell Storing',r:'rare',d:'Store up to 5 levels of spells; cast them using the original caster\'s save DC. Requires attunement.'},
+    {n:'Wand of Fireballs',r:'rare',d:'7 charges; 3rd-level Fireball (DC 15). Extra charges = higher level. Regains 1d6+1 at dawn. Requires attunement.'},
+    {n:'Wand of Lightning Bolts',r:'rare',d:'7 charges; 3rd-level Lightning Bolt (DC 15). Regains 1d6+1 at dawn. Requires attunement.'},
+    {n:'Wand of the War Mage +1',r:'uncommon',d:'+1 to spell attack rolls. Ignore half cover. Requires attunement by a spellcaster.'},
+    {n:'Wand of the War Mage +2',r:'rare',d:'+2 to spell attack rolls. Ignore half cover. Requires attunement by a spellcaster.'},
+  ],
+  // Table E — Rare (T3)
+  E: [
+    {n:'Spell Scroll (8th Level)',r:'very rare',d:'A scroll bearing an 8th-level spell. Requires a DC 18 check if above your level.'},
+    {n:'Potion of Flying',r:'very rare',d:'Fly at your walking speed for 1 hour. If this ends mid-air, you fall.'},
+    {n:'Potion of Invisibility',r:'very rare',d:'Become invisible for 1 hour. Attack or cast a spell to end early.'},
+    {n:'Belt of Fire Giant Strength',r:'very rare',d:'STR becomes 25 while wearing. Requires attunement.'},
+    {n:'Belt of Frost Giant Strength',r:'very rare',d:'STR becomes 23 while wearing. Requires attunement.'},
+    {n:'Belt of Stone Giant Strength',r:'very rare',d:'STR becomes 23 while wearing. Requires attunement.'},
+    {n:'Carpet of Flying (3×5)',r:'very rare',d:'Fly at 35 ft. speed. Holds 200 lbs.'},
+    {n:'Helm of Brilliance',r:'very rare',d:'Charges for Daylight, Fireball, Prismatic Spray, Wall of Fire. Gems absorbed for fire resistance. Requires attunement.'},
+    {n:'Helm of Teleportation',r:'rare',d:'3 charges. Cast Teleport (DC 13). Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Horn of Valhalla (Silver)',r:'rare',d:'Summon 2d4+2 berserkers. Recharges after 7 days. Any creature can use it.'},
+    {n:'Horn of Valhalla (Brass)',r:'rare',d:'Summon 3d4+3 berserkers. Recharges 7 days. Requires proficiency with medium armor.'},
+    {n:'Ring of Invisibility',r:'legendary',d:'Become invisible at will. Ends if you attack or cast. Requires attunement.'},
+    {n:'Ring of Shooting Stars',r:'very rare',d:'Charges: Faerie Fire, Ball Lightning, Shooting Stars. Regains 1d6 at dawn. Requires attunement outdoors.'},
+    {n:'Rod of Rulership',r:'rare',d:'Command all creatures within 120 ft. (DC 15 WIS). 2 uses/day. Requires attunement.'},
+    {n:'Wand of Binding',r:'rare',d:'7 charges: Hold Monster or Hold Person (DC 17). Regains 1d6+1 at dawn. Requires attunement.'},
+    {n:'Wand of Wonder',r:'rare',d:'7 charges: roll d100 for random effect (wild magic table). Regains 1d6+1 at dawn. Requires attunement.'},
+  ],
+  // Table F — Very Rare, enchanted weapons/armor (T3)
+  F: [
+    {n:'Weapon +1',r:'uncommon',d:'This magic weapon grants a +1 bonus to attack and damage rolls.'},
+    {n:'Shield +1',r:'uncommon',d:'+1 AC bonus in addition to the shield\'s normal bonus.'},
+    {n:'Weapon +2',r:'rare',d:'This magic weapon grants a +2 bonus to attack and damage rolls.'},
+    {n:'Shield +2',r:'rare',d:'+2 AC bonus in addition to the shield\'s normal bonus.'},
+    {n:'Armor +1',r:'rare',d:'While wearing this armor, you have a +1 bonus to AC.'},
+    {n:'Sentinel Shield',r:'uncommon',d:'Advantage on initiative rolls and WIS (Perception) checks while carrying.'},
+    {n:'Shield of Missile Attraction',r:'rare',d:'Resistance to ranged weapon attacks. Cursed — DM determines. Requires attunement.'},
+    {n:'Sword of Vengeance',r:'uncommon',d:'+1 bonus. Curse: attack the creature that last damaged you on your turn. Requires attunement.'},
+    {n:'Trident of Fish Command',r:'uncommon',d:'3 charges. Cast Dominate Beast on a beast with swimming speed (DC 15). Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Wand of Magic Missiles',r:'uncommon',d:'7 charges. Cast Magic Missile (1 charge per spell level, 1st–7th). Regains 1d6+1 at dawn.'},
+    {n:'Javelin of Lightning',r:'uncommon',d:'Throw it: 5×30-ft. line of lightning (DC 13 DEX, 4d6). Returns to hand after. One use/dawn.'},
+    {n:'Mace of Disruption',r:'rare',d:'Deals extra radiant damage to fiends and undead. Requires attunement.'},
+    {n:'Mace of Smiting',r:'rare',d:'+1 attack/damage vs. constructs; crits deal max damage. Requires attunement.'},
+    {n:'Mace of Terror',r:'rare',d:'3 charges. 30-ft. cone: Frightened (DC 15 WIS). Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Rapier of Warning',r:'uncommon',d:'+1 attack. Wielder can\'t be surprised. Advantage on initiative. Requires attunement.'},
+    {n:'Scimitar of Speed',r:'very rare',d:'+2 bonus. Use bonus action to make one attack with it. Requires attunement.'},
+    {n:'Nine Lives Stealer',r:'very rare',d:'+2. On a hit, if target has fewer than 100 HP: DC 15 CON save or die. 1d8+1 charges (once per charge). Requires attunement.'},
+  ],
+  // Table G — Very Rare (T3–T4)
+  G: [
+    {n:'Weapon +3',r:'very rare',d:'This magic weapon grants a +3 bonus to attack and damage rolls.'},
+    {n:'Shield +3',r:'very rare',d:'+3 AC bonus in addition to the shield\'s normal bonus.'},
+    {n:'Armor +2',r:'very rare',d:'While wearing this armor, you have a +2 bonus to AC.'},
+    {n:'Armor +3',r:'legendary',d:'While wearing this armor, you have a +3 bonus to AC.'},
+    {n:'Cloak of Arachnida',r:'very rare',d:'Spider climb, web immunity, cast Web once/day. Requires attunement.'},
+    {n:'Dancing Sword',r:'very rare',d:'Bonus action: it hovers and attacks on its own for 1 minute. +3 bonus. Requires attunement.'},
+    {n:'Demon Armor',r:'very rare',d:'AC 18; unarmed strikes deal 1d8+STR slashing damage. Cursed. Requires attunement.'},
+    {n:'Dragon Scale Mail',r:'very rare',d:'AC 14+DEX(max 2). Resistance to chosen dragon\'s damage type. Adv on saves vs that dragon. Requires attunement.'},
+    {n:'Dwarven Plate',r:'very rare',d:'AC 20. Move 5 ft. instead of 0 when pushed against your will. Requires attunement.'},
+    {n:'Flame Tongue',r:'very rare',d:'+2. Command word: blade ignites, 2d6 fire bonus damage, 40 ft. bright light. Requires attunement.'},
+    {n:'Frost Brand',r:'very rare',d:'+3. On hit: 1d6 cold bonus. Extinguishes flames in 30 ft. Grants fire resistance. Requires attunement.'},
+    {n:'Helm of Brilliance',r:'very rare',d:'Charges for powerful light and fire spells. Gems grant fire resistance. Requires attunement.'},
+    {n:'Horn of Valhalla (Bronze)',r:'very rare',d:'Summon 4d4+4 berserkers. Recharges 7 days. Requires proficiency with medium armor and shields.'},
+    {n:'Manual of Bodily Health',r:'very rare',d:'Reading raises CON by 2 (max 24). Loses magic; regains after 100 years.'},
+    {n:'Manual of Gainful Exercise',r:'very rare',d:'Reading raises STR by 2 (max 24). Loses magic; regains after 100 years.'},
+    {n:'Manual of Quickness of Action',r:'very rare',d:'Reading raises DEX by 2 (max 24). Loses magic; regains after 100 years.'},
+    {n:'Mirror of Life Trapping',r:'very rare',d:'12 cells; each can imprison one creature (DC 15 CHA). Command word releases.'},
+    {n:'Ring of Regeneration',r:'very rare',d:'Regain 1d6 HP every 10 min. Regrow lost limbs (1d6+1 days). Requires attunement.'},
+    {n:'Ring of Spell Turning',r:'legendary',d:'Resistance to spell attacks. If a spell targets only you: save DC 15 CHA or reflect it. Requires attunement.'},
+    {n:'Robe of Eyes',r:'rare',d:'See in all directions including invisible/ethereal in 120 ft. Can\'t be blinded. Requires attunement.'},
+    {n:'Rod of Absorption',r:'very rare',d:'Absorb spells targeting you (up to 50 spell levels); use to cast. Requires attunement.'},
+    {n:'Rod of Alertness',r:'very rare',d:'+1 AC and saves. Detect spells, invisible, plants. 8 charges for spells. Requires attunement.'},
+    {n:'Robe of Scintillating Colors',r:'very rare',d:'10 charges. Each charge: dazzle creatures within 30 ft. (DC 15 WIS or blinded). Requires attunement.'},
+    {n:'Tome of Clear Thought',r:'very rare',d:'Reading raises INT by 2 (max 24). Loses magic; regains after 100 years.'},
+    {n:'Tome of Leadership and Influence',r:'very rare',d:'Reading raises CHA by 2 (max 24). Loses magic; regains after 100 years.'},
+    {n:'Tome of Understanding',r:'very rare',d:'Reading raises WIS by 2 (max 24). Loses magic; regains after 100 years.'},
+  ],
+  // Table H — Legendary (T4)
+  H: [
+    {n:'Potion of Supreme Healing',r:'very rare',d:'You regain 10d4+20 HP when you drink this potion.'},
+    {n:'Spell Scroll (9th Level)',r:'legendary',d:'A scroll bearing a 9th-level spell.'},
+    {n:'Amulet of the Planes',r:'very rare',d:'Proficiency: cast Plane Shift at will. DC 15 INT check; failure = random plane. Requires attunement.'},
+    {n:'Belt of Cloud Giant Strength',r:'legendary',d:'STR becomes 27 while wearing. Requires attunement.'},
+    {n:'Belt of Storm Giant Strength',r:'legendary',d:'STR becomes 29 while wearing. Requires attunement.'},
+    {n:'Carpet of Flying (6×9)',r:'very rare',d:'Fly at 40 ft. Holds 400 lbs.'},
+    {n:'Crystal Ball (true seeing)',r:'legendary',d:'Cast Scrying (DC 17) through the ball; also grants True Seeing. Requires attunement.'},
+    {n:'Iron Flask',r:'legendary',d:'Trap one extraplanar creature (DC 17 WIS). Creature must obey for 1 hour/day when released.'},
+    {n:'Plate Armor of Etherealness',r:'legendary',d:'Cast Etherealness 10 min/day (can split). Requires attunement.'},
+    {n:'Ring of Air Elemental Command',r:'legendary',d:'Fly 90 ft., Gust of Wind at will, Whirlwind (DC 18). Elemental slaves from Plane of Air. Requires attunement.'},
+    {n:'Ring of Earth Elemental Command',r:'legendary',d:'Tremorsense, Stoneskin at will, Wall of Stone once/day. Requires attunement.'},
+    {n:'Ring of Fire Elemental Command',r:'legendary',d:'Fire immunity, Burning Hands at will, Fireball once/day (DC 18). Requires attunement.'},
+    {n:'Ring of Water Elemental Command',r:'legendary',d:'Water walk, Water Breathing, Control Water once/day. Requires attunement.'},
+    {n:'Ring of Three Wishes',r:'legendary',d:'3 charges; cast Wish. Each use: 50% chance ring loses remaining charges.'},
+    {n:'Robe of the Archmagi',r:'legendary',d:'AC 15 (no armor). +2 to spell save DC and spell attack. Advantage on saves vs. spells. Requires attunement by a sorcerer, warlock, or wizard.'},
+    {n:'Rod of Lordly Might',r:'legendary',d:'Functions as +3 mace. 6 buttons: Detect Magic, Hold Person, Fear, Paralysis, Lightning Bolt, Drain Life. Requires attunement.'},
+    {n:'Sphere of Annihilation',r:'legendary',d:'A 2-ft. void sphere. Control with DC 13 INT check. Destroys everything it contacts.'},
+    {n:'Staff of the Magi',r:'legendary',d:'50 charges. Vast range of wizard spells. On break: Retributive Strike. Requires attunement by a wizard.'},
+    {n:'Staff of Thunderbolts',r:'legendary',d:'3 charges: Thunderwave, Call Lightning, Thunder Step. Regains 1d3 at dawn. Requires attunement.'},
+    {n:'Talisman of Pure Good',r:'legendary',d:'+2 to spell save DC. Fiends/undead touching it take 8d6 radiant damage. Destroys the talisman. Requires attunement by a good creature.'},
+    {n:'Talisman of Ultimate Evil',r:'legendary',d:'Evil only. Good creatures touching it: DC 20 CON or die. Has 6 charges. Requires attunement by an evil creature.'},
+  ],
+  // Table I — Legendary weapons (T4)
+  I: [
+    {n:'Defender',r:'legendary',d:'+3. Transfer up to +3 to AC as a bonus action. Requires attunement.'},
+    {n:'Hammer of Thunderbolts',r:'legendary',d:'+1 vs. giants (+4 to hit, 5d6 thunder on hit). Can stun (DC 17 CON) and destroy giants. Requires attunement with Belt of Giant Strength and Gauntlets of Ogre Power.'},
+    {n:'Holy Avenger',r:'legendary',d:'+3. 2d10 radiant vs. fiends/undead. 30-ft. aura: advantage on saves vs. spells for you and allies. Requires attunement by a paladin.'},
+    {n:'Luck Blade',r:'legendary',d:'+1 to +3 bonus. Lucky (1/day reroll). Wish (1d4–1 uses). Requires attunement.'},
+    {n:'Sword of Answering',r:'legendary',d:'+3 longsword aligned to a specific alignment. Reaction: attack the creature that just hit you. INT 10 and matching alignment required. Requires attunement.'},
+    {n:'Sword of Sharpness',r:'very rare',d:'+3. On hit, max damage die. On 20: +14 damage, sever a limb (DM decides). Requires attunement.'},
+    {n:'Vorpal Sword',r:'legendary',d:'+3. On hit roll of 20: decapitate the target (no roll needed). Ignores slashing resistance. Requires attunement.'},
+    {n:'Ring of Djinni Summoning',r:'legendary',d:'Summon a djinni for up to 1 hour. Obeys commands. Requires attunement.'},
+    {n:'Ring of Elemental Command (any)',r:'legendary',d:'Full elemental control of one plane. Immunity, summon elementals. Requires attunement.'},
+    {n:'Staff of Power',r:'very rare',d:'+2 to attack/spell/AC. 20 charges for many spells. On break: Retributive Strike. Requires attunement by a wizard/sorcerer/warlock.'},
+    {n:'Blackrazor',r:'legendary',d:'+3. Soul eating sword. Advantage vs. psychic damage. On kill: gain temp HP and speed. Requires attunement.'},
+    {n:'Wave',r:'legendary',d:'+3 trident. Underwater advantage. Converts alignment. Neptune\'s tine powers. Requires attunement.'},
+    {n:'Whelm',r:'legendary',d:'+3 warhammer. Panic vs. aberrations/undead. Dwarven bonding. Knockout on crit. Requires attunement.'},
+  ],
+};
+
+// DMG Table: Hoard rolls by tier (d100, [lo, hi, table, numRolls])
+var HOARD_TABLES = {
+  0: [ // CR 0-4
+    [1,6,null,0],    // no items (1-6)
+    [7,16,'A',1],   // 1 item A
+    [17,26,'B',1],
+    [27,36,'C',1],
+    [37,44,'D',1],
+    [45,52,'A',2],
+    [53,58,'B',2],
+    [59,62,'A',3],
+    [63,65,'B',3],
+    [66,68,'A',4],
+    [69,70,'C',2],
+    [71,72,'D',2],
+    [73,74,'A',5],
+    [75,76,'B',4],
+    [77,78,'C',3],
+    [79,80,'D',3],
+    [81,85,'A',6],
+    [86,90,'B',5],
+    [91,94,'C',4],
+    [95,96,'D',4],
+    [97,98,'E',1],
+    [99,100,'F',1],
+  ],
+  1: [ // CR 5-10
+    [1,4,null,0],
+    [5,10,'A',2],
+    [11,16,'A',2,'B',1],
+    [17,22,'A',2,'C',1],
+    [23,28,'A',3,'D',1],
+    [29,32,'B',3],
+    [33,36,'B',3,'C',1],
+    [37,40,'B',3,'D',1],
+    [41,44,'C',3],
+    [45,48,'C',3,'D',1],
+    [49,52,'D',2],
+    [53,58,'C',4],
+    [59,62,'D',3],
+    [63,66,'E',2],
+    [67,68,'E',2,'F',1],
+    [69,70,'E',2,'G',1],
+    [71,72,'E',2,'H',1],
+    [73,74,'F',3],
+    [75,76,'G',2],
+    [77,78,'G',2,'H',1],
+    [79,80,'H',3],
+    [81,82,'E',3],
+    [83,84,'F',3,'G',1],
+    [85,86,'G',3,'H',1],
+    [87,88,'H',4],
+    [89,90,'G',4],
+    [91,93,'E',4],
+    [94,96,'F',4],
+    [97,98,'G',3,'H',2],
+    [99,100,'H',5],
+  ],
+  2: [ // CR 11-16
+    [1,3,null,0],
+    [4,6,'C',2],
+    [7,9,'D',2,'E',1],
+    [10,12,'D',2,'F',1],
+    [13,15,'D',2,'G',1],
+    [16,19,'D',3,'E',1],
+    [20,23,'C',4,'D',2],
+    [24,26,'D',3,'G',1],
+    [27,29,'E',3,'F',1],
+    [30,35,'E',4],
+    [36,40,'F',3,'G',1],
+    [41,45,'F',4],
+    [46,50,'G',3,'H',1],
+    [51,55,'G',4],
+    [56,60,'H',3,'I',1],
+    [61,65,'H',4],
+    [66,68,'G',4,'I',1],
+    [69,72,'H',3,'I',2],
+    [73,76,'I',3],
+    [77,80,'H',4,'I',2],
+    [81,85,'I',4],
+    [86,90,'H',3,'I',3],
+    [91,95,'I',5],
+    [96,100,'H',2,'I',5],
+  ],
+  3: [ // CR 17+
+    [1,2,null,0],
+    [3,5,'C',3,'D',2],
+    [6,8,'D',3,'E',2],
+    [9,11,'E',3,'F',2],
+    [12,14,'F',3,'G',2],
+    [15,17,'G',3,'H',2],
+    [18,20,'H',3,'I',2],
+    [21,25,'G',4,'H',3],
+    [26,30,'H',4,'I',3],
+    [31,35,'I',4],
+    [36,40,'H',4,'I',4],
+    [41,45,'I',5],
+    [46,50,'H',3,'I',5],
+    [51,55,'I',6],
+    [56,60,'H',3,'I',6],
+    [61,65,'I',7],
+    [66,70,'H',2,'I',7],
+    [71,75,'I',8],
+    [76,80,'H',2,'I',8],
+    [81,85,'I',9],
+    [86,90,'H',2,'I',9],
+    [91,95,'I',10],
+    [96,100,'H',2,'I',10],
+  ],
+};
+
+// Art objects by tier
+var ART_TIERS = [[10,25],[25,50],[50,250],[250,2500]]; // [base, max] per tier
+
+function pickGems(tier) {
+  var gemTiers = [[10,50],[50,100],[100,500],[500,5000]];
+  var pool = GEMS[gemTiers[tier][0]] || GEMS[10];
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 
-function tableRarity(t) {
-  var map = { A:'common', B:'uncommon', C:'uncommon', D:'rare', E:'rare', F:'rare', G:'very rare', H:'very rare', I:'legendary' };
-  return map[t] || 'uncommon';
+function pickArt(tier) {
+  var artKeys = [10,25,50,250];
+  var key = artKeys[Math.min(tier, artKeys.length-1)];
+  var pool = ART_OBJECTS[key] || ART_OBJECTS[10];
+  return pool[Math.floor(Math.random()*pool.length)] + ' (' + key.toLocaleString() + ' gp)';
+}
+
+function rollMagicItem(table) {
+  var pool = MAGIC_ITEMS[table];
+  if (!pool || !pool.length) return null;
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 
 function rollCoins(spec) {
-  // spec: { cp:[n,d,mult], sp:..., gp:..., pp:... }
   var result = {};
   ['cp','sp','ep','gp','pp'].forEach(function(coin) {
     var s = spec[coin];
@@ -548,82 +883,121 @@ function formatCoins(coins) {
   if (coins.ep) parts.push(coins.ep.toLocaleString() + ' ep');
   if (coins.sp) parts.push(coins.sp.toLocaleString() + ' sp');
   if (coins.cp) parts.push(coins.cp.toLocaleString() + ' cp');
-  return parts.length ? parts.join(', ') : '0 cp';
+  return parts.length ? parts.join(', ') : '—';
 }
 
-function coinsToGp(coins) {
-  return (coins.pp||0)*10 + (coins.gp||0) + (coins.ep||0)*0.5 + (coins.sp||0)*0.1 + (coins.cp||0)*0.01;
+function coinsToGp(c) {
+  return (c.pp||0)*10+(c.gp||0)+(c.ep||0)*0.5+(c.sp||0)*0.1+(c.cp||0)*0.01;
 }
 
 function generateLoot() {
-  var cr = parseFloat(document.getElementById('loot-cr').value);
-  var count = Math.max(1, parseInt(document.getElementById('loot-count').value) || 1);
-  var type = document.getElementById('loot-type').value;
-  var tier = crTier(cr) - 1; // 0-indexed
+  var cr    = parseFloat(document.getElementById('loot-cr').value);
+  var count = Math.max(1, parseInt(document.getElementById('loot-count').value)||1);
+  var type  = document.getElementById('loot-type').value;
+  var tier  = crTier(cr) - 1; // 0-indexed
 
-  var magicItems = [];
-  var totalCoins = { cp:0, sp:0, ep:0, gp:0, pp:0 };
+  var valuables = []; // {name, rarity, type}
+  var totalCoins = {cp:0,sp:0,ep:0,gp:0,pp:0};
 
   if (type === 'individual') {
     var spec = INDIVIDUAL[tier];
-    for (var i = 0; i < count; i++) {
+    for (var i=0;i<count;i++) {
       var c = rollCoins(spec);
-      Object.keys(c).forEach(function(k) { totalCoins[k] = (totalCoins[k]||0) + c[k]; });
+      Object.keys(c).forEach(function(k){totalCoins[k]=(totalCoins[k]||0)+c[k];});
     }
   } else {
-    // Hoard
+    // Hoard coins
     var hSpec = HOARD_COINS[tier];
     totalCoins = rollCoins(hSpec);
-    // Roll for magic items
-    var mc = HOARD_MAGIC_CHANCE[tier];
-    if (mc) {
-      var pct = roll(1, 100);
-      mc.rolls.forEach(function(entry) {
-        if (pct >= entry[0] && pct <= entry[1]) {
-          var numItems = roll(1,6) > 4 ? 2 : 1; // sometimes 2
-          for (var j=0;j<numItems;j++) {
-            var item = rollMagicItem(entry[2]);
-            if (item) magicItems.push(item);
-          }
-        }
-      });
-      // Higher tiers may get gems/art too
-      if (tier >= 1) {
-        var gemPct = roll(1,100);
-        if (gemPct > 60) {
-          var gems = ['Quartz (10 gp)', 'Onyx (50 gp)', 'Garnet (100 gp)', 'Amethyst (100 gp)', 'Pearl (100 gp)', 'Topaz (500 gp)', 'Ruby (1,000 gp)', 'Diamond (5,000 gp)'];
-          var numGems = roll(1,6);
-          var gemType = gems[Math.min(tier * 2 + Math.floor(Math.random()*2), gems.length-1)];
-          for (var g=0;g<numGems;g++) magicItems.push({ name: gemType, rarity: 'gem' });
+
+    // Gems/art objects (DMG hoard tables also include these)
+    var gemRoll = roll(1,100);
+    if (tier === 0 && gemRoll >= 26 && gemRoll <= 50) {
+      var ng = roll(2,6); for(var g=0;g<ng;g++) valuables.push({name:pickGems(0),type:'gem',rarity:'gem'});
+    } else if (tier === 0 && gemRoll >= 51 && gemRoll <= 75) {
+      var na = roll(2,4); for(var a=0;a<na;a++) valuables.push({name:pickArt(0),type:'art',rarity:'art'});
+    } else if (tier === 0 && gemRoll >= 76) {
+      var ng2 = roll(3,6); for(var g2=0;g2<ng2;g2++) valuables.push({name:pickGems(0),type:'gem',rarity:'gem'});
+    }
+    if (tier === 1 && gemRoll >= 21 && gemRoll <= 45) {
+      var ng3 = roll(3,6); for(var g3=0;g3<ng3;g3++) valuables.push({name:pickGems(1),type:'gem',rarity:'gem'});
+    } else if (tier === 1 && gemRoll >= 46 && gemRoll <= 70) {
+      var na2 = roll(2,4); for(var a2=0;a2<na2;a2++) valuables.push({name:pickArt(1),type:'art',rarity:'art'});
+    } else if (tier >= 2) {
+      var ng4 = roll(2,6); for(var g4=0;g4<ng4;g4++) valuables.push({name:pickGems(Math.min(tier,3)),type:'gem',rarity:'gem'});
+      var na3 = roll(2,4); for(var a3=0;a3<na3;a3++) valuables.push({name:pickArt(Math.min(tier,3)),type:'art',rarity:'art'});
+    }
+
+    // Magic items via hoard table
+    var tbl = HOARD_TABLES[Math.min(tier,3)];
+    var pct = roll(1,100);
+    var matched = tbl.filter(function(r){return pct>=r[0]&&pct<=r[1];})[0];
+    if (matched) {
+      for (var mi=2; mi<matched.length; mi+=2) {
+        var mtable = matched[mi];
+        var mcount2 = matched[mi+1]||1;
+        if (!mtable) continue;
+        for (var mj=0;mj<mcount2;mj++) {
+          var item = rollMagicItem(mtable);
+          if (item) valuables.push({name:item.n, rarity:item.r, type:'magic', d:item.d});
         }
       }
     }
   }
 
+  // Build HTML
+  var XP_BY_CR={0:10,0.125:25,0.25:50,0.5:100,1:200,2:450,3:700,4:1100,5:1800,6:2300,7:2900,8:3900,9:5000,10:5900,11:7200,12:8400,13:10000,14:11500,15:13000,16:15000,17:18000,18:20000,19:22000,20:25000,25:75000,30:155000};
+  var xp = XP_BY_CR[cr];
   var totalGp = coinsToGp(totalCoins);
+
+  var rarityColor = {common:'inherit',uncommon:'#1a5c2a',rare:'#1a3c8b','very rare':'#64148b',legendary:'#8b1a1a',gem:'#7a5c10',art:'#7a5c10'};
+
   var html = '<div class="result-card">';
-  html += '<div class="result-card-title">🎲 ' + (type==='hoard'?'Hoard':'Individual') + ' Loot — CR ' + cr + (count>1?' × '+count+' creatures':'') + '</div>';
+  html += '<div class="result-card-title">🎲 ' + (type==='hoard'?'Hoard':'Individual') + ' Loot — CR ' + cr;
+  if (count > 1) html += ' × ' + count + ' creatures';
+  if (xp) html += ' &nbsp;|&nbsp; XP: ' + (xp*count).toLocaleString();
+  html += '</div>';
 
-  html += '<div class="loot-item"><span class="loot-name" style="font-weight:600;">💰 Coins</span><span class="loot-val">' + formatCoins(totalCoins) + ' <em>(≈ ' + totalGp.toLocaleString(undefined,{maximumFractionDigits:1}) + ' gp)</em></span></div>';
+  // Coins
+  var coinStr = formatCoins(totalCoins);
+  if (totalGp > 0) coinStr += ' <em style="font-size:.82rem;color:var(--ink-light);">(≈ ' + totalGp.toLocaleString(undefined,{maximumFractionDigits:0}) + ' gp total)</em>';
+  html += '<div class="loot-item"><span class="loot-name" style="font-weight:600;">💰 Coins</span><span class="loot-val">' + coinStr + '</span></div>';
 
-  if (magicItems.length) {
-    html += '<div style="margin-top:.7rem;font-family:\'Cinzel\',serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;">✨ Magic Items & Valuables</div>';
-    magicItems.forEach(function(item) {
-      var rarCls = item.rarity.replace(' ','-');
-      html += '<div class="loot-item">'
-        + '<span class="loot-name">' + item.name + '</span>'
-        + '<span class="loot-rarity ' + rarCls + '">' + item.rarity + '</span></div>';
+  // Valuables
+  var gems   = valuables.filter(function(v){return v.type==='gem';});
+  var art    = valuables.filter(function(v){return v.type==='art';});
+  var magic  = valuables.filter(function(v){return v.type==='magic';});
+
+  if (gems.length) {
+    html += '<div style="margin-top:.65rem;font-family:\'Cinzel\',serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem;">💎 Gems</div>';
+    gems.forEach(function(v){
+      html += '<div class="loot-item"><span class="loot-name">' + v.name + '</span></div>';
     });
-  } else if (type === 'hoard') {
-    html += '<div class="loot-item"><span class="loot-name" style="color:var(--ink-light);font-style:italic;">No magic items this hoard (roll again for another chance)</span></div>';
   }
 
-  // XP hint
-  var XP_BY_CR = {0:10,0.125:25,0.25:50,0.5:100,1:200,2:450,3:700,4:1100,5:1800,6:2300,7:2900,8:3900,9:5000,10:5900,11:7200,12:8400,13:10000,14:11500,15:13000,16:15000,17:18000,18:20000,19:22000,20:25000,25:75000,30:155000};
-  var xp = XP_BY_CR[cr];
-  if (xp) {
-    var totalXp = xp * count;
-    html += '<div style="margin-top:.7rem;font-size:.78rem;color:var(--ink-light);font-style:italic;">XP award: ' + totalXp.toLocaleString() + ' ('+count+' × '+xp.toLocaleString()+')</div>';
+  if (art.length) {
+    html += '<div style="margin-top:.65rem;font-family:\'Cinzel\',serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem;">🖼 Art Objects</div>';
+    art.forEach(function(v){
+      html += '<div class="loot-item"><span class="loot-name">' + v.name + '</span></div>';
+    });
+  }
+
+  if (magic.length) {
+    html += '<div style="margin-top:.65rem;font-family:\'Cinzel\',serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.25rem;">✨ Magic Items</div>';
+    magic.forEach(function(v){
+      var rc2 = (v.rarity||'').replace(' ','-');
+      var col = rarityColor[v.rarity] || 'inherit';
+      html += '<div class="loot-item" style="flex-direction:column;align-items:flex-start;gap:.15rem;">'
+        + '<div style="display:flex;justify-content:space-between;width:100%;align-items:center;">'
+        + '<span class="loot-name" style="color:'+col+';">' + v.name + '</span>'
+        + '<span class="loot-rarity ' + rc2 + '">' + (v.rarity||'') + '</span></div>';
+      if (v.d) html += '<div style="font-size:.78rem;color:var(--ink-light);font-style:italic;line-height:1.4;">' + v.d.slice(0,140) + (v.d.length>140?'…':'') + '</div>';
+      html += '</div>';
+    });
+  }
+
+  if (type==='hoard' && !gems.length && !art.length && !magic.length) {
+    html += '<div class="loot-item"><span class="loot-name" style="color:var(--ink-light);font-style:italic;">No valuables this hoard — coins only. Roll again for another chance.</span></div>';
   }
 
   html += '</div>';
