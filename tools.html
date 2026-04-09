@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Forge | DM Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--parchment:#f4e8c1;--parchment-dark:#e8d5a0;--ink:#1a1209;--ink-light:#3d2b1a;--crimson:#8b1a1a;--crimson-light:#b52a2a;--gold:#c9973a;--gold-light:#e8b84b;--green:#1a5c2a;--bg:#1a1209;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 20%,rgba(139,26,26,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(201,151,58,.08) 0%,transparent 60%);min-height:100vh;font-family:'Crimson Pro',serif;color:var(--ink);padding:2rem 1rem 4rem;}
+.page-header{text-align:center;margin-bottom:2rem;}
+.page-header h1{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--gold-light);letter-spacing:.08em;text-shadow:0 2px 24px rgba(201,151,58,.4);}
+.page-header p{color:var(--parchment-dark);font-style:italic;font-size:1.05rem;margin-top:.3rem;opacity:.7;}
+.divider{width:280px;height:2px;margin:.8rem auto;background:linear-gradient(90deg,transparent,var(--gold),transparent);position:relative;}
+.divider::before{content:'⚔';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--bg);padding:0 .6rem;color:var(--gold);}
+.nav-back{display:inline-block;margin-bottom:1rem;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;color:var(--gold);text-decoration:none;opacity:.7;transition:opacity .2s;}
+.nav-back:hover{opacity:1;}
+/* Shell */
+.shell{max-width:1000px;margin:0 auto;background:var(--parchment);border-radius:4px;box-shadow:0 0 0 3px var(--gold),0 0 0 6px var(--crimson),0 8px 48px rgba(0,0,0,.7);overflow:hidden;}
+/* Tabs */
+.tabs{display:flex;background:rgba(26,18,9,.96);border-bottom:2px solid var(--gold);overflow-x:auto;}
+.tab-btn{flex:1;min-width:120px;padding:.9rem .5rem;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,232,193,.55);background:transparent;border:none;cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.tab-btn:hover{color:var(--gold-light);}
+.tab-btn.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.tab-btn .ti{display:block;font-size:1.2rem;margin-bottom:.2rem;}
+/* Panels */
+.panel{display:none;padding:1.8rem 2rem 2rem;}
+.panel.active{display:block;}
+/* Section titles */
+.sec-title{font-family:'Cinzel',serif;font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--crimson),transparent);opacity:.4;}
+/* Shared button */
+.action-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.1em;background:var(--crimson);color:var(--parchment);border:1px solid var(--gold);border-radius:4px;cursor:pointer;transition:all .2s;}
+.action-btn:hover{background:var(--crimson-light);}
+.action-btn.secondary{background:transparent;color:var(--crimson);border-color:var(--crimson);}
+.action-btn.secondary:hover{background:rgba(139,26,26,.08);}
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.9rem;}
+th{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--crimson);padding:.45rem .6rem;text-align:left;border-bottom:1.5px solid rgba(139,26,26,.3);background:rgba(139,26,26,.04);}
+td{padding:.42rem .6rem;border-bottom:1px solid rgba(139,26,26,.08);vertical-align:top;}
+tr:nth-child(even) td{background:rgba(139,26,26,.025);}
+/* Cards */
+.result-card{background:rgba(201,151,58,.06);border:1px solid rgba(201,151,58,.3);border-radius:4px;padding:1rem 1.2rem;margin-top:1.2rem;}
+.result-card-title{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem;}
+.result-card h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--crimson);margin-bottom:.4rem;}
+/* Loot */
+.loot-item{display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;border-bottom:1px solid rgba(139,26,26,.07);gap:.5rem;}
+.loot-name{font-size:.92rem;color:var(--ink);}
+.loot-val{font-size:.82rem;color:var(--ink-light);font-style:italic;white-space:nowrap;}
+.loot-rarity{font-size:.68rem;padding:.1rem .45rem;border-radius:99px;border:1px solid rgba(139,26,26,.25);color:var(--ink-light);}
+.loot-rarity.uncommon{border-color:rgba(26,92,42,.4);color:#1a5c2a;background:rgba(26,92,42,.06);}
+.loot-rarity.rare{border-color:rgba(26,60,139,.4);color:#1a3c8b;background:rgba(26,60,139,.06);}
+.loot-rarity.very-rare{border-color:rgba(100,20,139,.4);color:#64148b;background:rgba(100,20,139,.06);}
+.loot-rarity.legendary{border-color:var(--crimson);color:var(--crimson);background:rgba(139,26,26,.07);}
+/* Select & inputs */
+select,input[type=number],input[type=text]{padding:.5rem .75rem;border:1px solid rgba(139,26,26,.3);border-radius:4px;background:rgba(248,237,205,.6);font-family:'Crimson Pro',serif;font-size:.95rem;color:var(--ink);outline:none;}
+select:focus,input:focus{border-color:var(--crimson);}
+label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson);display:block;margin-bottom:.3rem;}
+/* Merchant layout */
+.shop-grid{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;margin-top:.5rem;}
+.shop-list{border-right:1px solid rgba(139,26,26,.15);padding-right:1.2rem;}
+.shop-item{padding:.5rem .6rem;border-radius:4px;cursor:pointer;transition:background .12s;font-size:.9rem;}
+.shop-item:hover{background:rgba(139,26,26,.05);}
+.shop-item.active{background:rgba(139,26,26,.08);font-weight:600;color:var(--crimson);}
+.shop-item-category{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(139,26,26,.45);padding:.7rem .6rem .25rem;border-top:1px solid rgba(139,26,26,.1);margin-top:.4rem;}
+.shop-item-category:first-child{border-top:none;margin-top:0;padding-top:.25rem;}
+/* Reference tables */
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.ref-block{margin-bottom:1.5rem;}
+.ref-block h4{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,151,58,.25);}
+.tag{display:inline-block;font-size:.7rem;padding:.1rem .45rem;border-radius:99px;border:1px solid rgba(139,26,26,.22);color:var(--ink-light);margin:.1rem;}
+.hint{font-size:.82rem;color:var(--ink-light);font-style:italic;margin-bottom:.8rem;}
+@media(max-width:640px){.shop-grid{grid-template-columns:1fr;}.shop-list{border-right:none;border-bottom:1px solid rgba(139,26,26,.15);padding-right:0;padding-bottom:.8rem;}.ref-grid{grid-template-columns:1fr;}.panel{padding:1.2rem 1rem 1.5rem;}}
+</style>
+</head>
+<body>
+<header class="page-header">
+  <h1>Character Forge</h1>
+  <div class="divider"></div>
+  <p>DM Tools &amp; Reference</p>
+</header>
+<div style="max-width:1000px;margin:0 auto 1rem">
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</div>
+<div class="shell">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showPanel('merchant')"><span class="ti">🏪</span>Merchant</button>
+    <button class="tab-btn" onclick="showPanel('loot')"><span class="ti">💰</span>Loot Generator</button>
+    <button class="tab-btn" onclick="showPanel('reference')"><span class="ti">📖</span>Rules Reference</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ MERCHANT -->
+  <div class="panel active" id="panel-merchant">
+    <div class="sec-title">Town Merchant</div>
+    <p class="hint">Click a shop to browse its stock. Prices from the 2024 PHB SRD. Availability assumes a town of 1,000+ residents.</p>
+    <div class="shop-grid">
+      <div class="shop-list" id="shop-list"></div>
+      <div id="shop-stock"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ LOOT -->
+  <div class="panel" id="panel-loot">
+    <div class="sec-title">Encounter Loot Generator</div>
+    <p class="hint">Enter the Challenge Rating of the encounter. The generator rolls hoard and individual treasure appropriate for that CR tier, following DMG 2024 guidelines.</p>
+    <div style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem;">
+      <div>
+        <label for="loot-cr">Challenge Rating</label>
+        <select id="loot-cr" style="width:120px;">
+          <option value="0">CR 0</option>
+          <option value="0.125">CR 1/8</option>
+          <option value="0.25">CR 1/4</option>
+          <option value="0.5">CR 1/2</option>
+          <option value="1" selected>CR 1</option>
+          <option value="2">CR 2</option>
+          <option value="3">CR 3</option>
+          <option value="4">CR 4</option>
+          <option value="5">CR 5</option>
+          <option value="6">CR 6</option>
+          <option value="7">CR 7</option>
+          <option value="8">CR 8</option>
+          <option value="9">CR 9</option>
+          <option value="10">CR 10</option>
+          <option value="11">CR 11</option>
+          <option value="12">CR 12</option>
+          <option value="13">CR 13</option>
+          <option value="14">CR 14</option>
+          <option value="15">CR 15</option>
+          <option value="16">CR 16</option>
+          <option value="17">CR 17</option>
+          <option value="18">CR 18</option>
+          <option value="19">CR 19</option>
+          <option value="20">CR 20</option>
+          <option value="25">CR 25</option>
+          <option value="30">CR 30</option>
+        </select>
+      </div>
+      <div>
+        <label for="loot-count">Number of Creatures</label>
+        <input type="number" id="loot-count" value="1" min="1" max="20" style="width:80px;">
+      </div>
+      <div>
+        <label for="loot-type">Hoard Type</label>
+        <select id="loot-type" style="width:160px;">
+          <option value="individual">Individual Treasure</option>
+          <option value="hoard">Hoard (lair / boss)</option>
+        </select>
+      </div>
+      <button class="action-btn" onclick="generateLoot()">🎲 Roll Loot</button>
+    </div>
+    <div id="loot-result"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ REFERENCE -->
+  <div class="panel" id="panel-reference">
+    <div class="sec-title">Rules Quick Reference</div>
+    <div class="ref-grid" id="ref-grid"></div>
+  </div>
+</div>
+
+<script>
+// ── Tab switcher ──────────────────────────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  var btns = document.querySelectorAll('.tab-btn');
+  var map = { merchant: 0, loot: 1, reference: 2 };
+  if (btns[map[id]]) btns[map[id]].classList.add('active');
+}
+
+// ── Dice helpers ──────────────────────────────────────────────────────────────
+function d(sides) { return Math.floor(Math.random() * sides) + 1; }
+function roll(n, sides) { var t = 0; for (var i = 0; i < n; i++) t += d(sides); return t; }
+function gp(n) { return n.toLocaleString() + ' gp'; }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MERCHANT
+// ══════════════════════════════════════════════════════════════════════════════
+var SHOPS = [
+  {
+    category: 'Arms & Armour',
+    name: 'The Iron Anvil',
+    icon: '⚔',
+    desc: 'Weapons, armour, and shields. Standard PHB prices. Magical enhancements available on request.',
+    stock: [
+      { name: 'Club',          price: '1 sp',  notes: 'Simple, 1d4 bludg., 2 lb' },
+      { name: 'Dagger',        price: '2 gp',  notes: 'Simple, 1d4 pierce, finesse, light, thrown 20/60' },
+      { name: 'Handaxe',       price: '5 gp',  notes: 'Simple, 1d6 slash, light, thrown 20/60' },
+      { name: 'Javelin',       price: '5 sp',  notes: 'Simple, 1d6 pierce, thrown 30/120' },
+      { name: 'Mace',          price: '5 gp',  notes: 'Simple, 1d6 bludg.' },
+      { name: 'Quarterstaff',  price: '2 sp',  notes: 'Simple, 1d6/1d8 bludg., versatile' },
+      { name: 'Spear',         price: '1 gp',  notes: 'Simple, 1d6/1d8 pierce, versatile, thrown 20/60' },
+      { name: 'Shortsword',    price: '10 gp', notes: 'Martial, 1d6 pierce, finesse, light' },
+      { name: 'Longsword',     price: '15 gp', notes: 'Martial, 1d8/1d10 slash, versatile' },
+      { name: 'Rapier',        price: '25 gp', notes: 'Martial, 1d8 pierce, finesse' },
+      { name: 'Battleaxe',     price: '10 gp', notes: 'Martial, 1d8/1d10 slash, versatile' },
+      { name: 'Warhammer',     price: '15 gp', notes: 'Martial, 1d8/1d10 bludg., versatile' },
+      { name: 'Greataxe',      price: '30 gp', notes: 'Martial, 1d12 slash, heavy, two-handed' },
+      { name: 'Greatsword',    price: '50 gp', notes: 'Martial, 2d6 slash, heavy, two-handed' },
+      { name: 'Maul',          price: '10 gp', notes: 'Martial, 2d6 bludg., heavy, two-handed' },
+      { name: 'Light Crossbow',price: '25 gp', notes: 'Simple, 1d8 pierce, ranged 80/320, loading' },
+      { name: 'Hand Crossbow', price: '75 gp', notes: 'Martial, 1d6 pierce, ranged 30/120, light' },
+      { name: 'Shortbow',      price: '25 gp', notes: 'Simple, 1d6 pierce, ranged 80/320, two-handed' },
+      { name: 'Longbow',       price: '50 gp', notes: 'Martial, 1d8 pierce, ranged 150/600, heavy' },
+      { name: 'Leather Armor', price: '10 gp', notes: 'Light, AC 11+DEX' },
+      { name: 'Chain Shirt',   price: '50 gp', notes: 'Medium, AC 13+DEX(max 2)' },
+      { name: 'Scale Mail',    price: '50 gp', notes: 'Medium, AC 14+DEX(max 2), stealth disadv.' },
+      { name: 'Chain Mail',    price: '75 gp', notes: 'Heavy, AC 16, STR 13 req., stealth disadv.' },
+      { name: 'Plate Armor',   price: '1,500 gp', notes: 'Heavy, AC 18, STR 15 req., stealth disadv.' },
+      { name: 'Shield',        price: '10 gp', notes: '+2 AC, 6 lb' },
+      { name: 'Arrows (20)',   price: '1 gp',  notes: 'Ammunition for bows' },
+      { name: 'Bolts (20)',    price: '1 gp',  notes: 'Ammunition for crossbows' },
+    ]
+  },
+  {
+    category: 'Arms & Armour',
+    name: 'Vex & Sons – Used Arms',
+    icon: '🪓',
+    desc: 'Second-hand weapons at half price. Quality varies — roll a DC 10 Investigation to spot flaws before buying.',
+    stock: [
+      { name: 'Worn Dagger',   price: '1 gp',  notes: 'Notched but serviceable. 1d4 pierce.' },
+      { name: 'Battered Mace', price: '2 gp',  notes: 'Slightly bent handle. 1d6 bludg.' },
+      { name: 'Old Shortbow',  price: '12 gp', notes: 'Fraying string included. 1d6 pierce.' },
+      { name: 'Chipped Shortsword', price: '5 gp', notes: '1d6 pierce, finesse, light.' },
+      { name: 'Dented Shield', price: '4 gp',  notes: '+2 AC but makes noise when moving.' },
+      { name: 'Rusty Chain Mail', price: '35 gp', notes: 'AC 16, STR 13 req. — squeaks in stealth.' },
+      { name: 'Padded Armor',  price: '3 gp',  notes: 'Light, AC 11+DEX. Comfortable.' },
+      { name: 'Hide Armor',    price: '7 gp',  notes: 'Medium, AC 12+DEX(max 2). Smells of bear.' },
+    ]
+  },
+  {
+    category: 'Adventuring Gear',
+    name: 'Oaken Pack – General Goods',
+    icon: '🎒',
+    desc: 'Everything an adventurer needs before descending into the dungeon. Bulk discounts available.',
+    stock: [
+      { name: "Explorer's Pack",     price: '10 gp', notes: 'Backpack, bedroll, 10 torches, rations (10), rope, tinderbox, waterskin' },
+      { name: "Dungeoneer's Pack",   price: '12 gp', notes: 'Backpack, crowbar, hammer, pitons (10), torches (10), tinderbox, rations (10), rope, waterskin' },
+      { name: "Burglar's Pack",      price: '16 gp', notes: 'Backpack, ball bearings, string 10ft, candles (5), crowbar, lantern, oil (2), rations (5), waterskin' },
+      { name: "Scholar's Pack",      price: '40 gp', notes: 'Backpack, book of lore, ink, pen, parchment (10), sand pouch, knife' },
+      { name: 'Rope, Hempen (50ft)', price: '1 gp',  notes: '10 lb, 500 lb capacity' },
+      { name: 'Rope, Silk (50ft)',   price: '10 gp', notes: '5 lb, 500 lb capacity' },
+      { name: 'Torch',               price: '1 cp',  notes: '1 hour, bright 20ft, dim 40ft' },
+      { name: 'Lantern, Hooded',     price: '5 gp',  notes: '6 hr/oil, bright 30ft, dim 60ft' },
+      { name: 'Oil (flask)',         price: '1 sp',  notes: 'Fuels lanterns; splash as improvised weapon' },
+      { name: 'Rations (1 day)',     price: '5 sp',  notes: 'Dry food for one day' },
+      { name: 'Bedroll',             price: '1 gp',  notes: 'For comfortable long rests outdoors' },
+      { name: 'Tent (2-person)',     price: '2 gp',  notes: '20 lb. Shelters 2 Medium creatures' },
+      { name: 'Waterskin',           price: '2 sp',  notes: 'Holds 4 pints of liquid' },
+      { name: 'Tinderbox',           price: '5 sp',  notes: 'Light a fire in 1 action' },
+      { name: 'Crowbar',             price: '2 gp',  notes: 'Advantage on STR checks to force things open' },
+      { name: 'Grappling Hook',      price: '2 gp',  notes: '4 lb. Thrown with rope' },
+      { name: 'Pitons (10)',         price: '5 sp',  notes: 'Essential for climbing' },
+      { name: 'Block & Tackle',      price: '1 gp',  notes: 'Reduces lifting weight by ¾' },
+      { name: 'Shovel',              price: '2 gp',  notes: '5 lb. Useful underground' },
+      { name: 'Ladder (10ft)',       price: '1 sp',  notes: '25 lb. Cumbersome but useful' },
+      { name: 'Mirror, Steel',       price: '5 gp',  notes: 'See around corners; repel vampires' },
+      { name: 'Spyglass',            price: '1,000 gp', notes: 'Objects appear 2× closer' },
+    ]
+  },
+  {
+    category: 'Adventuring Gear',
+    name: 'The Keen Eye – Tools & Kits',
+    icon: '🔧',
+    desc: 'Specialist tools and kits for every trade. Training in a tool takes 250 days and a tutor.',
+    stock: [
+      { name: "Thieves' Tools",      price: '25 gp', notes: 'Pick locks, disarm traps. DEX check to use.' },
+      { name: "Healer's Kit",        price: '5 gp',  notes: '10 uses. Stabilise at 0 HP, no check needed.' },
+      { name: 'Herbalism Kit',       price: '5 gp',  notes: 'Craft antitoxin, healing potions.' },
+      { name: "Alchemist's Supplies",price: '50 gp', notes: 'Brew alchemical items.' },
+      { name: "Cartographer's Tools",price: '15 gp', notes: 'Make and read maps.' },
+      { name: "Calligrapher's Supplies", price: '10 gp', notes: 'Produce written works.' },
+      { name: "Carpenter's Tools",   price: '8 gp',  notes: 'Build and repair wooden objects.' },
+      { name: "Smith's Tools",       price: '20 gp', notes: 'Work metal. Repair armour.' },
+      { name: "Tinker's Tools",      price: '50 gp', notes: 'Repair mechanical items.' },
+      { name: "Disguise Kit",        price: '25 gp', notes: 'Cosmetics, wigs, costumes. CHA (Deception).' },
+      { name: "Forgery Kit",         price: '15 gp', notes: 'Duplicate written materials.' },
+      { name: "Navigator's Tools",   price: '25 gp', notes: 'Chart a course at sea.' },
+      { name: "Poisoner's Kit",      price: '50 gp', notes: 'Harvest and apply poisons. WIS check.' },
+      { name: "Weaver's Tools",      price: '1 gp',  notes: 'Craft cloth and clothing.' },
+      { name: "Woodcarver's Tools",  price: '1 gp',  notes: 'Carve wood. Craft arrows.' },
+    ]
+  },
+  {
+    category: 'Alchemist & Apothecary',
+    name: "Mira's Mixtures",
+    icon: '⚗',
+    desc: 'Potions, poisons, and alchemical goods. All sales final. Ask about the monthly batch discount.',
+    stock: [
+      { name: 'Antitoxin',               price: '50 gp',   notes: 'Adv. on CON saves vs poison for 1 hour' },
+      { name: 'Potion of Healing',        price: '50 gp',   notes: 'Restore 2d4+2 HP' },
+      { name: 'Potion of Greater Healing',price: '150 gp',  notes: 'Restore 4d4+4 HP' },
+      { name: 'Potion of Superior Healing',price: '450 gp', notes: 'Restore 8d4+8 HP' },
+      { name: 'Holy Water (flask)',        price: '25 gp',   notes: '2d6 radiant vs undead/fiends, as improvised weapon' },
+      { name: 'Alchemist Fire',           price: '50 gp',   notes: 'Thrown; 1d4 fire/turn until DC 10 DEX check' },
+      { name: 'Acid (vial)',              price: '25 gp',   notes: 'Thrown; 2d6 acid, splash 5ft' },
+      { name: 'Poison, Basic (vial)',     price: '100 gp',  notes: 'Coat weapon; DC 10 CON or 1d4 poison + poisoned 1 min' },
+      { name: 'Healer\'s Kit',            price: '5 gp',    notes: '10 uses. Stabilise without a Medicine check.' },
+      { name: 'Ink (1-oz bottle)',        price: '10 gp',   notes: 'Writing ink' },
+    ]
+  },
+  {
+    category: 'Books & Scrolls',
+    name: 'The Scrivener\'s Shelf',
+    icon: '📜',
+    desc: 'Tomes, maps, spell scrolls and reference works. Wizard spell scrolls available at DM discretion.',
+    stock: [
+      { name: 'Book (blank)',             price: '25 gp',   notes: '100 pages. Ideal for a spellbook.' },
+      { name: 'Spellbook (blank)',        price: '50 gp',   notes: '100 vellum pages, arcane-durable binding' },
+      { name: 'Map, Local Area',          price: '1 gp',    notes: 'Rough map of the surrounding 20 miles' },
+      { name: 'Map, Regional',            price: '5 gp',    notes: 'Detailed map of a kingdom or territory' },
+      { name: 'Spell Scroll (Cantrip)',   price: '25 gp',   notes: 'A cantrip of the DM\'s choice; single use' },
+      { name: 'Spell Scroll (Level 1)',   price: '75 gp',   notes: 'A 1st-level spell; must be on your class list' },
+      { name: 'Spell Scroll (Level 2)',   price: '150 gp',  notes: 'A 2nd-level spell; DC 13 check if above your level' },
+      { name: 'Spell Scroll (Level 3)',   price: '300 gp',  notes: 'A 3rd-level spell; DC 15 check if above your level' },
+      { name: 'Religious Text',           price: '25 gp',   notes: 'Holy scriptures. Doubles as a holy symbol.' },
+      { name: 'Star Charts',             price: '100 gp',  notes: 'Navigator\'s resource. Advantage on Survival to navigate.' },
+      { name: 'Parchment (sheet)',        price: '1 sp',    notes: 'Single sheet for writing' },
+      { name: 'Ink Pen',                 price: '2 cp',    notes: 'For writing' },
+    ]
+  },
+  {
+    category: 'Food & Lodging',
+    name: 'The Wobbly Flagon Inn',
+    icon: '🍺',
+    desc: 'Rooms, meals, and a few amenities. Ask barkeep Thurl about local rumours — one gold loosens his tongue.',
+    stock: [
+      { name: 'Squalid Stay (night)',     price: '7 cp',  notes: 'Straw pallet in common room, vermin possible' },
+      { name: 'Poor Stay (night)',        price: '1 sp',  notes: 'Shared room, basic blanket' },
+      { name: 'Modest Stay (night)',      price: '5 sp',  notes: 'Private bunk, simple breakfast included' },
+      { name: 'Comfortable Stay (night)', price: '8 sp',  notes: 'Clean room, two meals, stabling' },
+      { name: 'Wealthy Stay (night)',     price: '2 gp',  notes: 'Fine room, full board, laundry service' },
+      { name: 'Aristocratic Stay (night)',price: '4 gp',  notes: 'Suite, servants, exotic menu' },
+      { name: 'Squalid Meal',            price: '3 cp',  notes: 'Gruel and hard bread' },
+      { name: 'Poor Meal',               price: '6 cp',  notes: 'Stew and a hunk of bread' },
+      { name: 'Modest Meal',             price: '3 sp',  notes: 'Roast fowl, seasonal veg, small beer' },
+      { name: 'Comfortable Meal',        price: '5 sp',  notes: 'Three-course with wine' },
+      { name: 'Wealthy Meal',            price: '8 sp',  notes: 'Fine dining, multiple courses, good wine' },
+      { name: 'Ale (mug)',               price: '4 cp',  notes: 'Local brew' },
+      { name: 'Wine, Common (pitcher)',   price: '2 sp',  notes: 'Table wine' },
+      { name: 'Wine, Fine (bottle)',      price: '10 gp', notes: 'Imported vintage' },
+      { name: 'Stabling (per day)',       price: '5 sp',  notes: 'Feed and shelter for one horse' },
+    ]
+  },
+  {
+    category: 'Food & Lodging',
+    name: 'The Provender – Foodstuffs',
+    icon: '🌾',
+    desc: 'Rations, livestock, grain, and fresh produce for long journeys.',
+    stock: [
+      { name: 'Rations (1 day)',     price: '5 sp',   notes: 'Hardtack, dried meat, dried fruit' },
+      { name: 'Chicken',             price: '2 cp',   notes: 'Egg-layer or roasting bird' },
+      { name: 'Pig',                 price: '3 gp',   notes: 'Good eating for a week' },
+      { name: 'Cow',                 price: '10 gp',  notes: 'Milk or meat' },
+      { name: 'Ox',                  price: '15 gp',  notes: 'Draft animal, also edible' },
+      { name: 'Wheat (bushel)',      price: '1 sp',   notes: '60 lb' },
+      { name: 'Flour (lb)',          price: '2 cp',   notes: 'Milled wheat' },
+      { name: 'Salt (lb)',           price: '5 cp',   notes: 'Preservative, essential' },
+      { name: 'Spices (lb)',         price: '1 gp',   notes: 'Pepper, cinnamon, cloves — varies by season' },
+      { name: 'Oil, Cooking (flask)',price: '1 sp',   notes: 'Pressed olive or vegetable oil' },
+    ]
+  },
+  {
+    category: 'Transport & Mounts',
+    name: 'Hilda\'s Stables',
+    icon: '🐴',
+    desc: 'Mounts, tack, vehicles, and passage booking. Ask about the weekly caravan to the city.',
+    stock: [
+      { name: 'Draft Horse',         price: '50 gp',   notes: 'Speed 40 ft, 540 lb carrying' },
+      { name: 'Riding Horse',        price: '75 gp',   notes: 'Speed 60 ft, 480 lb carrying' },
+      { name: 'Warhorse',            price: '400 gp',  notes: 'Speed 60 ft, CR 1/2, trained for combat' },
+      { name: 'Pony',                price: '30 gp',   notes: 'Speed 40 ft, smaller load' },
+      { name: 'Mule',                price: '8 gp',    notes: 'Speed 40 ft, stubborn but durable' },
+      { name: 'Saddle, Riding',      price: '10 gp',   notes: '25 lb' },
+      { name: 'Saddle, Military',    price: '20 gp',   notes: 'Adv. on checks to stay mounted, 30 lb' },
+      { name: 'Saddle, Pack',        price: '5 gp',    notes: 'For carrying cargo, 15 lb' },
+      { name: 'Saddlebags',          price: '4 gp',    notes: '8 lb, holds 20 lb' },
+      { name: 'Bit & Bridle',        price: '2 gp',    notes: '1 lb' },
+      { name: 'Feed (per day)',       price: '5 cp',    notes: 'Hay, oats, water' },
+      { name: 'Cart',                price: '15 gp',   notes: '200 lb, pulled by one horse' },
+      { name: 'Wagon',               price: '35 gp',   notes: '400 lb, needs two horses' },
+      { name: 'Carriage',            price: '100 gp',  notes: 'Enclosed passenger vehicle' },
+      { name: 'Rowboat',             price: '50 gp',   notes: 'Speed 15 ft, 2 passengers + cargo' },
+      { name: 'Keelboat',            price: '3,000 gp',notes: 'Crew 1+, 100 ton cargo, river/coast' },
+      { name: 'Passage (local)',      price: '2 cp/mi', notes: 'Per mile, on foot with a guide' },
+      { name: 'Passage (coach)',      price: '3 cp/mi', notes: 'Per mile, coach seat' },
+      { name: 'Passage (ship)',       price: '1 sp/mi', notes: 'Per mile, berth on a merchant vessel' },
+    ]
+  },
+  {
+    category: 'Magic & Religion',
+    name: 'The Arcane Quarter',
+    icon: '🔮',
+    desc: 'Spell components, foci, and religious goods. Special orders take 1d6 days.',
+    stock: [
+      { name: 'Component Pouch',     price: '25 gp',   notes: 'Holds all non-costly components for spells' },
+      { name: 'Arcane Focus (Orb)',  price: '20 gp',   notes: 'Crystal orb spellcasting focus' },
+      { name: 'Arcane Focus (Staff)',price: '5 gp',    notes: 'Wooden staff spellcasting focus' },
+      { name: 'Arcane Focus (Wand)', price: '10 gp',   notes: 'A foot-long stick of carved wood' },
+      { name: 'Holy Symbol (Amulet)',price: '5 gp',    notes: 'Divine focus for clerics and paladins' },
+      { name: 'Holy Symbol (Shield)',price: '10 gp',   notes: 'Embossed symbol on shield face' },
+      { name: 'Druidic Focus (Staff)',price: '5 gp',   notes: 'Wooden quarterstaff as druid focus' },
+      { name: 'Druidic Focus (Totem)',price: '1 gp',   notes: 'Carved animal totem focus' },
+      { name: 'Candle',              price: '1 cp',    notes: 'Burns 1 hour, 5ft bright light' },
+      { name: 'Incense (block)',     price: '1 cp',    notes: 'Ceremony and ritual use' },
+      { name: 'Chalk (1 piece)',     price: '1 cp',    notes: 'Draw circles and diagrams' },
+      { name: 'Parchment (10)',      price: '1 sp ea', notes: 'For writing spells and rituals' },
+      { name: 'Ink (1 oz)',          price: '10 gp',   notes: 'For spell scroll transcription' },
+    ]
+  },
+  {
+    category: 'Magic & Religion',
+    name: 'Brother Aldric\'s Relics',
+    icon: '✝',
+    desc: 'Divine goods, vestments, and blessed items. A small shrine in the back is free to use.',
+    stock: [
+      { name: 'Prayer Book',         price: '25 gp',   notes: 'Religious text, doubles as holy symbol' },
+      { name: 'Vestments',           price: '5 gp',    notes: 'Priestly robes, impress the faithful' },
+      { name: 'Censer',              price: '5 gp',    notes: 'Used in ceremony' },
+      { name: 'Alms Box',            price: '5 gp',    notes: 'Collect offerings' },
+      { name: 'Stick of Incense',    price: '1 cp',    notes: 'Ritual use; burns 1 hour' },
+      { name: 'Robes',               price: '1 gp',    notes: 'Simple ceremonial garments' },
+    ]
+  },
+];
+
+var currentShop = 0;
+
+function buildMerchant() {
+  var list = document.getElementById('shop-list');
+  var html = '';
+  var lastCat = '';
+  SHOPS.forEach(function(shop, idx) {
+    if (shop.category !== lastCat) {
+      html += '<div class="shop-item-category">' + shop.category + '</div>';
+      lastCat = shop.category;
+    }
+    html += '<div class="shop-item' + (idx===0?' active':'') + '" onclick="openShop(' + idx + ')">'
+      + shop.icon + ' ' + shop.name + '</div>';
+  });
+  list.innerHTML = html;
+  openShop(0);
+}
+
+function openShop(idx) {
+  currentShop = idx;
+  var shop = SHOPS[idx];
+  // Update list highlights
+  document.querySelectorAll('.shop-item').forEach(function(el, i) {
+    el.classList.toggle('active', i === idx);
+  });
+  var stock = document.getElementById('shop-stock');
+  var rows = shop.stock.map(function(item) {
+    return '<tr><td><strong>' + item.name + '</strong></td><td>' + item.price + '</td><td style="color:var(--ink-light);font-size:.82rem;">' + item.notes + '</td></tr>';
+  }).join('');
+  stock.innerHTML = '<div style="margin-bottom:.8rem;">'
+    + '<span style="font-family:\'Cinzel\',serif;font-size:1rem;color:var(--crimson);">' + shop.icon + ' ' + shop.name + '</span>'
+    + '<p style="font-size:.85rem;color:var(--ink-light);font-style:italic;margin-top:.25rem;">' + shop.desc + '</p>'
+    + '</div>'
+    + '<table><thead><tr><th>Item</th><th>Price</th><th>Notes</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LOOT GENERATOR (DMG 2024 treasure tables)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Tier based on CR
+function crTier(cr) {
+  if (cr <= 4)  return 1;
+  if (cr <= 10) return 2;
+  if (cr <= 16) return 3;
+  return 4;
+}
+
+// Individual treasure by tier (coin rolls per creature)
+var INDIVIDUAL = [
+  // tier 1 (CR 0–4)
+  { cp: [5,6,0,0], sp: [0,0,3,6], ep: [0,0,1,4], gp: [0,0,0,0], pp: [0,0,0,0] },
+  // tier 2 (CR 5–10)
+  { cp: [0,0,0,0], sp: [4,6,0,0], ep: [1,6,0,0], gp: [2,6,0,0], pp: [0,0,0,0] },
+  // tier 3 (CR 11–16)
+  { cp: [0,0,0,0], sp: [0,0,0,0], ep: [2,8,0,0], gp: [4,6,0,0], pp: [2,6,0,0] },
+  // tier 4 (CR 17+)
+  { cp: [0,0,0,0], sp: [0,0,0,0], ep: [0,0,0,0], gp: [12,6,0,0], pp: [8,6,0,0] },
+];
+
+// Hoard base coins by tier
+var HOARD_COINS = [
+  { cp:[6,6,100], sp:[3,6,100], gp:[2,6,10], pp:[0,0,0] },  // T1
+  { cp:[0,0,0],   sp:[0,0,0],  gp:[6,6,100], ep:[3,6,10], pp:[0,0,0] }, // T2
+  { cp:[0,0,0],   sp:[0,0,0],  gp:[6,6,1000],ep:[0,0,0],  pp:[5,6,100] }, // T3
+  { cp:[0,0,0],   sp:[0,0,0],  gp:[12,6,1000],ep:[0,0,0], pp:[8,6,1000] }, // T4
+];
+
+// Magic item tables simplified (names by rarity)
+var MAGIC_ITEMS = {
+  A: ['Spell Scroll (Cantrip)', 'Potion of Healing', 'Potion of Climbing', 'Bag of 1,000 Ball Bearings', 'Candle of the Deep', 'Driftglobe', 'Pipe of Smoke Monsters', 'Veteran\'s Cane'],
+  B: ['Potion of Greater Healing', 'Spell Scroll (Level 1)', 'Spell Scroll (Level 2)', 'Bag of Holding', 'Boots of Striding and Springing', 'Broom of Flying', 'Goggles of Night', 'Helm of Comprehending Languages'],
+  C: ['Potion of Superior Healing', 'Spell Scroll (Level 4)', 'Bag of Tricks', 'Boots of Elvenkind', 'Cloak of Elvenkind', 'Eyes of Charming', 'Figurine of Wondrous Power', 'Immovable Rod', 'Lantern of Revealing', 'Medallion of Thoughts', 'Necklace of Adaptation', 'Periapt of Wound Closure', 'Pipes of Haunting', 'Ring of Water Walking', 'Robe of Useful Items'],
+  D: ['Spell Scroll (Level 5)', 'Potion of Heroism', 'Elven Chain', 'Belt of Hill Giant Strength', 'Brooch of Shielding', 'Cloak of Protection', 'Eyes of the Eagle', 'Gauntlets of Ogre Power', 'Hat of Disguise', 'Headband of Intellect', 'Medallion of Thoughts', 'Necklace of Fireballs', 'Periapt of Health', 'Winged Boots'],
+  E: ['Spell Scroll (Level 6)', 'Spell Scroll (Level 7)', 'Helm of Teleportation', 'Horn of Valhalla (silver)', 'Ring of Animal Influence', 'Ring of Evasion', 'Ring of Feather Falling', 'Ring of Free Action', 'Ring of Protection', 'Ring of Resistance'],
+  F: ['Weapon +1', 'Shield +1', 'Sentinel Shield', 'Sword of Vengeance', 'Trident of Fish Command', 'Wand of Magic Missiles', 'Wand of the War Mage +1', 'Wind Fan', 'Winged Boots', 'Woodhen\'s Basket'],
+  G: ['Weapon +2', 'Shield +2', 'Ring of Invisibility', 'Ring of Spell Storing', 'Rod of Rulership', 'Rope of Entanglement', 'Manual of Health', 'Manual of Gainful Exercise', 'Tome of Understanding'],
+  H: ['Weapon +3', 'Shield +3', 'Amulet of the Planes', 'Carpet of Flying', 'Crystal Ball', 'Ring of Regeneration', 'Ring of Three Wishes', 'Robe of Stars', 'Sphere of Annihilation', 'Talisman of Pure Good'],
+  I: ['Defender', 'Hammer of Thunderbolts', 'Luck Blade', 'Sword of Answering', 'Holy Avenger', 'Ring of Djinni Summoning', 'Rod of Lordly Might', 'Staff of the Magi', 'Vorpal Sword'],
+};
+
+// Which item tables per tier, per hoard roll (simplified)
+var HOARD_MAGIC_CHANCE = [
+  // T1: 6% A+B
+  { rolls: [[6,100,'A'],[96,100,'B']] },
+  // T2: more frequent, higher tables
+  { rolls: [[1,4,'A'],[5,10,'B'],[11,16,'C'],[17,22,'D'],[71,75,'E'],[76,78,'F']] },
+  // T3
+  { rolls: [[1,3,'C'],[4,8,'D'],[9,14,'E'],[15,22,'F'],[23,30,'G'],[31,38,'H'],[90,95,'I']] },
+  // T4
+  { rolls: [[1,2,'E'],[3,10,'F'],[11,24,'G'],[25,45,'H'],[46,75,'I']] },
+];
+
+function rollMagicItem(table) {
+  var pool = MAGIC_ITEMS[table] || [];
+  if (!pool.length) return null;
+  return { name: pool[Math.floor(Math.random() * pool.length)], rarity: tableRarity(table) };
+}
+
+function tableRarity(t) {
+  var map = { A:'common', B:'uncommon', C:'uncommon', D:'rare', E:'rare', F:'rare', G:'very rare', H:'very rare', I:'legendary' };
+  return map[t] || 'uncommon';
+}
+
+function rollCoins(spec) {
+  // spec: { cp:[n,d,mult], sp:..., gp:..., pp:... }
+  var result = {};
+  ['cp','sp','ep','gp','pp'].forEach(function(coin) {
+    var s = spec[coin];
+    if (!s || !s[0]) { result[coin] = 0; return; }
+    result[coin] = roll(s[0], s[1]) * (s[2] || 1);
+  });
+  return result;
+}
+
+function formatCoins(coins) {
+  var parts = [];
+  if (coins.pp) parts.push(coins.pp.toLocaleString() + ' pp');
+  if (coins.gp) parts.push(coins.gp.toLocaleString() + ' gp');
+  if (coins.ep) parts.push(coins.ep.toLocaleString() + ' ep');
+  if (coins.sp) parts.push(coins.sp.toLocaleString() + ' sp');
+  if (coins.cp) parts.push(coins.cp.toLocaleString() + ' cp');
+  return parts.length ? parts.join(', ') : '0 cp';
+}
+
+function coinsToGp(coins) {
+  return (coins.pp||0)*10 + (coins.gp||0) + (coins.ep||0)*0.5 + (coins.sp||0)*0.1 + (coins.cp||0)*0.01;
+}
+
+function generateLoot() {
+  var cr = parseFloat(document.getElementById('loot-cr').value);
+  var count = Math.max(1, parseInt(document.getElementById('loot-count').value) || 1);
+  var type = document.getElementById('loot-type').value;
+  var tier = crTier(cr) - 1; // 0-indexed
+
+  var magicItems = [];
+  var totalCoins = { cp:0, sp:0, ep:0, gp:0, pp:0 };
+
+  if (type === 'individual') {
+    var spec = INDIVIDUAL[tier];
+    for (var i = 0; i < count; i++) {
+      var c = rollCoins(spec);
+      Object.keys(c).forEach(function(k) { totalCoins[k] = (totalCoins[k]||0) + c[k]; });
+    }
+  } else {
+    // Hoard
+    var hSpec = HOARD_COINS[tier];
+    totalCoins = rollCoins(hSpec);
+    // Roll for magic items
+    var mc = HOARD_MAGIC_CHANCE[tier];
+    if (mc) {
+      var pct = roll(1, 100);
+      mc.rolls.forEach(function(entry) {
+        if (pct >= entry[0] && pct <= entry[1]) {
+          var numItems = roll(1,6) > 4 ? 2 : 1; // sometimes 2
+          for (var j=0;j<numItems;j++) {
+            var item = rollMagicItem(entry[2]);
+            if (item) magicItems.push(item);
+          }
+        }
+      });
+      // Higher tiers may get gems/art too
+      if (tier >= 1) {
+        var gemPct = roll(1,100);
+        if (gemPct > 60) {
+          var gems = ['Quartz (10 gp)', 'Onyx (50 gp)', 'Garnet (100 gp)', 'Amethyst (100 gp)', 'Pearl (100 gp)', 'Topaz (500 gp)', 'Ruby (1,000 gp)', 'Diamond (5,000 gp)'];
+          var numGems = roll(1,6);
+          var gemType = gems[Math.min(tier * 2 + Math.floor(Math.random()*2), gems.length-1)];
+          for (var g=0;g<numGems;g++) magicItems.push({ name: gemType, rarity: 'gem' });
+        }
+      }
+    }
+  }
+
+  var totalGp = coinsToGp(totalCoins);
+  var html = '<div class="result-card">';
+  html += '<div class="result-card-title">🎲 ' + (type==='hoard'?'Hoard':'Individual') + ' Loot — CR ' + cr + (count>1?' × '+count+' creatures':'') + '</div>';
+
+  html += '<div class="loot-item"><span class="loot-name" style="font-weight:600;">💰 Coins</span><span class="loot-val">' + formatCoins(totalCoins) + ' <em>(≈ ' + totalGp.toLocaleString(undefined,{maximumFractionDigits:1}) + ' gp)</em></span></div>';
+
+  if (magicItems.length) {
+    html += '<div style="margin-top:.7rem;font-family:\'Cinzel\',serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;">✨ Magic Items & Valuables</div>';
+    magicItems.forEach(function(item) {
+      var rarCls = item.rarity.replace(' ','-');
+      html += '<div class="loot-item">'
+        + '<span class="loot-name">' + item.name + '</span>'
+        + '<span class="loot-rarity ' + rarCls + '">' + item.rarity + '</span></div>';
+    });
+  } else if (type === 'hoard') {
+    html += '<div class="loot-item"><span class="loot-name" style="color:var(--ink-light);font-style:italic;">No magic items this hoard (roll again for another chance)</span></div>';
+  }
+
+  // XP hint
+  var XP_BY_CR = {0:10,0.125:25,0.25:50,0.5:100,1:200,2:450,3:700,4:1100,5:1800,6:2300,7:2900,8:3900,9:5000,10:5900,11:7200,12:8400,13:10000,14:11500,15:13000,16:15000,17:18000,18:20000,19:22000,20:25000,25:75000,30:155000};
+  var xp = XP_BY_CR[cr];
+  if (xp) {
+    var totalXp = xp * count;
+    html += '<div style="margin-top:.7rem;font-size:.78rem;color:var(--ink-light);font-style:italic;">XP award: ' + totalXp.toLocaleString() + ' ('+count+' × '+xp.toLocaleString()+')</div>';
+  }
+
+  html += '</div>';
+  document.getElementById('loot-result').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RULES REFERENCE
+// ══════════════════════════════════════════════════════════════════════════════
+var REFERENCE = [
+  {
+    title: 'Currency & Conversion',
+    rows: [
+      ['Copper (cp)', '1 cp', '—', 'Poorest coinage'],
+      ['Silver (sp)', '10 cp', '10 sp', 'Common trade'],
+      ['Electrum (ep)', '50 cp', '5 sp', 'Rare; some distrust it'],
+      ['Gold (gp)',  '100 cp', '10 sp / 2 ep', 'Standard adventuring'],
+      ['Platinum (pp)', '1,000 cp', '100 gp', 'Wealth of kings'],
+    ],
+    cols: ['Coin', 'In Copper', 'In Silver', 'Notes'],
+  },
+  {
+    title: 'Carrying Capacity (PHB)',
+    rows: [
+      ['Carrying capacity', 'STR × 15 lb', '', ''],
+      ['Push / Drag / Lift', 'STR × 30 lb', '½ speed', ''],
+      ['Encumbered', 'STR × 5 lb', '−10 ft speed', ''],
+      ['Heavily Encumbered', 'STR × 10 lb', '−20 ft speed, disadv. STR/DEX/CON', ''],
+    ],
+    cols: ['Condition', 'Threshold', 'Effect', ''],
+  },
+  {
+    title: 'Ability Score Modifiers',
+    rows: [
+      ['1', '−5'], ['2–3','−4'], ['4–5','−3'], ['6–7','−2'], ['8–9','−1'],
+      ['10–11','0'], ['12–13','+1'], ['14–15','+2'], ['16–17','+3'],
+      ['18–19','+4'], ['20–21','+5'], ['22–23','+6'], ['24–25','+7'], ['26–27','+8'],
+      ['28–29','+9'], ['30','+10'],
+    ],
+    cols: ['Score', 'Modifier'],
+  },
+  {
+    title: 'Proficiency Bonus by Level',
+    rows: [
+      ['1–4','＋2'], ['5–8','＋3'], ['9–12','＋4'], ['13–16','＋5'], ['17–20','＋6'],
+    ],
+    cols: ['Levels', 'Prof. Bonus'],
+  },
+  {
+    title: 'Difficulty Classes (DC)',
+    rows: [
+      ['Trivial','5'], ['Easy','10'], ['Medium','15'],
+      ['Hard','20'], ['Very Hard','25'], ['Nearly Impossible','30'],
+    ],
+    cols: ['Difficulty', 'DC'],
+  },
+  {
+    title: 'Conditions (Summary)',
+    rows: [
+      ['Blinded','Can\'t see. Auto-fail sight checks. Attacks vs = adv., attacks by = disadv.'],
+      ['Charmed','Can\'t attack charmer. Charmer has adv. on social checks vs you.'],
+      ['Deafened','Can\'t hear. Auto-fail hearing checks.'],
+      ['Exhaustion','Level 1=disadv. checks; 2=½ speed; 3=disadv. attacks/saves; 4=½ HP max; 5=speed 0; 6=death.'],
+      ['Frightened','Disadv. on checks & attacks while source is in sight. Can\'t move closer.'],
+      ['Grappled','Speed 0. Ends if grappler is incapacitated or moved away.'],
+      ['Incapacitated','Can\'t take actions or reactions.'],
+      ['Invisible','Can\'t be seen. Attacks vs = disadv., attacks by = adv. Hide checks more likely to succeed.'],
+      ['Paralyzed','Incapacitated + can\'t move or speak. Fails STR/DEX saves. Hits = crits within 5ft.'],
+      ['Petrified','Turned to stone. Weight × 10. Incapacitated, can\'t move/speak, unaware of surroundings.'],
+      ['Poisoned','Disadv. on attack rolls and ability checks.'],
+      ['Prone','Disadv. on attacks. Attacks from ≤5ft = adv., attacks from >5ft = disadv.'],
+      ['Restrained','Speed 0. Disadv. on attacks and DEX saves. Attacks vs = adv.'],
+      ['Stunned','Incapacitated, can\'t move, can only speak falteringly. Fails STR/DEX saves. Attacks vs = adv.'],
+      ['Unconscious','Incapacitated + prone + unaware. Drops objects. Hits = crits within 5ft. Fails STR/DEX.'],
+    ],
+    cols: ['Condition','Effect'],
+  },
+  {
+    title: 'Movement & Distance',
+    rows: [
+      ['Normal move', 'Up to speed (ft) as part of turn','',''],
+      ['Difficult terrain', '1 ft of movement costs 2 ft','',''],
+      ['Crawling', '1 ft costs 2 ft','',''],
+      ['Swimming', '1 ft costs 2 ft (unless speed)','',''],
+      ['Climbing', '1 ft costs 2 ft (unless speed)','',''],
+      ['Long jump', 'STR score feet running; ½ standing','',''],
+      ['High jump', '3 + STR mod (ft) running; ½ standing','',''],
+      ['Forced march', '>8 hr/day: DC 10+1/hr CON save or gain Exhaustion','',''],
+      ['Fast travel (road)', '4 mi/hr, 30 mi/day','',''],
+      ['Normal travel (road)', '3 mi/hr, 24 mi/day','',''],
+      ['Slow travel', '2 mi/hr, 18 mi/day','',''],
+    ],
+    cols: ['Action','Rule','',''],
+  },
+  {
+    title: 'Rest & Recovery',
+    rows: [
+      ['Short Rest','1+ hours. Spend Hit Dice to heal (d+CON each). No exhaustion recovery.'],
+      ['Long Rest','8+ hours. Regain all HP. Regain ½ Hit Dice (min 1). Lose 1 exhaustion level.'],
+      ['Hit Dice','Roll HD + CON mod per die spent. Max = character level.'],
+      ['Stabilising','DC 10 Medicine check, or Healer\'s Kit. 1d4 hours to regain 1 HP then.'],
+      ['Death Saves','3 successes = stable. 3 failures = dead. Crit on 1 = 2 failures. Crit on 20 = 1 HP.'],
+    ],
+    cols: ['Type','Rule'],
+  },
+  {
+    title: 'Cover',
+    rows: [
+      ['Half cover (+2 AC)', 'Low wall, furniture, other creature'],
+      ['Three-quarters (+5 AC)', 'Arrow slit, thick tree trunk'],
+      ['Full cover', 'Can\'t be directly targeted by attacks or spells'],
+    ],
+    cols: ['Cover Type', 'Examples'],
+  },
+  {
+    title: 'Light & Vision',
+    rows: [
+      ['Bright light', 'Normal vision'],
+      ['Dim light', 'Lightly obscured. Disadv. on Perception (sight).'],
+      ['Darkness', 'Heavily obscured. Effectively blind unless darkvision.'],
+      ['Darkvision (60ft)', 'Dim light → bright, darkness → dim. No colour in darkness.'],
+      ['Blindsight', 'Perceive without sight within range.'],
+      ['Truesight', 'See in darkness, invisible, illusions, true forms, Ethereal Plane.'],
+    ],
+    cols: ['Condition', 'Effect'],
+  },
+  {
+    title: 'Concentration',
+    rows: [
+      ['Taking damage','DC 10 or ½ damage (higher) — CON saving throw to maintain'],
+      ['Casting another conc. spell','Previous concentration ends immediately'],
+      ['Incapacitated or dies','Concentration ends'],
+      ['Grappled / Restrained','No automatic break, but may be moved causing damage'],
+      ['War Caster feat','Advantage on concentration saves'],
+      ['Resilient (CON)','Proficiency on CON saves (including concentration)'],
+    ],
+    cols: ['Trigger','Rule'],
+  },
+  {
+    title: 'Common Actions in Combat',
+    rows: [
+      ['Attack','Make one or more weapon/spell attacks'],
+      ['Cast a Spell','Cast a spell with casting time of 1 action'],
+      ['Dash','Double your speed this turn'],
+      ['Disengage','Movement doesn\'t provoke opportunity attacks this turn'],
+      ['Dodge','Attacks vs you = disadv. (if you can see attacker). Adv. on DEX saves.'],
+      ['Help','Give ally adv. on ability check, or attack vs creature within 5ft of you'],
+      ['Hide','Stealth check to become hidden (must be obscured)'],
+      ['Ready','Prepare a reaction for a specified trigger'],
+      ['Search','Perception or Investigation check'],
+      ['Use an Object','Interact with a second object (first is free)'],
+      ['Grapple','STR (Athletics) vs STR (Athletics)/DEX (Acrobatics). Grappled on success.'],
+      ['Shove','STR (Athletics) vs STR (Athletics)/DEX (Acrobatics). Prone or push 5ft.'],
+    ],
+    cols: ['Action','Effect'],
+  },
+  {
+    title: 'Surprise',
+    rows: [
+      ['Detection','Passive Perception vs Dexterity (Stealth) check of hidden side'],
+      ['Surprised creatures','Can\'t move or take actions on first turn. No reactions until end of that turn.'],
+      ['Advantage on initiative','Granted by some features (e.g. Alert feat: +5)'],
+    ],
+    cols: ['Rule','Detail'],
+  },
+  {
+    title: 'Spell Slots & Casting',
+    rows: [
+      ['Upcast','Use a higher slot for a spell — often increases effect'],
+      ['Ritual casting','No slot needed; takes 10 extra minutes (if "Ritual" tag)'],
+      ['Concentration','Only one at a time; broken by damage (DC 10 or ½ dmg, whichever higher)'],
+      ['Components','V = verbal, S = somatic (gesture), M = material (may have GP cost)'],
+      ['Wild Shape','Concentration spells maintained; spells can\'t be cast in beast form'],
+      ['Counterspell','Reaction vs a spell being cast ≤60ft. Auto-succeeds ≤L3; DC 10+level above.'],
+    ],
+    cols: ['Term', 'Rule'],
+  },
+];
+
+function buildReference() {
+  var grid = document.getElementById('ref-grid');
+  var col1 = '', col2 = '';
+  REFERENCE.forEach(function(block, idx) {
+    var html = '<div class="ref-block"><h4>' + block.title + '</h4>';
+    html += '<table><thead><tr>' + block.cols.filter(Boolean).map(function(c){return '<th>'+c+'</th>';}).join('') + '</tr></thead><tbody>';
+    block.rows.forEach(function(row) {
+      html += '<tr>' + row.filter(function(_,i){return i<block.cols.length;}).map(function(cell){return '<td>'+cell+'</td>';}).join('') + '</tr>';
+    });
+    html += '</tbody></table></div>';
+    if (idx % 2 === 0) col1 += html; else col2 += html;
+  });
+  grid.innerHTML = '<div>' + col1 + '</div><div>' + col2 + '</div>';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildMerchant();
+buildReference();
+</script>
+</body>
+</html>
