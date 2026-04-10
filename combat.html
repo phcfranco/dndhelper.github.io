@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Character Forge | Combat Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--p:#f4e8c1;--pd:#e8d5a0;--ink:#1a1209;--il:#3d2b1a;--cr:#8b1a1a;--crl:#b52a2a;--go:#c9973a;--gl:#e8b84b;--green:#1a5c2a;--bg:#1a1209;--dead:#555;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);min-height:100vh;font-family:"Crimson Pro",serif;color:var(--ink);padding:1.5rem 1rem 4rem;}
+h1{font-family:"Cinzel",serif;font-weight:900;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--gl);letter-spacing:.08em;text-align:center;text-shadow:0 2px 16px rgba(201,151,58,.4);}
+.sub{text-align:center;color:var(--pd);font-style:italic;font-size:1rem;opacity:.7;margin:.25rem 0 1.2rem;}
+.dv{width:220px;height:2px;margin:.6rem auto 1.2rem;background:linear-gradient(90deg,transparent,var(--go),transparent);}
+.back{display:inline-block;margin-bottom:1rem;font-family:"Cinzel",serif;font-size:.68rem;letter-spacing:.1em;color:var(--go);text-decoration:none;opacity:.7;}
+.back:hover{opacity:1;}
+/* Layout */
+.layout{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start;}
+/* Panel shell */
+.panel{background:var(--p);border-radius:4px;box-shadow:0 0 0 2px var(--go),0 0 0 4px var(--cr),0 4px 32px rgba(0,0,0,.6);overflow:hidden;}
+.panel-hdr{background:rgba(26,18,9,.95);padding:.75rem 1.2rem;font-family:"Cinzel",serif;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gl);display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.panel-body{padding:1rem 1.2rem;}
+/* Section title */
+.sec{font-family:"Cinzel",serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cr);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid rgba(139,26,26,.2);}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;font-family:"Cinzel",serif;font-size:.65rem;letter-spacing:.09em;border-radius:3px;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap;}
+.btn-primary{background:var(--cr);color:var(--p);border-color:var(--go);}
+.btn-primary:hover{background:var(--crl);}
+.btn-secondary{background:transparent;color:var(--cr);border-color:rgba(139,26,26,.35);}
+.btn-secondary:hover{background:rgba(139,26,26,.07);}
+.btn-gold{background:var(--go);color:#1a1209;border-color:var(--gl);}
+.btn-gold:hover{background:var(--gl);}
+.btn-sm{padding:.28rem .6rem;font-size:.6rem;}
+.btn-danger{background:rgba(139,26,26,.12);color:var(--cr);border-color:rgba(139,26,26,.3);}
+.btn-danger:hover{background:var(--cr);color:var(--p);}
+.btn-green{background:rgba(26,92,42,.12);color:var(--green);border-color:rgba(26,92,42,.3);}
+.btn-green:hover{background:var(--green);color:white;}
+/* Inputs */
+input[type=text],input[type=number],select{padding:.42rem .65rem;border:1px solid rgba(139,26,26,.3);border-radius:3px;background:rgba(248,237,205,.7);font-family:"Crimson Pro",serif;font-size:.92rem;color:var(--ink);outline:none;width:100%;}
+input:focus,select:focus{border-color:var(--cr);background:rgba(248,237,205,.95);}
+label{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cr);display:block;margin-bottom:.25rem;}
+.row{display:flex;gap:.6rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.7rem;}
+.field{flex:1;min-width:80px;}
+/* ── COMBAT TRACKER ── */
+.combatants{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;}
+.combatant{border:1px solid rgba(139,26,26,.2);border-radius:4px;padding:.6rem .8rem;background:rgba(248,237,205,.5);transition:all .2s;position:relative;}
+.combatant.active{border-color:var(--go);background:rgba(201,151,58,.1);box-shadow:0 0 0 2px rgba(201,151,58,.3);}
+.combatant.dead{opacity:.45;background:rgba(50,50,50,.08);border-color:#999;}
+.combatant.player{border-left:3px solid var(--green);}
+.combatant.monster{border-left:3px solid var(--cr);}
+.comb-top{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.comb-name{font-family:"Cinzel",serif;font-size:.85rem;font-weight:600;color:var(--ink);flex:1;min-width:100px;cursor:default;position:relative;}
+.comb-name.has-stat:hover .stat-tooltip{display:block;}
+.stat-tooltip{display:none;position:absolute;left:0;top:100%;z-index:100;background:#1a1209;color:var(--pd);font-family:"Crimson Pro",serif;font-size:.78rem;padding:.7rem .9rem;border-radius:4px;border:1px solid var(--go);min-width:280px;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,.8);line-height:1.5;white-space:normal;}
+.stat-tooltip h4{font-family:"Cinzel",serif;font-size:.75rem;color:var(--gl);margin-bottom:.3rem;}
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.3rem;}
+.stat-block{text-align:center;min-width:40px;}
+.stat-block .sv{font-size:.65rem;color:rgba(244,232,193,.5);}
+.stat-block .vl{font-size:.88rem;color:var(--pd);font-weight:600;}
+.comb-ini{font-family:"Cinzel",serif;font-size:.82rem;color:var(--go);width:28px;text-align:center;font-weight:700;}
+.comb-hp-bar{flex:1;min-width:120px;}
+.hp-track{display:flex;align-items:center;gap:.4rem;}
+.hp-cur{font-family:"Cinzel",serif;font-size:.92rem;font-weight:700;min-width:36px;text-align:right;}
+.hp-max{font-size:.75rem;color:var(--il);white-space:nowrap;}
+.hp-bar{height:6px;background:rgba(139,26,26,.15);border-radius:3px;flex:1;overflow:hidden;}
+.hp-fill{height:100%;border-radius:3px;transition:width .3s,background .3s;}
+.comb-actions{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;}
+.dmg-inp{width:60px !important;padding:.28rem .4rem !important;font-size:.82rem !important;}
+.turn-indicator{width:10px;height:10px;border-radius:50%;background:var(--go);flex-shrink:0;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+/* Round banner */
+.round-banner{background:rgba(139,26,26,.08);border:1px solid rgba(139,26,26,.2);border-radius:4px;padding:.5rem 1rem;text-align:center;margin-bottom:1rem;font-family:"Cinzel",serif;font-size:.75rem;color:var(--cr);letter-spacing:.1em;}
+/* ── ENCOUNTER BUILDER ── */
+.enc-result{margin-top:.8rem;padding:.7rem;background:rgba(201,151,58,.06);border:1px solid rgba(201,151,58,.25);border-radius:4px;}
+.enc-result-title{font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go);margin-bottom:.45rem;}
+.enc-monster-row{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;border-bottom:1px solid rgba(139,26,26,.07);font-size:.88rem;gap:.5rem;}
+.enc-monster-name{flex:1;cursor:pointer;position:relative;}
+.enc-monster-name:hover{color:var(--cr);}
+.enc-monster-name:hover .stat-tooltip{display:block;}
+.enc-add{padding:.18rem .5rem !important;}
+.difficulty-badge{display:inline-block;padding:.15rem .55rem;border-radius:99px;font-size:.68rem;font-family:"Cinzel",serif;letter-spacing:.06em;}
+.diff-trivial{background:rgba(100,100,100,.1);color:#666;border:1px solid #999;}
+.diff-easy{background:rgba(26,92,42,.1);color:var(--green);border:1px solid rgba(26,92,42,.3);}
+.diff-medium{background:rgba(201,151,58,.12);color:#7a5c10;border:1px solid rgba(201,151,58,.3);}
+.diff-hard{background:rgba(200,80,0,.1);color:#b85000;border:1px solid rgba(200,80,0,.3);}
+.diff-deadly{background:rgba(139,26,26,.1);color:var(--cr);border:1px solid rgba(139,26,26,.3);}
+/* Monster picker autocomplete */
+.autocomplete-wrap{position:relative;}
+.autocomplete-list{position:absolute;left:0;right:0;top:100%;background:#1a1209;border:1px solid var(--go);border-radius:0 0 4px 4px;z-index:200;max-height:200px;overflow-y:auto;}
+.ac-item{padding:.35rem .7rem;font-size:.88rem;color:var(--pd);cursor:pointer;display:flex;justify-content:space-between;}
+.ac-item:hover{background:rgba(201,151,58,.15);}
+.ac-cr{font-size:.72rem;color:rgba(244,232,193,.4);}
+/* Log */
+.log{max-height:140px;overflow-y:auto;font-size:.8rem;color:var(--il);background:rgba(0,0,0,.04);border:1px solid rgba(139,26,26,.1);border-radius:3px;padding:.4rem .6rem;}
+.log-entry{padding:.1rem 0;border-bottom:1px solid rgba(139,26,26,.05);}
+.log-entry.dmg{color:var(--cr);}
+.log-entry.heal{color:var(--green);}
+.log-entry.dead{color:#888;font-style:italic;}
+.log-entry.turn{color:var(--go);font-weight:600;}
+/* Tabs */
+.tabs2{display:flex;border-bottom:2px solid rgba(139,26,26,.2);margin-bottom:.9rem;}
+.tb2{flex:1;padding:.5rem .5rem;font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(139,26,26,.5);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tb2.on{color:var(--cr);border-bottom-color:var(--cr);}
+.tab-pnl{display:none;}
+.tab-pnl.on{display:block;}
+/* XP meter */
+.xp-meter{margin-top:.6rem;font-size:.82rem;color:var(--il);}
+.xp-bar-wrap{height:8px;background:rgba(139,26,26,.12);border-radius:4px;margin:.3rem 0;overflow:hidden;}
+.xp-bar{height:100%;border-radius:4px;transition:width .3s;}
+/* Responsive */
+@media(max-width:800px){.layout{grid-template-columns:1fr;}.stat-tooltip{left:0;right:auto;min-width:240px;}}
+</style>
+</head>
+<body>
+<div style="max-width:1200px;margin:0 auto">
+  <a href="index.html" class="back">← Back to Home</a>
+</div>
+<h1>Character Forge</h1>
+<div class="dv"></div>
+<div class="sub">Combat Tracker &amp; Encounter Builder</div>
+
+<div class="layout">
+
+<!-- ═══════════════════════ LEFT: COMBAT TRACKER ═══════════════════════ -->
+<div>
+  <div class="panel" style="margin-bottom:1.2rem;">
+    <div class="panel-hdr">
+      ⚔ Combat Tracker
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-gold btn-sm" onclick="rollInitiative()">🎲 Roll Initiative</button>
+        <button class="btn btn-secondary btn-sm" onclick="nextTurn()">Next Turn ›</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetCombat()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <!-- Round banner -->
+      <div class="round-banner" id="round-banner">Round 1 — Press "Roll Initiative" to begin</div>
+
+      <!-- Add player -->
+      <div class="sec">Add Player</div>
+      <div class="row">
+        <div class="field"><label>Name</label><input type="text" id="p-name" placeholder="Player name" onkeydown="if(event.key==='Enter')addPlayer()"></div>
+        <div class="field" style="max-width:80px"><label>Init. Mod</label><input type="number" id="p-ini" value="2" style="width:100%"></div>
+        <div class="field" style="max-width:80px"><label>Max HP</label><input type="number" id="p-hp" value="20" style="width:100%"></div>
+        <button class="btn btn-secondary" style="margin-bottom:0" onclick="addPlayer()">+ Add</button>
+      </div>
+
+      <!-- Add monster manually -->
+      <div class="sec">Add Monster</div>
+      <div class="row">
+        <div class="field autocomplete-wrap">
+          <label>Monster (type to search)</label>
+          <input type="text" id="m-search" placeholder="e.g. Goblin, Wolf…" oninput="monsterSearch()" onkeydown="acKeydown(event)" autocomplete="off">
+          <div class="autocomplete-list" id="ac-list" style="display:none"></div>
+        </div>
+        <div class="field" style="max-width:70px"><label>Count</label><input type="number" id="m-count" value="1" min="1" max="20" style="width:100%"></div>
+        <button class="btn btn-secondary" style="margin-bottom:0" onclick="addSelectedMonster()">+ Add</button>
+      </div>
+
+      <!-- Combatant list -->
+      <div class="sec" style="margin-top:.5rem;">Initiative Order</div>
+      <div class="combatants" id="combatant-list">
+        <div style="text-align:center;padding:1.5rem;color:var(--il);font-style:italic;">Add players and monsters, then roll initiative.</div>
+      </div>
+
+      <!-- Log -->
+      <div class="sec">Combat Log</div>
+      <div class="log" id="combat-log"><div class="log-entry">Combat not started.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ RIGHT: ENCOUNTER BUILDER ═══════════════════════ -->
+<div>
+  <div class="panel">
+    <div class="panel-hdr">🐉 Encounter Builder</div>
+    <div class="panel-body">
+      <div class="tabs2">
+        <button class="tb2 on" onclick="showEncTab('random')">Random</button>
+        <button class="tb2" onclick="showEncTab('manual')">By CR/Type</button>
+      </div>
+
+      <!-- RANDOM TAB -->
+      <div class="tab-pnl on" id="enc-random">
+        <div class="row">
+          <div class="field">
+            <label>Party Size</label>
+            <input type="number" id="enc-party" value="4" min="1" max="10">
+          </div>
+          <div class="field">
+            <label>Party Level</label>
+            <select id="enc-level">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Difficulty</label>
+            <select id="enc-diff">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+              <option value="deadly">Deadly</option>
+              <option value="random">Random</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Environment</label>
+            <select id="enc-env">
+              <option value="any">Any</option>
+              <option value="forest">Forest</option>
+              <option value="dungeon">Dungeon</option>
+              <option value="mountain">Mountain</option>
+              <option value="arctic">Arctic</option>
+              <option value="underdark">Underdark</option>
+              <option value="coastal">Coastal</option>
+              <option value="desert">Desert</option>
+              <option value="swamp">Swamp</option>
+              <option value="plains">Plains</option>
+              <option value="urban">Urban</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:.5rem" onclick="generateEncounter()">🎲 Generate Encounter</button>
+      </div>
+
+      <!-- MANUAL TAB -->
+      <div class="tab-pnl" id="enc-manual">
+        <div class="row">
+          <div class="field">
+            <label>CR</label>
+            <select id="enc-cr">
+              <option value="any">Any CR</option>
+              <option value="0.125">CR 1/8</option>
+              <option value="0.25">CR 1/4</option>
+              <option value="0.5">CR 1/2</option>
+              <option value="1">CR 1</option><option value="2">CR 2</option><option value="3">CR 3</option><option value="4">CR 4</option><option value="5">CR 5</option><option value="6">CR 6</option><option value="7">CR 7</option><option value="8">CR 8</option><option value="9">CR 9</option><option value="10">CR 10</option><option value="11">CR 11</option><option value="12">CR 12</option><option value="13">CR 13</option><option value="14">CR 14</option><option value="15">CR 15</option><option value="16">CR 16</option><option value="17">CR 17</option><option value="18">CR 18</option><option value="19">CR 19</option><option value="20">CR 20</option><option value="21">CR 21</option><option value="22">CR 22</option><option value="23">CR 23</option><option value="24">CR 24</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select id="enc-type">
+              <option value="any">Any Type</option>
+              <option>aberration</option><option>beast</option><option>celestial</option>
+              <option>construct</option><option>dragon</option><option>elemental</option>
+              <option>fey</option><option>fiend</option><option>giant</option>
+              <option>humanoid</option><option>monstrosity</option><option>ooze</option>
+              <option>plant</option><option>undead</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:70px">
+            <label>Count</label>
+            <input type="number" id="enc-num" value="1" min="1" max="12">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:.5rem" onclick="generateManual()">🎲 Build Encounter</button>
+      </div>
+
+      <!-- Result -->
+      <div id="enc-result" style="display:none" class="enc-result">
+        <div class="enc-result-title" id="enc-title">Encounter</div>
+        <div id="enc-monsters"></div>
+        <div class="xp-meter" id="xp-meter"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap;">
+          <button class="btn btn-gold btn-sm" style="flex:1;justify-content:center" onclick="addEncounterToTracker()">⚔ Add to Tracker</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;justify-content:center" onclick="rerollEncounter()">🎲 Reroll</button>
+        </div>
+      </div>
+
+      <!-- Party XP Budget -->
+      <div style="margin-top:1rem;">
+        <div class="sec">Party XP Thresholds</div>
+        <div id="party-budget" style="font-size:.82rem;color:var(--il);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<script>
+/* ─────────────────────────────────────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────────────────────────────────────── */
+var MONSTERS = [{"n":"Bandit","cr":0.125,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":11,"sp":"30 ft.","str":11,"dex":12,"con":12,"int":10,"wis":10,"cha":10,"sk":"","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Non-lawful Alignment","hpd":"11 (2d8+2)","acd":"12 (Leather Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Blood Hawk","cr":0.125,"ty":"beast","sz":"Small","ac":12,"hp":7,"sp":"10 ft., fly 60 ft.","str":6,"dex":14,"con":10,"int":3,"wis":14,"cha":5,"sk":"Perception +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"7 (2d6)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Camel","cr":0.125,"ty":"beast","sz":"Large","ac":9,"hp":15,"sp":"50 ft.","str":16,"dex":8,"con":14,"int":2,"wis":8,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"15 (2d10+4)","acd":"9","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Cultist","cr":0.125,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":9,"sp":"30 ft.","str":11,"dex":12,"con":10,"int":10,"wis":11,"cha":10,"sk":"Deception +2, Religion +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Non-good Alignment","hpd":"9 (2d8)","acd":"12 (Leather Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Diseased Giant Rat","cr":0.125,"ty":"beast","sz":"Small","ac":12,"hp":7,"sp":"30 ft.","str":7,"dex":15,"con":11,"int":2,"wis":10,"cha":4,"sk":"","sv":"","se":"Darkvision 60 ft.","la":"","al":"Unaligned","hpd":"7","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Flying Snake","cr":0.125,"ty":"beast","sz":"Tiny","ac":14,"hp":5,"sp":"30 ft., fly 60 ft., swim 30 ft.","str":4,"dex":18,"con":11,"int":2,"wis":12,"cha":5,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"5 (2d4)","acd":"14","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Giant Crab","cr":0.125,"ty":"beast","sz":"Medium","ac":15,"hp":13,"sp":"30 ft., swim 30 ft.","str":13,"dex":15,"con":11,"int":1,"wis":9,"cha":3,"sk":"Stealth +4","sv":"","se":"Blindsight 30 Ft.","la":"","al":"Unaligned","hpd":"13 (3d8)","acd":"15 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Rat","cr":0.125,"ty":"beast","sz":"Small","ac":12,"hp":7,"sp":"30 ft.","str":7,"dex":15,"con":11,"int":2,"wis":10,"cha":4,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"7 (2d6)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Weasel","cr":0.125,"ty":"beast","sz":"Medium","ac":13,"hp":9,"sp":"40 ft.","str":11,"dex":16,"con":10,"int":4,"wis":12,"cha":5,"sk":"Perception +3, Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"9 (2d8)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Guard","cr":0.125,"ty":"humanoid (any race)","sz":"Medium","ac":16,"hp":11,"sp":"30 ft.","str":13,"dex":12,"con":12,"int":10,"wis":11,"cha":10,"sk":"Perception +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"11 (2d8+2)","acd":"16 (Chain Shirt, Shield)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Kobold","cr":0.125,"ty":"humanoid (kobold)","sz":"Small","ac":12,"hp":5,"sp":"30 ft.","str":7,"dex":15,"con":9,"int":8,"wis":7,"cha":8,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"5 (2d6-2)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Mastiff","cr":0.125,"ty":"beast","sz":"Medium","ac":12,"hp":5,"sp":"40 ft.","str":13,"dex":14,"con":12,"int":3,"wis":12,"cha":7,"sk":"Perception +3","sv":"","se":"","la":"","al":"Unaligned","hpd":"5 (1d8+1)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Merfolk","cr":0.125,"ty":"humanoid (merfolk)","sz":"Medium","ac":11,"hp":11,"sp":"10 ft., swim 40 ft.","str":10,"dex":13,"con":12,"int":11,"wis":11,"cha":12,"sk":"Perception +2","sv":"","se":"","la":"Aquan, Common","al":"Neutral","hpd":"11 (2d8+2)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Mule","cr":0.125,"ty":"beast","sz":"Medium","ac":10,"hp":11,"sp":"40 ft.","str":14,"dex":10,"con":13,"int":2,"wis":10,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Noble","cr":0.125,"ty":"humanoid (any race)","sz":"Medium","ac":15,"hp":9,"sp":"30 ft.","str":11,"dex":12,"con":11,"int":12,"wis":14,"cha":16,"sk":"Deception +5, Insight +4, Persuasion +5","sv":"","se":"","la":"Any Two Languages","al":"Any Alignment","hpd":"9 (2d8)","acd":"15 (Breastplate)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Poisonous Snake","cr":0.125,"ty":"beast","sz":"Tiny","ac":13,"hp":2,"sp":"30 ft., swim 30 ft.","str":2,"dex":16,"con":11,"int":1,"wis":10,"cha":3,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"2 (1d4)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Pony","cr":0.125,"ty":"beast","sz":"Medium","ac":10,"hp":11,"sp":"40 ft.","str":15,"dex":10,"con":13,"int":2,"wis":11,"cha":7,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Stirge","cr":0.125,"ty":"beast","sz":"Tiny","ac":14,"hp":2,"sp":"10 ft., fly 40 ft.","str":4,"dex":16,"con":11,"int":2,"wis":8,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"2 (1d4)","acd":"14 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Tribal Warrior","cr":0.125,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":11,"sp":"30 ft.","str":13,"dex":11,"con":12,"int":8,"wis":11,"cha":8,"sk":"","sv":"","se":"","la":"Any One Language","al":"Any Alignment","hpd":"11 (2d8+2)","acd":"12 (Hide Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Acolyte","cr":0.25,"ty":"humanoid (any race)","sz":"Medium","ac":10,"hp":9,"sp":"30 ft.","str":10,"dex":10,"con":10,"int":10,"wis":14,"cha":11,"sk":"Medicine +4, Religion +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"9 (2d8)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Axe Beak","cr":0.25,"ty":"beast","sz":"Large","ac":11,"hp":19,"sp":"50 ft.","str":14,"dex":12,"con":12,"int":2,"wis":10,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Blink Dog","cr":0.25,"ty":"fey","sz":"Medium","ac":13,"hp":22,"sp":"40 ft.","str":12,"dex":17,"con":12,"int":10,"wis":13,"cha":11,"sk":"Perception +3, Stealth +5","sv":"","se":"","la":"Blink Dog, Understands Sylvan But Can't Speak It","al":"Lawful Good","hpd":"22 (4d8+4)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Boar","cr":0.25,"ty":"beast","sz":"Medium","ac":11,"hp":11,"sp":"40 ft.","str":13,"dex":11,"con":12,"int":2,"wis":9,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"11 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Constrictor Snake","cr":0.25,"ty":"beast","sz":"Large","ac":12,"hp":13,"sp":"30 ft., swim 30 ft.","str":15,"dex":14,"con":12,"int":1,"wis":10,"cha":3,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"13 (2d10+2)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Draft Horse","cr":0.25,"ty":"beast","sz":"Large","ac":10,"hp":19,"sp":"40 ft.","str":18,"dex":10,"con":12,"int":2,"wis":11,"cha":7,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Dretch","cr":0.25,"ty":"fiend (demon)","sz":"Small","ac":11,"hp":18,"sp":"20 ft.","str":11,"dex":11,"con":12,"int":5,"wis":8,"cha":3,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Abyssal, Telepathy 60 Ft. (Works Only With Creatures That Understand Abyssal)","al":"Chaotic Evil","hpd":"18 (4d6+4)","acd":"11 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Drow","cr":0.25,"ty":"humanoid (elf)","sz":"Medium","ac":15,"hp":13,"sp":"30 ft.","str":10,"dex":14,"con":10,"int":11,"wis":11,"cha":12,"sk":"Perception +2, Stealth +4","sv":"","se":"Darkvision 120 Ft.","la":"Elvish, Undercommon","al":"Neutral Evil","hpd":"13 (3d8)","acd":"15 (Chain Shirt)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Elk","cr":0.25,"ty":"beast","sz":"Large","ac":10,"hp":13,"sp":"50 ft.","str":16,"dex":10,"con":12,"int":2,"wis":10,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"13 (2d10+2)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Flying Sword","cr":0.25,"ty":"construct","sz":"Small","ac":17,"hp":17,"sp":"0 ft., fly 50 ft. It can hover.","str":12,"dex":15,"con":11,"int":1,"wis":5,"cha":1,"sk":"","sv":"Dex +4","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"17 (5d6)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Badger","cr":0.25,"ty":"beast","sz":"Medium","ac":10,"hp":13,"sp":"30 ft., burrow 10 ft.","str":13,"dex":10,"con":15,"int":2,"wis":12,"cha":5,"sk":"","sv":"","se":"Darkvision 30 Ft.","la":"","al":"Unaligned","hpd":"13 (2d8+4)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Giant Bat","cr":0.25,"ty":"beast","sz":"Large","ac":13,"hp":22,"sp":"10 ft., fly 60 ft.","str":15,"dex":16,"con":11,"int":2,"wis":12,"cha":6,"sk":"","sv":"","se":"Blindsight 60 Ft.","la":"","al":"Unaligned","hpd":"22 (4d10)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Giant Centipede","cr":0.25,"ty":"beast","sz":"Small","ac":13,"hp":4,"sp":"30 ft., climb 30 ft.","str":5,"dex":14,"con":12,"int":1,"wis":7,"cha":3,"sk":"","sv":"","se":"Blindsight 30 Ft.","la":"","al":"Unaligned","hpd":"4 (1d6+1)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Frog","cr":0.25,"ty":"beast","sz":"Medium","ac":11,"hp":18,"sp":"30 ft., swim 30 ft.","str":12,"dex":13,"con":11,"int":2,"wis":10,"cha":3,"sk":"Perception +2, Stealth +3","sv":"","se":"Darkvision 30 Ft.","la":"","al":"Unaligned","hpd":"18 (4d8)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Giant Lizard","cr":0.25,"ty":"beast","sz":"Large","ac":12,"hp":19,"sp":"30 ft., climb 30 ft.","str":15,"dex":12,"con":13,"int":2,"wis":10,"cha":5,"sk":"","sv":"","se":"Darkvision 30 Ft.","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Giant Owl","cr":0.25,"ty":"beast","sz":"Large","ac":12,"hp":19,"sp":"5 ft., fly 60 ft.","str":13,"dex":15,"con":12,"int":8,"wis":13,"cha":10,"sk":"Perception +5, Stealth +4","sv":"","se":"Darkvision 120 Ft.","la":"Giant Owl, Understands Common, Elvish, And Sylvan But Can't Speak","al":"Neutral","hpd":"19 (3d10+3)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Poisonous Snake","cr":0.25,"ty":"beast","sz":"Medium","ac":14,"hp":11,"sp":"30 ft., swim 30 ft.","str":10,"dex":18,"con":13,"int":2,"wis":10,"cha":3,"sk":"Perception +2","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"14","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Giant Wolf Spider","cr":0.25,"ty":"beast","sz":"Medium","ac":13,"hp":11,"sp":"40 ft., climb 40 ft.","str":12,"dex":16,"con":13,"int":3,"wis":12,"cha":4,"sk":"Perception +3, Stealth +7","sv":"","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Goblin","cr":0.25,"ty":"humanoid (goblinoid)","sz":"Small","ac":15,"hp":7,"sp":"30 ft.","str":8,"dex":14,"con":10,"int":10,"wis":8,"cha":8,"sk":"Stealth +6","sv":"","se":"Darkvision 60 Ft.","la":"Common, Goblin","al":"Neutral Evil","hpd":"7 (2d6)","acd":"15 (Leather Armor, Shield)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Grimlock","cr":0.25,"ty":"humanoid (grimlock)","sz":"Medium","ac":11,"hp":11,"sp":"30 ft.","str":16,"dex":12,"con":12,"int":9,"wis":8,"cha":6,"sk":"Athletics +5, Perception +3, Stealth +3","sv":"","se":"Blindsight 30 Ft. Or 10 Ft. While Deafened (Blind Beyond This Radius)","la":"Undercommon","al":"Neutral Evil","hpd":"11 (2d8+2)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Panther","cr":0.25,"ty":"beast","sz":"Medium","ac":12,"hp":13,"sp":"50 ft., climb 40 ft.","str":14,"dex":15,"con":10,"int":3,"wis":14,"cha":7,"sk":"Perception +4, Stealth +6","sv":"","se":"","la":"","al":"Unaligned","hpd":"13 (3d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Pseudodragon","cr":0.25,"ty":"dragon","sz":"Tiny","ac":13,"hp":7,"sp":"15 ft., fly 60 ft.","str":6,"dex":15,"con":13,"int":10,"wis":12,"cha":10,"sk":"Perception +3, Stealth +4","sv":"","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Understands Common And Draconic But Can't Speak","al":"Neutral Good","hpd":"7 (2d4+2)","acd":"13","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Riding Horse","cr":0.25,"ty":"beast","sz":"Large","ac":10,"hp":13,"sp":"60 ft.","str":16,"dex":10,"con":12,"int":2,"wis":11,"cha":7,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"13 (2d10+2)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Skeleton","cr":0.25,"ty":"undead","sz":"Medium","ac":13,"hp":13,"sp":"30 ft.","str":10,"dex":14,"con":15,"int":6,"wis":8,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Understands All Languages It Spoke In Life But Can't Speak","al":"Lawful Evil","hpd":"13 (2d8+4)","acd":"13 (Armor Scraps)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Sprite","cr":0.25,"ty":"fey","sz":"Tiny","ac":15,"hp":2,"sp":"10 ft., fly 40 ft.","str":3,"dex":18,"con":10,"int":14,"wis":13,"cha":11,"sk":"Perception +3, Stealth +8","sv":"","se":"","la":"Common, Elvish, Sylvan","al":"Neutral Good","hpd":"2 (1d4)","acd":"15 (Leather Armor)","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Steam Mephit","cr":0.25,"ty":"elemental","sz":"Small","ac":10,"hp":21,"sp":"30 ft., fly 30 ft.","str":5,"dex":11,"con":10,"int":11,"wis":10,"cha":12,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Aquan, Ignan","al":"Neutral Evil","hpd":"21 (6d6)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Bats","cr":0.25,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"0 ft., fly 30 ft.","str":5,"dex":15,"con":10,"int":2,"wis":12,"cha":4,"sk":"","sv":"","se":"Blindsight 60 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Rats","cr":0.25,"ty":"swarm of tiny beasts","sz":"Medium","ac":10,"hp":24,"sp":"30 ft.","str":9,"dex":11,"con":9,"int":2,"wis":10,"cha":3,"sk":"","sv":"","se":"Darkvision 30 Ft.","la":"","al":"Unaligned","hpd":"24 (7d8-7)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Ravens","cr":0.25,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":24,"sp":"10 ft., fly 50 ft.","str":6,"dex":14,"con":8,"int":3,"wis":12,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"24 (7d8-7)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Violet Fungus","cr":0.25,"ty":"plant","sz":"Medium","ac":5,"hp":18,"sp":"5 ft.","str":3,"dex":1,"con":10,"int":1,"wis":3,"cha":1,"sk":"","sv":"","se":"Blindsight 30 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"18 (4d8)","acd":"5","ini":-5,"b":"Free Basic Rules (2014)"},{"n":"Wolf","cr":0.25,"ty":"beast","sz":"Medium","ac":13,"hp":11,"sp":"40 ft.","str":12,"dex":15,"con":12,"int":3,"wis":12,"cha":6,"sk":"Perception +3, Stealth +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"11 (2d8+2)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Zombie","cr":0.25,"ty":"undead","sz":"Medium","ac":8,"hp":22,"sp":"20 ft.","str":13,"dex":6,"con":16,"int":3,"wis":6,"cha":5,"sk":"","sv":"Wis +0","se":"Darkvision 60 Ft.","la":"Understands All Languages It Spoke In Life But Can't Speak","al":"Neutral Evil","hpd":"22 (3d8+9)","acd":"8","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Ape","cr":0.5,"ty":"beast","sz":"Medium","ac":12,"hp":19,"sp":"30 ft., climb 30 ft.","str":16,"dex":14,"con":14,"int":6,"wis":12,"cha":7,"sk":"Athletics +5, Perception +3","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d8+6)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Black Bear","cr":0.5,"ty":"beast","sz":"Medium","ac":11,"hp":19,"sp":"40 ft., climb 30 ft.","str":15,"dex":10,"con":14,"int":2,"wis":12,"cha":7,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d8+6)","acd":"11 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Cockatrice","cr":0.5,"ty":"monstrosity","sz":"Small","ac":11,"hp":27,"sp":"20 ft., fly 40 ft.","str":6,"dex":12,"con":12,"int":2,"wis":13,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"27 (6d6+6)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Crocodile","cr":0.5,"ty":"beast","sz":"Large","ac":12,"hp":19,"sp":"20 ft., swim 30 ft.","str":15,"dex":10,"con":13,"int":2,"wis":10,"cha":5,"sk":"Stealth +2","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Darkmantle","cr":0.5,"ty":"monstrosity","sz":"Small","ac":11,"hp":22,"sp":"10 ft., fly 30 ft.","str":16,"dex":12,"con":13,"int":2,"wis":10,"cha":5,"sk":"Stealth +3","sv":"","se":"Blindsight 60 Ft.","la":"","al":"Unaligned","hpd":"22 (5d6+5)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Deep Gnome (Svirfneblin)","cr":0.5,"ty":"humanoid (gnome)","sz":"Small","ac":15,"hp":16,"sp":"20 ft.","str":15,"dex":14,"con":14,"int":12,"wis":10,"cha":9,"sk":"Investigation +3, Perception +2, Stealth +4","sv":"","se":"darkvision 120 ft.","la":"Gnomish, Terran, Undercommon","al":"Neutral Good","hpd":"16 (3d6 + 6)","acd":"15 (chain shirt)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Dust Mephit","cr":0.5,"ty":"elemental","sz":"Small","ac":12,"hp":17,"sp":"30 ft., fly 30 ft.","str":5,"dex":14,"con":10,"int":9,"wis":11,"cha":10,"sk":"Perception +2, Stealth +4","sv":"","se":"Darkvision 60 Ft.","la":"Auran, Terran","al":"Neutral Evil","hpd":"17 (5d6)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Goat","cr":0.5,"ty":"beast","sz":"Large","ac":11,"hp":19,"sp":"40 ft.","str":17,"dex":11,"con":12,"int":3,"wis":12,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"11 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Giant Sea Horse","cr":0.5,"ty":"beast","sz":"Large","ac":13,"hp":16,"sp":"0 ft., swim 40 ft.","str":12,"dex":15,"con":11,"int":2,"wis":12,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"16 (3d10)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Seahorse","cr":0.5,"ty":"Beast","sz":"Large","ac":14,"hp":16,"sp":"5 ft., Swim 40 ft.","str":15,"dex":12,"con":11,"int":2,"wis":12,"cha":5,"sk":"","sv":"Str +2, Dex +1, Con +0, Int -4, Wis +1, Cha -3","se":"","la":"None","al":"Unaligned","hpd":"16 (3d10)","acd":"14","ini":1,"b":"Free Basic Rules (2024)"},{"n":"Giant Wasp","cr":0.5,"ty":"beast","sz":"Medium","ac":12,"hp":13,"sp":"10 ft., fly 50 ft.","str":10,"dex":14,"con":10,"int":1,"wis":10,"cha":3,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"13 (3d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Gnoll","cr":0.5,"ty":"humanoid (gnoll)","sz":"Medium","ac":15,"hp":22,"sp":"30 ft.","str":14,"dex":12,"con":11,"int":6,"wis":10,"cha":7,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Gnoll","al":"Chaotic Evil","hpd":"22 (5d8)","acd":"15 (Hide Armor, Shield)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Gray Ooze","cr":0.5,"ty":"ooze","sz":"Medium","ac":8,"hp":22,"sp":"10 ft., climb 10 ft.","str":12,"dex":6,"con":16,"int":1,"wis":6,"cha":2,"sk":"Stealth +2","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"22 (3d8+9)","acd":"8","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Hobgoblin","cr":0.5,"ty":"humanoid (goblinoid)","sz":"Medium","ac":18,"hp":11,"sp":"30 ft.","str":13,"dex":12,"con":12,"int":10,"wis":10,"cha":9,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common, Goblin","al":"Lawful Evil","hpd":"11 (2d8+2)","acd":"18 (Chain Mail, Shield)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Ice Mephit","cr":0.5,"ty":"elemental","sz":"Small","ac":11,"hp":21,"sp":"30 ft., fly 30 ft.","str":7,"dex":13,"con":10,"int":9,"wis":11,"cha":12,"sk":"Perception +2, Stealth +3","sv":"","se":"Darkvision 60 Ft.","la":"Aquan, Auran","al":"Neutral Evil","hpd":"21 (6d6)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Lizardfolk","cr":0.5,"ty":"humanoid (lizardfolk)","sz":"Medium","ac":15,"hp":22,"sp":"30 ft., swim 30 ft.","str":15,"dex":10,"con":13,"int":7,"wis":12,"cha":7,"sk":"Perception +3, Stealth +4, Survival +5","sv":"","se":"","la":"Draconic","al":"Neutral","hpd":"22 (4d8+4)","acd":"15 (Natural Armor, Shield)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Magma Mephit","cr":0.5,"ty":"elemental","sz":"Small","ac":11,"hp":22,"sp":"30 ft., fly 30 ft.","str":8,"dex":12,"con":12,"int":7,"wis":10,"cha":10,"sk":"Stealth +3","sv":"","se":"Darkvision 60 Ft.","la":"Ignan, Terran","al":"Neutral Evil","hpd":"22 (5d6+5)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Magmin","cr":0.5,"ty":"elemental","sz":"Small","ac":14,"hp":9,"sp":"30 ft.","str":7,"dex":15,"con":12,"int":8,"wis":11,"cha":10,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Ignan","al":"Chaotic Neutral","hpd":"9 (2d6+2)","acd":"14 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Orc","cr":0.5,"ty":"humanoid (orc)","sz":"Medium","ac":13,"hp":15,"sp":"30 ft.","str":16,"dex":12,"con":16,"int":7,"wis":11,"cha":10,"sk":"Intimidation +2","sv":"","se":"Darkvision 60 Ft.","la":"Common, Orc","al":"Chaotic Evil","hpd":"15 (2d8+6)","acd":"13 (Hide Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Reef Shark","cr":0.5,"ty":"beast","sz":"Medium","ac":12,"hp":22,"sp":"Swim 40 ft.","str":14,"dex":13,"con":13,"int":1,"wis":10,"cha":4,"sk":"Perception +2","sv":"","se":"Blindsight 30 Ft.","la":"","al":"Unaligned","hpd":"22 (4d8+4)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Rust Monster","cr":0.5,"ty":"monstrosity","sz":"Medium","ac":14,"hp":27,"sp":"40 ft.","str":13,"dex":12,"con":13,"int":2,"wis":13,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"27 (5d8+5)","acd":"14 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Sahuagin","cr":0.5,"ty":"humanoid (sahuagin)","sz":"Medium","ac":12,"hp":22,"sp":"30 ft., swim 40 ft.","str":13,"dex":11,"con":12,"int":12,"wis":13,"cha":9,"sk":"Perception +5","sv":"","se":"Darkvision 120 Ft.","la":"Sahuagin","al":"Lawful Evil","hpd":"22 (4d8+4)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Satyr","cr":0.5,"ty":"fey","sz":"Medium","ac":14,"hp":31,"sp":"40 ft.","str":12,"dex":16,"con":11,"int":12,"wis":10,"cha":14,"sk":"Perception +2, Performance +6, Stealth +5","sv":"","se":"","la":"Common, Elvish, Sylvan","al":"Chaotic Neutral","hpd":"31 (7d8)","acd":"14 (Leather Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Scout","cr":0.5,"ty":"humanoid (any race)","sz":"Medium","ac":13,"hp":16,"sp":"30 ft.","str":11,"dex":14,"con":12,"int":11,"wis":13,"cha":11,"sk":"Nature +4, Perception +5, Stealth +6, Survival +5","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"16 (3d8+3)","acd":"13 (Leather Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Shadow","cr":0.5,"ty":"undead","sz":"Medium","ac":12,"hp":16,"sp":"40 ft.","str":6,"dex":14,"con":13,"int":6,"wis":10,"cha":8,"sk":"Stealth +4","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Chaotic Evil","hpd":"16 (3d8+3)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Beetles","cr":0.5,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"20 ft., burrow 5 ft., climb 20 ft.","str":3,"dex":13,"con":10,"int":1,"wis":7,"cha":1,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Centipedes","cr":0.5,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"20 ft., climb 20 ft.","str":3,"dex":13,"con":10,"int":1,"wis":7,"cha":1,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Insects","cr":0.5,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"20 ft., climb 20 ft.","str":3,"dex":13,"con":10,"int":1,"wis":7,"cha":1,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Spiders","cr":0.5,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"20 ft., climb 20 ft.","str":3,"dex":13,"con":10,"int":1,"wis":7,"cha":1,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Wasps","cr":0.5,"ty":"swarm of tiny beasts","sz":"Medium","ac":12,"hp":22,"sp":"5 ft., fly 30 ft.","str":3,"dex":13,"con":10,"int":1,"wis":7,"cha":1,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"22 (5d8)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Thug","cr":0.5,"ty":"humanoid (any race)","sz":"Medium","ac":11,"hp":32,"sp":"30 ft.","str":15,"dex":11,"con":14,"int":10,"wis":10,"cha":11,"sk":"Intimidation +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Non-good Alignment","hpd":"32 (5d8+10)","acd":"11 (Leather Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Warhorse","cr":0.5,"ty":"beast","sz":"Large","ac":11,"hp":19,"sp":"60 ft.","str":18,"dex":12,"con":13,"int":2,"wis":12,"cha":7,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Warhorse Skeleton","cr":0.5,"ty":"undead","sz":"Large","ac":13,"hp":22,"sp":"60 ft.","str":18,"dex":12,"con":15,"int":2,"wis":8,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Lawful Evil","hpd":"22 (3d10+6)","acd":"13 (Barding Scraps)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Worg","cr":0.5,"ty":"monstrosity","sz":"Large","ac":13,"hp":26,"sp":"50 ft.","str":16,"dex":13,"con":13,"int":7,"wis":11,"cha":8,"sk":"Perception +4","sv":"","se":"Darkvision 60 Ft.","la":"Goblin, Worg","al":"Neutral Evil","hpd":"26 (4d10+4)","acd":"13 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Animated Armor","cr":1.0,"ty":"construct","sz":"Medium","ac":18,"hp":33,"sp":"25 ft.","str":14,"dex":11,"con":13,"int":1,"wis":3,"cha":1,"sk":"","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"33 (6d8+6)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Brass Dragon Wyrmling","cr":1.0,"ty":"dragon","sz":"Medium","ac":16,"hp":16,"sp":"30 ft., burrow 15 ft., fly 60 ft.","str":15,"dex":10,"con":13,"int":10,"wis":11,"cha":13,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +3, Wis +2, Cha +3","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Chaotic Good","hpd":"16 (3d8+3)","acd":"16 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Brown Bear","cr":1.0,"ty":"beast","sz":"Large","ac":11,"hp":34,"sp":"40 ft., climb 30 ft.","str":19,"dex":10,"con":16,"int":2,"wis":13,"cha":7,"sk":"Perception +3","sv":"","se":"","la":"","al":"Unaligned","hpd":"34 (4d10+12)","acd":"11 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Bugbear","cr":1.0,"ty":"humanoid (goblinoid)","sz":"Medium","ac":16,"hp":27,"sp":"30 ft.","str":15,"dex":14,"con":13,"int":8,"wis":11,"cha":9,"sk":"Stealth +6, Survival +2","sv":"","se":"Darkvision 60 Ft.","la":"Common, Goblin","al":"Chaotic Evil","hpd":"27 (5d8+5)","acd":"16 (Hide Armor, Shield)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Copper Dragon Wyrmling","cr":1.0,"ty":"dragon","sz":"Medium","ac":16,"hp":22,"sp":"30 ft., climb 30 ft., fly 60 ft.","str":15,"dex":12,"con":13,"int":14,"wis":11,"cha":13,"sk":"Perception +4, Stealth +3","sv":"Dex +3, Con +3, Wis +2, Cha +3","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Chaotic Good","hpd":"22 (4d8+4)","acd":"16 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Death Dog","cr":1.0,"ty":"monstrosity","sz":"Medium","ac":12,"hp":39,"sp":"40 ft.","str":15,"dex":14,"con":14,"int":3,"wis":13,"cha":6,"sk":"Perception +5, Stealth +4","sv":"","se":"Darkvision 120 Ft.","la":"","al":"Neutral Evil","hpd":"39 (6d8+12)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Dire Wolf","cr":1.0,"ty":"beast","sz":"Large","ac":14,"hp":37,"sp":"50 ft.","str":17,"dex":15,"con":15,"int":3,"wis":12,"cha":7,"sk":"Perception +3, Stealth +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"37 (5d10+10)","acd":"14 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Dryad","cr":1.0,"ty":"fey","sz":"Medium","ac":11,"hp":22,"sp":"30 ft.","str":10,"dex":12,"con":11,"int":14,"wis":15,"cha":18,"sk":"Perception +4, Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"Elvish, Sylvan","al":"Neutral","hpd":"22 (5d8)","acd":"11 (16 With Barkskin)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Duergar","cr":1.0,"ty":"humanoid (dwarf)","sz":"Medium","ac":16,"hp":26,"sp":"25 ft.","str":14,"dex":11,"con":14,"int":11,"wis":10,"cha":9,"sk":"","sv":"","se":"Darkvision 120 Ft.","la":"Dwarvish, Undercommon","al":"Lawful Evil","hpd":"26 (4d8+4)","acd":"16 (Scale Mail, Shield)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ghoul","cr":1.0,"ty":"undead","sz":"Medium","ac":12,"hp":22,"sp":"30 ft.","str":13,"dex":15,"con":10,"int":7,"wis":10,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common","al":"Chaotic Evil","hpd":"22 (5d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Eagle","cr":1.0,"ty":"beast","sz":"Large","ac":13,"hp":26,"sp":"10 ft., fly 80 ft.","str":16,"dex":17,"con":13,"int":8,"wis":14,"cha":10,"sk":"Perception +4","sv":"","se":"","la":"Giant Eagle, Understands Common And Auran But Can't Speak","al":"Neutral Good","hpd":"26 (4d10+4)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Giant Hyena","cr":1.0,"ty":"beast","sz":"Large","ac":12,"hp":45,"sp":"50 ft.","str":16,"dex":14,"con":14,"int":2,"wis":12,"cha":7,"sk":"Perception +3","sv":"","se":"","la":"","al":"Unaligned","hpd":"45 (6d10+12)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Octopus","cr":1.0,"ty":"beast","sz":"Large","ac":11,"hp":52,"sp":"10 ft., swim 60 ft.","str":17,"dex":13,"con":13,"int":4,"wis":10,"cha":4,"sk":"Perception +4, Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"52 (8d10+8)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Giant Spider","cr":1.0,"ty":"beast","sz":"Large","ac":14,"hp":26,"sp":"30 ft., climb 30 ft.","str":14,"dex":16,"con":12,"int":2,"wis":11,"cha":4,"sk":"Stealth +7","sv":"","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"26 (4d10+4)","acd":"14 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Giant Toad","cr":1.0,"ty":"beast","sz":"Large","ac":11,"hp":39,"sp":"20 ft., swim 40 ft.","str":15,"dex":13,"con":13,"int":2,"wis":10,"cha":3,"sk":"","sv":"","se":"Darkvision 30 Ft.","la":"","al":"Unaligned","hpd":"39 (6d10+6)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Giant Vulture","cr":1.0,"ty":"beast","sz":"Large","ac":10,"hp":22,"sp":"10 ft., fly 60 ft.","str":15,"dex":10,"con":15,"int":6,"wis":12,"cha":7,"sk":"Perception +3","sv":"","se":"","la":"Understands Common But Can't Speak","al":"Neutral Evil","hpd":"22 (3d10+6)","acd":"10","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Harpy","cr":1.0,"ty":"monstrosity","sz":"Medium","ac":11,"hp":38,"sp":"20 ft., fly 40 ft.","str":12,"dex":13,"con":12,"int":7,"wis":10,"cha":13,"sk":"","sv":"","se":"","la":"Common","al":"Chaotic Evil","hpd":"38 (7d8+7)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Hippogriff","cr":1.0,"ty":"monstrosity","sz":"Large","ac":11,"hp":19,"sp":"40 ft, fly 60 ft.","str":17,"dex":13,"con":13,"int":2,"wis":12,"cha":8,"sk":"Perception +5","sv":"","se":"","la":"","al":"Unaligned","hpd":"19 (3d10+3)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Imp","cr":1.0,"ty":"fiend (devil, shapechanger)","sz":"Tiny","ac":13,"hp":10,"sp":"20 ft., fly 40 ft.","str":6,"dex":17,"con":13,"int":11,"wis":12,"cha":14,"sk":"Deception +4, Insight +3, Persuasion +4, Stealth +5","sv":"","se":"Darkvision 120 Ft.","la":"Infernal, Common","al":"Lawful Evil","hpd":"10 (3d4+3)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Lion","cr":1.0,"ty":"beast","sz":"Large","ac":12,"hp":26,"sp":"50 ft.","str":17,"dex":15,"con":13,"int":3,"wis":12,"cha":8,"sk":"Perception +3, Stealth +6","sv":"","se":"","la":"","al":"Unaligned","hpd":"26 (4d10+4)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Quasit","cr":1.0,"ty":"fiend (demon)","sz":"Tiny","ac":13,"hp":7,"sp":"40 ft.","str":5,"dex":17,"con":10,"int":7,"wis":10,"cha":10,"sk":"Stealth +5","sv":"","se":"Darkvision 120 Ft.","la":"Abyssal, Common","al":"Chaotic Evil","hpd":"7 (3d4)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Specter","cr":1.0,"ty":"undead","sz":"Medium","ac":12,"hp":22,"sp":"0 ft., fly 50 ft. (hover)","str":1,"dex":14,"con":11,"int":10,"wis":10,"cha":11,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Understands All Languages It Knew In Life But Can't Speak","al":"Chaotic Evil","hpd":"22 (5d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Spy","cr":1.0,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":27,"sp":"30 ft.","str":10,"dex":15,"con":10,"int":12,"wis":14,"cha":16,"sk":"Deception +5, Insight +4, Investigation +5, Perception +6, Persuasion +5, Sleight Of Hand +4, Stealth +4","sv":"","se":"","la":"Any Two Languages","al":"Any Alignment","hpd":"27 (6d8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Quippers","cr":1.0,"ty":"swarm of tiny beasts","sz":"Medium","ac":13,"hp":28,"sp":"0 ft., swim 40 ft.","str":13,"dex":16,"con":9,"int":1,"wis":7,"cha":2,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"28 (8d8-8)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Tiger","cr":1.0,"ty":"beast","sz":"Large","ac":12,"hp":37,"sp":"40 ft.","str":17,"dex":15,"con":14,"int":3,"wis":12,"cha":8,"sk":"Perception +3, Stealth +6","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"37 (5d10+10)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Ankheg","cr":2.0,"ty":"monstrosity","sz":"Large","ac":14,"hp":39,"sp":"30 ft., burrow 10 ft.","str":17,"dex":11,"con":13,"int":1,"wis":13,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft., Tremorsense 60 Ft.","la":"","al":"Unaligned","hpd":"39 (6d10+6)","acd":"14 (Natural Armor, 11 While Prone)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Awakened Tree","cr":2.0,"ty":"plant","sz":"Huge","ac":13,"hp":59,"sp":"20 ft.","str":19,"dex":6,"con":15,"int":10,"wis":10,"cha":7,"sk":"","sv":"","se":"","la":"One Language Known By Its Creator","al":"Unaligned","hpd":"59 (7d12+14)","acd":"13 (Natural Armor)","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Azer","cr":2.0,"ty":"elemental","sz":"Medium","ac":17,"hp":39,"sp":"30 ft.","str":17,"dex":12,"con":15,"int":12,"wis":13,"cha":10,"sk":"","sv":"Con +4","se":"","la":"Ignan","al":"Lawful Neutral","hpd":"39 (6d8+12)","acd":"17 (Natural Armor, Shield)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Bandit Captain","cr":2.0,"ty":"humanoid (any race)","sz":"Medium","ac":15,"hp":65,"sp":"30 ft.","str":15,"dex":16,"con":14,"int":14,"wis":11,"cha":14,"sk":"Athletics +4, Deception +4","sv":"Str +4, Dex +5, Wis +2","se":"","la":"Any Two Languages","al":"Any Non-lawful Alignment","hpd":"65 (10d8+20)","acd":"15 (Studded Leather)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Berserker","cr":2.0,"ty":"humanoid (any race)","sz":"Medium","ac":13,"hp":67,"sp":"30 ft.","str":16,"dex":12,"con":17,"int":9,"wis":11,"cha":9,"sk":"","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Chaotic Alignment","hpd":"67 (9d8+27)","acd":"13 (Hide Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Black Dragon Wyrmling","cr":2.0,"ty":"dragon","sz":"Medium","ac":17,"hp":33,"sp":"30 ft., fly 60 ft., swim 30 ft.","str":15,"dex":14,"con":13,"int":10,"wis":11,"cha":13,"sk":"Perception +4, Stealth +4","sv":"Dex +4, Con +3, Wis +2, Cha +3","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Chaotic Evil","hpd":"33 (6d8+6)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Bronze Dragon Wyrmling","cr":2.0,"ty":"dragon","sz":"Medium","ac":17,"hp":32,"sp":"30 ft., fly 60 ft., swim 30 ft.","str":17,"dex":10,"con":15,"int":12,"wis":11,"cha":15,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +4, Wis +2, Cha +4","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Lawful Good","hpd":"32 (5d8+10)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Centaur","cr":2.0,"ty":"monstrosity","sz":"Large","ac":12,"hp":45,"sp":"50 ft.","str":18,"dex":14,"con":14,"int":9,"wis":13,"cha":11,"sk":"Athletics +6, Perception +3, Survival +3","sv":"","se":"","la":"Elvish, Sylvan","al":"Neutral Good","hpd":"45 (6d10+12)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Cult Fanatic","cr":2.0,"ty":"humanoid (any race)","sz":"Medium","ac":13,"hp":33,"sp":"30 ft.","str":11,"dex":14,"con":12,"int":10,"wis":13,"cha":14,"sk":"Deception +4, Persuasion +4, Religion +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Non-good Alignment","hpd":"33 (6d8+6)","acd":"13 (Leather Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Druid","cr":2.0,"ty":"humanoid (any race)","sz":"Medium","ac":11,"hp":27,"sp":"30 ft.","str":10,"dex":12,"con":13,"int":12,"wis":15,"cha":11,"sk":"Medicine +4, Nature +3, Perception +4","sv":"","se":"","la":"Druidic Plus Any Two Languages","al":"Any Alignment","hpd":"27 (5d8+5)","acd":"11 (16 With Barkskin)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Ettercap","cr":2.0,"ty":"monstrosity","sz":"Medium","ac":13,"hp":44,"sp":"30 ft., climb 30 ft.","str":14,"dex":15,"con":13,"int":7,"wis":12,"cha":8,"sk":"Perception +3, Stealth +4, Survival +3","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Neutral Evil","hpd":"44 (8d8+8)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Gargoyle","cr":2.0,"ty":"elemental","sz":"Medium","ac":15,"hp":52,"sp":"30 ft., fly 60 ft.","str":15,"dex":11,"con":16,"int":6,"wis":11,"cha":7,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Terran","al":"Chaotic Evil","hpd":"52 (7d8+21)","acd":"15 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Gelatinous Cube","cr":2.0,"ty":"ooze","sz":"Large","ac":6,"hp":84,"sp":"15 ft.","str":14,"dex":3,"con":20,"int":1,"wis":6,"cha":1,"sk":"","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"84 (8d10+40)","acd":"6","ini":-4,"b":"Free Basic Rules (2014)"},{"n":"Ghast","cr":2.0,"ty":"undead","sz":"Medium","ac":13,"hp":36,"sp":"30 ft.","str":16,"dex":17,"con":10,"int":11,"wis":10,"cha":8,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common","al":"Chaotic Evil","hpd":"36 (8d8)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Giant Boar","cr":2.0,"ty":"beast","sz":"Large","ac":12,"hp":42,"sp":"40 ft.","str":17,"dex":10,"con":16,"int":2,"wis":7,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"42 (5d10+15)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Giant Constrictor Snake","cr":2.0,"ty":"beast","sz":"Huge","ac":12,"hp":60,"sp":"30 ft., swim 30 ft.","str":19,"dex":14,"con":12,"int":1,"wis":10,"cha":3,"sk":"Perception +2","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"60 (8d12+8)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Giant Elk","cr":2.0,"ty":"beast","sz":"Huge","ac":14,"hp":42,"sp":"60 ft.","str":19,"dex":16,"con":14,"int":7,"wis":14,"cha":10,"sk":"Perception +4","sv":"","se":"","la":"Giant Elk, Understands Common, Elvish, And Sylvan But Can't Speak","al":"Unaligned","hpd":"42 (5d12+10)","acd":"14 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Gibbering Mouther","cr":2.0,"ty":"aberration","sz":"Medium","ac":9,"hp":67,"sp":"10 ft., swim 10 ft.","str":10,"dex":8,"con":16,"int":3,"wis":10,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Neutral","hpd":"67 (9d8+27)","acd":"9","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Green Dragon Wyrmling","cr":2.0,"ty":"dragon","sz":"Medium","ac":17,"hp":38,"sp":"30 ft., fly 60 ft., swim 30 ft.","str":15,"dex":12,"con":13,"int":14,"wis":11,"cha":13,"sk":"Perception +4, Stealth +3","sv":"Dex +3, Con +3, Wis +2, Cha +3","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Lawful Evil","hpd":"38 (7d8+7)","acd":"17 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Grick","cr":2.0,"ty":"monstrosity","sz":"Medium","ac":14,"hp":27,"sp":"30 ft., climb 30 ft.","str":14,"dex":14,"con":11,"int":3,"wis":14,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Neutral","hpd":"27 (6d8)","acd":"14 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Griffon","cr":2.0,"ty":"monstrosity","sz":"Large","ac":12,"hp":59,"sp":"30 ft., fly 80 ft.","str":18,"dex":15,"con":16,"int":2,"wis":13,"cha":8,"sk":"Perception +5","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"59 (7d10+21)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Hunter Shark","cr":2.0,"ty":"beast","sz":"Large","ac":12,"hp":45,"sp":"Swim 40 ft.","str":18,"dex":13,"con":15,"int":1,"wis":10,"cha":4,"sk":"Perception +2","sv":"","se":"Blindsight 30 Ft.","la":"","al":"Unaligned","hpd":"45 (6d10+12)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Merrow","cr":2.0,"ty":"monstrosity","sz":"Large","ac":13,"hp":45,"sp":"10 ft., swim 40 ft.","str":18,"dex":10,"con":15,"int":8,"wis":10,"cha":9,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Abyssal, Aquan","al":"Chaotic Evil","hpd":"45 (6d10+12)","acd":"13 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Mimic","cr":2.0,"ty":"monstrosity (shapechanger)","sz":"Medium","ac":12,"hp":58,"sp":"15 ft.","str":17,"dex":12,"con":15,"int":5,"wis":13,"cha":8,"sk":"Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Neutral","hpd":"58 (9d8+18)","acd":"12 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Minotaur Skeleton","cr":2.0,"ty":"undead","sz":"Large","ac":12,"hp":67,"sp":"40 ft.","str":18,"dex":11,"con":15,"int":6,"wis":8,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Understands Abyssal But Can't Speak","al":"Lawful Evil","hpd":"67 (9d10+18)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ochre Jelly","cr":2.0,"ty":"ooze","sz":"Large","ac":8,"hp":45,"sp":"10 ft., climb 10 ft.","str":15,"dex":6,"con":14,"int":2,"wis":6,"cha":1,"sk":"","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"45 (6d10+12)","acd":"8","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Ogre","cr":2.0,"ty":"giant","sz":"Large","ac":11,"hp":59,"sp":"40 ft.","str":19,"dex":8,"con":16,"int":5,"wis":7,"cha":7,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common, Giant","al":"Chaotic Evil","hpd":"59 (7d10+21)","acd":"11 (Hide Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Ogre Zombie","cr":2.0,"ty":"undead","sz":"Large","ac":8,"hp":85,"sp":"30 ft.","str":19,"dex":6,"con":18,"int":3,"wis":6,"cha":5,"sk":"","sv":"Wis +0","se":"Darkvision 60 Ft.","la":"Understands Common And Giant But Can't Speak","al":"Neutral Evil","hpd":"85 (9d10+36)","acd":"8","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Pegasus","cr":2.0,"ty":"celestial","sz":"Large","ac":12,"hp":59,"sp":"60 ft., fly 90 ft.","str":18,"dex":15,"con":16,"int":10,"wis":15,"cha":13,"sk":"Perception +6","sv":"Dex +4, Wis +4, Cha +3","se":"","la":"Understands Celestial, Common, Elvish, And Sylvan But Can't Speak","al":"Chaotic Good","hpd":"59 (7d10+21)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Plesiosaurus","cr":2.0,"ty":"beast","sz":"Large","ac":13,"hp":68,"sp":"20 ft., swim 40 ft.","str":18,"dex":15,"con":16,"int":2,"wis":12,"cha":5,"sk":"Perception +3, Stealth +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"68 (8d10+24)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Polar Bear","cr":2.0,"ty":"beast","sz":"Large","ac":12,"hp":42,"sp":"40 ft., swim 30 ft.","str":20,"dex":10,"con":16,"int":2,"wis":13,"cha":7,"sk":"Perception +3","sv":"","se":"","la":"","al":"Unaligned","hpd":"42 (5d10+15)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Priest","cr":2.0,"ty":"humanoid (any race)","sz":"Medium","ac":13,"hp":27,"sp":"25 ft.","str":10,"dex":10,"con":12,"int":13,"wis":16,"cha":13,"sk":"Medicine +7, Persuasion +3, Religion +4","sv":"","se":"","la":"Any Two Languages","al":"Any Alignment","hpd":"27 (5d8+5)","acd":"13 (Chain Shirt)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Rhinoceros","cr":2.0,"ty":"beast","sz":"Large","ac":11,"hp":45,"sp":"40 ft.","str":21,"dex":8,"con":15,"int":2,"wis":12,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"45 (6d10+12)","acd":"11 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Rug of Smothering","cr":2.0,"ty":"construct","sz":"Large","ac":12,"hp":33,"sp":"10 ft.","str":17,"dex":14,"con":10,"int":1,"wis":3,"cha":1,"sk":"","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"33 (6d10)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Saber-Toothed Tiger","cr":2.0,"ty":"beast","sz":"Large","ac":12,"hp":52,"sp":"40 ft.","str":18,"dex":14,"con":15,"int":3,"wis":12,"cha":8,"sk":"Perception +3, Stealth +6","sv":"","se":"","la":"","al":"Unaligned","hpd":"52 (7d10 + 14)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Sea Hag","cr":2.0,"ty":"fey","sz":"Medium","ac":14,"hp":52,"sp":"30 ft., swim 40 ft.","str":16,"dex":13,"con":16,"int":12,"wis":12,"cha":13,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Aquan, Common, Giant","al":"Chaotic Evil","hpd":"52 (7d8+21)","acd":"14 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Silver Dragon Wyrmling","cr":2.0,"ty":"dragon","sz":"Medium","ac":17,"hp":45,"sp":"30 ft., fly 60 ft.","str":19,"dex":10,"con":17,"int":12,"wis":11,"cha":15,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +5, Wis +2, Cha +4","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Lawful Good","hpd":"45 (6d8+18)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Swarm of Poisonous Snakes","cr":2.0,"ty":"swarm of tiny beasts","sz":"Medium","ac":14,"hp":36,"sp":"30 ft., swim 30 ft.","str":8,"dex":18,"con":11,"int":1,"wis":10,"cha":3,"sk":"","sv":"","se":"Blindsight 10 Ft.","la":"","al":"Unaligned","hpd":"36 (8d8)","acd":"14","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Wererat","cr":2.0,"ty":"humanoid (human, shapechanger)","sz":"Medium","ac":12,"hp":33,"sp":"30 ft.","str":10,"dex":15,"con":12,"int":11,"wis":10,"cha":8,"sk":"Perception +2, Stealth +4","sv":"","se":"Darkvision 60 Ft. (Rat Form Only)","la":"Common (Can't Speak In Rat Form)","al":"Lawful Evil","hpd":"33 (6d8+6)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"White Dragon Wyrmling","cr":2.0,"ty":"dragon","sz":"Medium","ac":16,"hp":32,"sp":"30 ft., burrow 15 ft., fly 60 ft., swim 30 ft.","str":14,"dex":10,"con":14,"int":5,"wis":10,"cha":11,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +4, Wis +2, Cha +2","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Chaotic Evil","hpd":"32 (5d8+10)","acd":"16 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Will-o'-Wisp","cr":2.0,"ty":"undead","sz":"Tiny","ac":19,"hp":22,"sp":"0 ft., fly 50 ft. (hover)","str":1,"dex":28,"con":10,"int":13,"wis":14,"cha":11,"sk":"","sv":"","se":"Darkvision 120 ft.","la":"the languages it knew in life","al":"Chaotic Evil","hpd":"22","acd":"19","ini":9,"b":"Free Basic Rules (2014)"},{"n":"Basilisk","cr":3.0,"ty":"monstrosity","sz":"Medium","ac":15,"hp":52,"sp":"20 ft.","str":16,"dex":8,"con":15,"int":2,"wis":8,"cha":7,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"52 (8d8+16)","acd":"15 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Bearded Devil","cr":3.0,"ty":"fiend (devil)","sz":"Medium","ac":13,"hp":52,"sp":"30 ft.","str":16,"dex":15,"con":15,"int":9,"wis":11,"cha":11,"sk":"","sv":"Str +5, Con +4, Wis +2","se":"Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"52 (8d8+16)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Blue Dragon Wyrmling","cr":3.0,"ty":"dragon","sz":"Medium","ac":17,"hp":52,"sp":"30 ft., burrow 15 ft., fly 60 ft.","str":17,"dex":10,"con":15,"int":12,"wis":11,"cha":15,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +4, Wis +2, Cha +4","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Lawful Evil","hpd":"52 (8d8+16)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Doppelganger","cr":3.0,"ty":"monstrosity (shapechanger)","sz":"Medium","ac":14,"hp":52,"sp":"30 ft.","str":11,"dex":18,"con":14,"int":11,"wis":12,"cha":14,"sk":"Deception +6, Insight +3","sv":"","se":"Darkvision 60 Ft.","la":"Common","al":"Unaligned","hpd":"52 (8d8+16)","acd":"14","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Giant Scorpion","cr":3.0,"ty":"beast","sz":"Large","ac":15,"hp":52,"sp":"40 ft.","str":15,"dex":13,"con":15,"int":1,"wis":9,"cha":3,"sk":"","sv":"","se":"Blindsight 60 Ft.","la":"","al":"Unaligned","hpd":"52 (7d10+14)","acd":"15 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Gold Dragon Wyrmling","cr":3.0,"ty":"dragon","sz":"Medium","ac":17,"hp":60,"sp":"30 ft., fly 60 ft., swim 30 ft.","str":19,"dex":14,"con":17,"int":14,"wis":11,"cha":16,"sk":"Perception +4, Stealth +4","sv":"Dex +4, Con +5, Wis +2, Cha +5","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Lawful Good","hpd":"60 (8d8+24)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Green Hag","cr":3.0,"ty":"fey","sz":"Medium","ac":17,"hp":82,"sp":"30 ft.","str":18,"dex":12,"con":16,"int":13,"wis":14,"cha":14,"sk":"Arcana +3, Deception +4, Perception +4, Stealth +3","sv":"","se":"Darkvision 60 Ft.","la":"Common, Draconic, Sylvan","al":"Neutral Evil","hpd":"82 (11d8+33)","acd":"17 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Hell Hound","cr":3.0,"ty":"fiend","sz":"Medium","ac":15,"hp":45,"sp":"50 ft.","str":17,"dex":12,"con":14,"int":6,"wis":13,"cha":6,"sk":"Perception +5","sv":"","se":"Darkvision 60 Ft.","la":"Understands Infernal But Can't Speak It","al":"Lawful Evil","hpd":"45 (7d8+14)","acd":"15 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Killer Whale","cr":3.0,"ty":"beast","sz":"Huge","ac":12,"hp":90,"sp":"Swim 60 ft.","str":19,"dex":10,"con":13,"int":3,"wis":12,"cha":7,"sk":"Perception +3","sv":"","se":"Blindsight 120 Ft.","la":"","al":"Unaligned","hpd":"90 (12d12+12)","acd":"12 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Knight","cr":3.0,"ty":"humanoid (any race)","sz":"Medium","ac":18,"hp":52,"sp":"30 ft.","str":16,"dex":11,"con":14,"int":11,"wis":11,"cha":15,"sk":"","sv":"Con +4, Wis +2","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"52 (8d8+16)","acd":"18 (Plate)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Manticore","cr":3.0,"ty":"monstrosity","sz":"Large","ac":14,"hp":68,"sp":"30 ft., fly 50 ft.","str":17,"dex":16,"con":17,"int":7,"wis":12,"cha":8,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Common","al":"Lawful Evil","hpd":"68 (8d10+24)","acd":"14 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Minotaur","cr":3.0,"ty":"monstrosity","sz":"Large","ac":14,"hp":76,"sp":"40 ft.","str":18,"dex":11,"con":16,"int":6,"wis":16,"cha":9,"sk":"Perception +7","sv":"","se":"Darkvision 60 Ft.","la":"Abyssal","al":"Chaotic Evil","hpd":"76 (9d10+27)","acd":"14 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Mummy","cr":3.0,"ty":"undead","sz":"Medium","ac":11,"hp":58,"sp":"20 ft.","str":16,"dex":8,"con":15,"int":6,"wis":10,"cha":12,"sk":"","sv":"Wis +2","se":"Darkvision 60 Ft.","la":"The Languages It Knew In Life","al":"Lawful Evil","hpd":"58 (9d8+18)","acd":"11 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Nightmare","cr":3.0,"ty":"fiend","sz":"Large","ac":13,"hp":68,"sp":"60 ft., fly 90 ft.","str":18,"dex":15,"con":16,"int":10,"wis":13,"cha":15,"sk":"","sv":"","se":"","la":"Understands Abyssal, Common, And Infernal But Can't Speak","al":"Neutral Evil","hpd":"68 (8d10+24)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Owlbear","cr":3.0,"ty":"monstrosity","sz":"Large","ac":13,"hp":59,"sp":"40 ft.","str":20,"dex":12,"con":17,"int":3,"wis":12,"cha":7,"sk":"Perception +3","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"59 (7d10+21)","acd":"13 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Phase Spider","cr":3.0,"ty":"monstrosity","sz":"Large","ac":13,"hp":32,"sp":"30 ft., climb 30 ft.","str":15,"dex":15,"con":12,"int":6,"wis":10,"cha":6,"sk":"Stealth +6","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"32 (5d10+5)","acd":"13 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Veteran","cr":3.0,"ty":"humanoid (any race)","sz":"Medium","ac":17,"hp":58,"sp":"30 ft.","str":16,"dex":13,"con":14,"int":10,"wis":11,"cha":10,"sk":"Athletics +5, Perception +2","sv":"","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"58 (9d8+18)","acd":"17 (Splint)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Werewolf","cr":3.0,"ty":"humanoid (human, shapechanger)","sz":"Medium","ac":11,"hp":58,"sp":"30 ft. (40 ft. in wolf form)","str":15,"dex":13,"con":14,"int":10,"wis":11,"cha":10,"sk":"Perception +4","sv":"","se":"","la":"Common (Can't Speak In Wolf Form)","al":"Chaotic Evil","hpd":"58 (9d8+18)","acd":"11 (In Humanoid Form, 12 In Wolf Or Hybrid Form)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Wight","cr":3.0,"ty":"undead","sz":"Medium","ac":14,"hp":45,"sp":"30 ft.","str":15,"dex":14,"con":16,"int":10,"wis":13,"cha":15,"sk":"Perception +3, Stealth +4","sv":"","se":"Darkvision 60 Ft.","la":"The Languages It Knew In Life","al":"Neutral Evil","hpd":"45 (6d8+18)","acd":"14 (Studded Leather)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Winter Wolf","cr":3.0,"ty":"monstrosity","sz":"Large","ac":13,"hp":75,"sp":"50 ft.","str":18,"dex":13,"con":14,"int":7,"wis":12,"cha":8,"sk":"Perception +5, Stealth +3","sv":"","se":"","la":"Common, Giant, Winter Wolf","al":"Neutral Evil","hpd":"75 (10d10+20)","acd":"13 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Black Pudding","cr":4.0,"ty":"ooze","sz":"Large","ac":7,"hp":85,"sp":"20 ft., climb 20 ft.","str":16,"dex":5,"con":16,"int":1,"wis":6,"cha":1,"sk":"","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"85 (10d10+30)","acd":"7","ini":-3,"b":"Free Basic Rules (2014)"},{"n":"Chuul","cr":4.0,"ty":"aberration","sz":"Large","ac":16,"hp":93,"sp":"30 ft., swim 30 ft.","str":19,"dex":10,"con":16,"int":5,"wis":11,"cha":5,"sk":"Perception +4","sv":"","se":"Darkvision 60 Ft.","la":"Understands Deep Speech But Can't Speak","al":"Chaotic Evil","hpd":"93 (11d10+33)","acd":"16 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Couatl","cr":4.0,"ty":"celestial","sz":"Medium","ac":19,"hp":97,"sp":"30 ft., fly 90 ft.","str":16,"dex":20,"con":17,"int":18,"wis":20,"cha":18,"sk":"","sv":"Con +5, Wis +7, Cha +6","se":"Truesight 120 Ft.","la":"All, Telepathy 120 Ft.","al":"Lawful Good","hpd":"97 (13d8+39)","acd":"19 (Natural Armor)","ini":5,"b":"Free Basic Rules (2014)"},{"n":"Elephant","cr":4.0,"ty":"beast","sz":"Huge","ac":12,"hp":76,"sp":"40 ft.","str":22,"dex":9,"con":17,"int":3,"wis":11,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"76 (8d12+24)","acd":"12 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Ettin","cr":4.0,"ty":"giant","sz":"Large","ac":12,"hp":85,"sp":"40 ft.","str":21,"dex":8,"con":17,"int":6,"wis":10,"cha":8,"sk":"Perception +4","sv":"","se":"Darkvision 60 Ft.","la":"Giant, Orc","al":"Chaotic Evil","hpd":"85 (10d10+30)","acd":"12 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Ghost","cr":4.0,"ty":"undead","sz":"Medium","ac":11,"hp":45,"sp":"0 ft., fly 40 ft. It can hover.","str":7,"dex":13,"con":10,"int":10,"wis":12,"cha":17,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Any Languages It Knew In Life","al":"Any Alignment","hpd":"45 (10d8)","acd":"11","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Incubus","cr":4.0,"ty":"Fiend (Shapechanger)","sz":"Medium","ac":15,"hp":66,"sp":"30 ft., fly 60 ft.","str":8,"dex":17,"con":13,"int":15,"wis":12,"cha":20,"sk":"Deception +9, Insight +5, Perception +5, Persuasion +9, Stealth +7","sv":"","se":"Darkvision 60 ft.","la":"Abyssal, Common, Infernal, Telepathy 60 ft.","al":"Neutral Evil","hpd":"66 (12d8 + 12)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Lamia","cr":4.0,"ty":"monstrosity","sz":"Large","ac":13,"hp":97,"sp":"30 ft.","str":16,"dex":13,"con":15,"int":14,"wis":15,"cha":16,"sk":"Deception +7, Insight +4, Stealth +3","sv":"","se":"Darkvision 60 Ft.","la":"Abyssal, Common","al":"Chaotic Evil","hpd":"97 (13d10+26)","acd":"13 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Red Dragon Wyrmling","cr":4.0,"ty":"dragon","sz":"Medium","ac":17,"hp":75,"sp":"30 ft., climb 30 ft., fly 60 ft.","str":19,"dex":10,"con":17,"int":12,"wis":11,"cha":15,"sk":"Perception +4, Stealth +2","sv":"Dex +2, Con +5, Wis +2, Cha +4","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Draconic","al":"Chaotic Evil","hpd":"75 (10d8+30)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Succubus","cr":4.0,"ty":"Fiend (Shapechanger)","sz":"Medium","ac":15,"hp":66,"sp":"30 ft., fly 60 ft.","str":8,"dex":17,"con":13,"int":15,"wis":12,"cha":20,"sk":"Deception +9, Insight +5, Perception +5, Persuasion +9, Stealth +7","sv":"","se":"Darkvision 60 ft.","la":"Abyssal, Common, Infernal, Telepathy 60 ft.","al":"Neutral Evil","hpd":"66 (12d8 + 12)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Succubus (Incubus)","cr":4.0,"ty":"fiend (shapechanger)","sz":"Medium","ac":15,"hp":66,"sp":"30 ft., fly 60 ft.","str":8,"dex":17,"con":13,"int":15,"wis":12,"cha":20,"sk":"Deception +9, Insight +5, Perception +5, Persuasion +9, Stealth +7","sv":"","se":"Darkvision 60 Ft.","la":"Abyssal, Common, Infernal, Telepathy 60 Ft.","al":"Neutral Evil","hpd":"66 (12d8+12)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Wereboar","cr":4.0,"ty":"humanoid (human, shapechanger)","sz":"Medium","ac":10,"hp":78,"sp":"30 ft. (40 ft. in boar form)","str":17,"dex":10,"con":15,"int":10,"wis":11,"cha":8,"sk":"Perception +2","sv":"","se":"","la":"Common (Can't Speak In Boar Form)","al":"Neutral Evil","hpd":"78 (12d8+24)","acd":"10 (In Humanoid Form, 11 In Boar And Hybrid Forms )","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Weretiger","cr":4.0,"ty":"humanoid (human, shapechanger)","sz":"Medium","ac":12,"hp":120,"sp":"30 ft. (40 ft. in tiger form)","str":17,"dex":15,"con":16,"int":10,"wis":13,"cha":11,"sk":"Perception +5, Stealth +4","sv":"","se":"Darkvision 60 Ft.","la":"Common (Can't Speak In Tiger Form)","al":"Neutral","hpd":"120 (16d8+48)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Air Elemental","cr":5.0,"ty":"elemental","sz":"Large","ac":15,"hp":90,"sp":"0 ft., fly 90 ft. (hover)","str":14,"dex":20,"con":14,"int":6,"wis":10,"cha":6,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Auran","al":"Neutral","hpd":"90 (12d10+24)","acd":"15","ini":5,"b":"Free Basic Rules (2014)"},{"n":"Barbed Devil","cr":5.0,"ty":"fiend (devil)","sz":"Medium","ac":15,"hp":110,"sp":"30 ft.","str":16,"dex":17,"con":18,"int":12,"wis":14,"cha":14,"sk":"Deception +5, Insight +5, Perception +8","sv":"Str +6, Con +7, Wis +5, Cha +5","se":"Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"110 (13d8+52)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Bulette","cr":5.0,"ty":"monstrosity","sz":"Large","ac":17,"hp":94,"sp":"40 ft., burrow 40 ft.","str":19,"dex":11,"con":21,"int":2,"wis":10,"cha":5,"sk":"Perception +6","sv":"","se":"Darkvision 60 Ft., Tremorsense 60 Ft.","la":"","al":"Unaligned","hpd":"94 (9d10+45)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Earth Elemental","cr":5.0,"ty":"elemental","sz":"Large","ac":17,"hp":126,"sp":"30 ft., burrow 30 ft.","str":20,"dex":8,"con":20,"int":5,"wis":10,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft., Tremorsense 60 Ft.","la":"Terran","al":"Neutral","hpd":"126 (12d10+60)","acd":"17 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Fire Elemental","cr":5.0,"ty":"elemental","sz":"Large","ac":13,"hp":102,"sp":"50 ft.","str":10,"dex":17,"con":16,"int":6,"wis":10,"cha":7,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Ignan","al":"Neutral","hpd":"102 (12d10+36)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Flesh Golem","cr":5.0,"ty":"construct","sz":"Medium","ac":9,"hp":93,"sp":"30 ft.","str":19,"dex":9,"con":18,"int":6,"wis":10,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Understands The Languages Of Its Creator But Can't Speak","al":"Neutral","hpd":"93 (11d8+44)","acd":"9","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Giant Crocodile","cr":5.0,"ty":"beast","sz":"Huge","ac":14,"hp":85,"sp":"30 ft., swim 50 ft.","str":21,"dex":9,"con":17,"int":2,"wis":10,"cha":7,"sk":"Stealth +5","sv":"","se":"","la":"","al":"Unaligned","hpd":"85 (9d12+27)","acd":"14 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Giant Shark","cr":5.0,"ty":"beast","sz":"Huge","ac":13,"hp":126,"sp":"Swim 50 ft.","str":23,"dex":11,"con":21,"int":1,"wis":10,"cha":5,"sk":"Perception +3","sv":"","se":"Blindsight 60 Ft.","la":"","al":"Unaligned","hpd":"126 (11d12+55)","acd":"13 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Gladiator","cr":5.0,"ty":"humanoid (any race)","sz":"Medium","ac":16,"hp":112,"sp":"30 ft.","str":18,"dex":15,"con":16,"int":10,"wis":12,"cha":15,"sk":"Athletics +10, Intimidation +5","sv":"Str +7, Dex +5, Con +6","se":"","la":"Any One Language (Usually Common)","al":"Any Alignment","hpd":"112 (15d8+45)","acd":"16 (Studded Leather, Shield)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Gorgon","cr":5.0,"ty":"monstrosity","sz":"Large","ac":19,"hp":114,"sp":"40 ft.","str":20,"dex":11,"con":18,"int":2,"wis":12,"cha":7,"sk":"Perception +4","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"114 (12d10+48)","acd":"19 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Half-Red Dragon Veteran","cr":5.0,"ty":"humanoid (human)","sz":"Medium","ac":18,"hp":65,"sp":"30 ft.","str":16,"dex":13,"con":14,"int":10,"wis":11,"cha":10,"sk":"Athletics +5, Perception +2","sv":"","se":"Blindsight 10 ft., Darkvision 60 ft.","la":"Common, Draconic","al":"Any","hpd":"65 (10d8+20)","acd":"18 (plate)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Hill Giant","cr":5.0,"ty":"giant","sz":"Huge","ac":13,"hp":105,"sp":"40 ft.","str":21,"dex":8,"con":19,"int":5,"wis":9,"cha":6,"sk":"Perception +2","sv":"","se":"","la":"Giant","al":"Chaotic Evil","hpd":"105 (10d12+40)","acd":"13 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Night Hag","cr":5.0,"ty":"fiend","sz":"Medium","ac":17,"hp":112,"sp":"30 ft.","str":18,"dex":15,"con":16,"int":16,"wis":14,"cha":16,"sk":"Deception +7, Insight +6, Perception +6, Stealth +6","sv":"","se":"Darkvision 120 Ft.","la":"Abyssal, Common, Infernal, Primordial","al":"Neutral Evil","hpd":"112 (15d8+45)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Otyugh","cr":5.0,"ty":"aberration","sz":"Large","ac":14,"hp":114,"sp":"30 ft.","str":16,"dex":11,"con":19,"int":6,"wis":13,"cha":6,"sk":"","sv":"Con +7","se":"Darkvision 120 Ft.","la":"Otyugh","al":"Neutral","hpd":"114 (12d10+48)","acd":"14 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Roper","cr":5.0,"ty":"monstrosity","sz":"Large","ac":20,"hp":93,"sp":"10 ft., climb 10 ft.","str":18,"dex":8,"con":17,"int":7,"wis":16,"cha":6,"sk":"Perception +6, Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Neutral Evil","hpd":"93 (11d10+33)","acd":"20 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Salamander","cr":5.0,"ty":"elemental","sz":"Large","ac":15,"hp":90,"sp":"30 ft.","str":18,"dex":14,"con":15,"int":11,"wis":10,"cha":12,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Ignan","al":"Neutral Evil","hpd":"90 (12d10+24)","acd":"15 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Shambling Mound","cr":5.0,"ty":"plant","sz":"Large","ac":15,"hp":136,"sp":"20 ft., swim 20 ft.","str":18,"dex":8,"con":16,"int":5,"wis":10,"cha":5,"sk":"Stealth +2","sv":"","se":"Blindsight 60 Ft. (Blind Beyond This Radius)","la":"","al":"Unaligned","hpd":"136 (16d10+48)","acd":"15 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Triceratops","cr":5.0,"ty":"beast","sz":"Huge","ac":13,"hp":95,"sp":"50 ft.","str":22,"dex":9,"con":17,"int":2,"wis":11,"cha":5,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"95 (10d12+30)","acd":"13 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Troll","cr":5.0,"ty":"giant","sz":"Large","ac":15,"hp":84,"sp":"30 ft.","str":18,"dex":13,"con":20,"int":7,"wis":9,"cha":7,"sk":"Perception +2","sv":"","se":"Darkvision 60 Ft.","la":"Giant","al":"Chaotic Evil","hpd":"84 (8d10+40)","acd":"15 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Unicorn","cr":5.0,"ty":"celestial","sz":"Large","ac":12,"hp":67,"sp":"50 ft.","str":18,"dex":14,"con":15,"int":11,"wis":17,"cha":16,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Celestial, Elvish, Sylvan, Telepathy 60 Ft.","al":"Lawful Good","hpd":"67 (9d10+18)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Vampire Spawn","cr":5.0,"ty":"undead","sz":"Medium","ac":15,"hp":82,"sp":"30 ft.","str":16,"dex":16,"con":16,"int":11,"wis":10,"cha":12,"sk":"Perception +3, Stealth +6","sv":"Dex +6, Wis +3","se":"Darkvision 60 Ft.","la":"The Languages It Knew In Life","al":"Neutral Evil","hpd":"82 (11d8+33)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Water Elemental","cr":5.0,"ty":"elemental","sz":"Large","ac":14,"hp":114,"sp":"30 ft., swim 90 ft.","str":18,"dex":14,"con":18,"int":5,"wis":10,"cha":8,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Aquan","al":"Neutral","hpd":"114 (12d10+48)","acd":"14 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Werebear","cr":5.0,"ty":"humanoid (human, shapechanger)","sz":"Medium","ac":10,"hp":135,"sp":"30 ft. (40 ft., climb 30 ft. in bear or hybrid form)","str":19,"dex":10,"con":17,"int":11,"wis":12,"cha":12,"sk":"Perception +7","sv":"","se":"","la":"Common (Can't Speak In Bear Form)","al":"Neutral Good","hpd":"135 (18d8+54)","acd":"10 (In Humanoid Form, 11 In Bear And Hybrid Forms )","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Wraith","cr":5.0,"ty":"undead","sz":"Medium","ac":13,"hp":67,"sp":"0 ft., fly 60 ft. (hover)","str":6,"dex":16,"con":16,"int":12,"wis":14,"cha":15,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"The Languages It Knew In Life","al":"Neutral Evil","hpd":"67 (9d8+27)","acd":"13","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Xorn","cr":5.0,"ty":"elemental","sz":"Medium","ac":19,"hp":73,"sp":"20 ft., burrow 20 ft.","str":17,"dex":10,"con":22,"int":11,"wis":10,"cha":11,"sk":"Perception +6, Stealth +3","sv":"","se":"Darkvision 60 Ft., Tremorsense 60 Ft.","la":"Terran","al":"Neutral","hpd":"73 (7d8+42)","acd":"19 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Chimera","cr":6.0,"ty":"monstrosity","sz":"Large","ac":14,"hp":114,"sp":"30 ft., fly 60 ft.","str":19,"dex":11,"con":19,"int":3,"wis":14,"cha":10,"sk":"Perception +8","sv":"","se":"Darkvision 60 Ft.","la":"Understands Draconic But Can't Speak","al":"Chaotic Evil","hpd":"114 (12d10+48)","acd":"14 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Drider","cr":6.0,"ty":"monstrosity","sz":"Large","ac":19,"hp":123,"sp":"30 ft., climb 30 ft.","str":16,"dex":16,"con":18,"int":13,"wis":14,"cha":12,"sk":"Perception +5, Stealth +9","sv":"","se":"Darkvision 120 Ft.","la":"Elvish, Undercommon","al":"Chaotic Evil","hpd":"123 (13d10+52)","acd":"19 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Invisible Stalker","cr":6.0,"ty":"elemental","sz":"Medium","ac":14,"hp":104,"sp":"50 ft., fly 50 ft. (hover)","str":16,"dex":19,"con":14,"int":10,"wis":15,"cha":11,"sk":"Perception +8, Stealth +10","sv":"","se":"Darkvision 60 Ft.","la":"Auran, Understands Common But Doesn't Speak It","al":"Neutral","hpd":"104 (16d8+32)","acd":"14","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Mage","cr":6.0,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":40,"sp":"30 ft.","str":9,"dex":14,"con":11,"int":17,"wis":12,"cha":11,"sk":"Arcana +6, History +6","sv":"Int +6, Wis +4","se":"","la":"Any Four Languages","al":"Any Alignment","hpd":"40 (9d8)","acd":"12 (15 With Mage Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Mammoth","cr":6.0,"ty":"beast","sz":"Huge","ac":13,"hp":126,"sp":"40 ft.","str":24,"dex":9,"con":21,"int":3,"wis":11,"cha":6,"sk":"","sv":"","se":"","la":"","al":"Unaligned","hpd":"126 (11d12+55)","acd":"13 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Medusa","cr":6.0,"ty":"monstrosity","sz":"Medium","ac":15,"hp":127,"sp":"30 ft.","str":10,"dex":15,"con":16,"int":12,"wis":13,"cha":15,"sk":"Deception +5, Insight +4, Perception +4, Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"Common","al":"Lawful Evil","hpd":"127 (17d8+51)","acd":"15 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Vrock","cr":6.0,"ty":"fiend (demon)","sz":"Large","ac":15,"hp":104,"sp":"40 ft., fly 60 ft.","str":17,"dex":15,"con":18,"int":8,"wis":13,"cha":8,"sk":"","sv":"Dex +5, Wis +4, Cha +2","se":"Darkvision 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"104 (11d10+44)","acd":"15 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Wyvern","cr":6.0,"ty":"dragon","sz":"Large","ac":13,"hp":110,"sp":"20 ft., fly 80 ft.","str":19,"dex":10,"con":16,"int":5,"wis":12,"cha":6,"sk":"Perception +4","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"110 (13d10+39)","acd":"13 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Young Brass Dragon","cr":6.0,"ty":"dragon","sz":"Large","ac":17,"hp":110,"sp":"40 ft., burrow 20 ft., fly 80 ft.","str":19,"dex":10,"con":17,"int":12,"wis":11,"cha":15,"sk":"Perception +6, Persuasion +5, Stealth +3","sv":"Dex +3, Con +6, Wis +3, Cha +5","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"110 (13d10+39)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Young White Dragon","cr":6.0,"ty":"dragon","sz":"Large","ac":17,"hp":133,"sp":"40 ft., burrow 20 ft., fly 80 ft., swim 40 ft.","str":18,"dex":10,"con":18,"int":6,"wis":11,"cha":12,"sk":"Perception +6, Stealth +3","sv":"Dex +3, Con +7, Wis +3, Cha +4","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"133 (14d10+56)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Giant Ape","cr":7.0,"ty":"beast","sz":"Huge","ac":12,"hp":157,"sp":"40 ft., climb 40 ft.","str":23,"dex":14,"con":18,"int":7,"wis":12,"cha":7,"sk":"Athletics +9, Perception +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"157 (15d12+60)","acd":"12","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Oni","cr":7.0,"ty":"giant","sz":"Large","ac":16,"hp":110,"sp":"30 ft., fly 30 ft.","str":19,"dex":11,"con":16,"int":14,"wis":12,"cha":15,"sk":"Arcana +5, Deception +8, Perception +4","sv":"Dex +3, Con +6, Wis +4, Cha +5","se":"Darkvision 60 Ft.","la":"Common, Giant","al":"Lawful Evil","hpd":"110 (13d10+39)","acd":"16 (Chain Mail)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Shield Guardian","cr":7.0,"ty":"construct","sz":"Large","ac":17,"hp":142,"sp":"30 ft.","str":18,"dex":8,"con":18,"int":7,"wis":10,"cha":3,"sk":"","sv":"","se":"Blindsight 10 Ft., Darkvision 60 Ft.","la":"Understands Commands Given In Any Language But Can't Speak","al":"Unaligned","hpd":"142 (15d10+60)","acd":"17 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Stone Giant","cr":7.0,"ty":"giant","sz":"Huge","ac":17,"hp":126,"sp":"40 ft.","str":23,"dex":15,"con":20,"int":10,"wis":12,"cha":9,"sk":"Athletics +12, Perception +4","sv":"Dex +5, Con +8, Wis +4","se":"Darkvision 60 Ft.","la":"Giant","al":"Neutral","hpd":"126 (11d12+55)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Young Black Dragon","cr":7.0,"ty":"dragon","sz":"Large","ac":18,"hp":127,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":19,"dex":14,"con":17,"int":12,"wis":11,"cha":15,"sk":"Perception +6, Stealth +5","sv":"Dex +5, Con +6, Wis +3, Cha +5","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"127 (15d10+45)","acd":"18 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Young Copper Dragon","cr":7.0,"ty":"dragon","sz":"Large","ac":17,"hp":119,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":19,"dex":12,"con":17,"int":16,"wis":13,"cha":15,"sk":"Deception +5, Perception +7, Stealth +4","sv":"Dex +4, Con +6, Wis +4, Cha +5","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"119 (14d10+42)","acd":"17 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Assassin","cr":8.0,"ty":"humanoid (any race)","sz":"Medium","ac":15,"hp":78,"sp":"30 ft.","str":11,"dex":16,"con":14,"int":13,"wis":11,"cha":10,"sk":"Acrobatics +6, Deception +3, Perception +3, Stealth +9","sv":"Dex +6, Int +4","se":"","la":"Thieves' Cant Plus Any Two Languages","al":"Any Non-good Alignment","hpd":"78 (12d8+24)","acd":"15 (Studded Leather)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Chain Devil","cr":8.0,"ty":"fiend (devil)","sz":"Medium","ac":16,"hp":85,"sp":"30 ft.","str":18,"dex":15,"con":18,"int":11,"wis":12,"cha":14,"sk":"","sv":"Con +7, Wis +4, Cha +5","se":"Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"85 (10d8+40)","acd":"16 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Cloaker","cr":8.0,"ty":"aberration","sz":"Large","ac":14,"hp":78,"sp":"10 ft., fly 40 ft.","str":17,"dex":15,"con":12,"int":13,"wis":12,"cha":14,"sk":"Stealth +5","sv":"","se":"Darkvision 60 Ft.","la":"Deep Speech, Undercommon","al":"Chaotic Neutral","hpd":"78 (12d10+12)","acd":"14 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Frost Giant","cr":8.0,"ty":"giant","sz":"Huge","ac":15,"hp":138,"sp":"40 ft.","str":23,"dex":9,"con":21,"int":9,"wis":10,"cha":12,"sk":"Athletics +9, Perception +3","sv":"Con +8, Wis +3, Cha +4","se":"","la":"Giant","al":"Neutral Evil","hpd":"138 (12d12+60)","acd":"15 (Patchwork Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Hezrou","cr":8.0,"ty":"fiend (demon)","sz":"Large","ac":16,"hp":136,"sp":"30 ft.","str":19,"dex":17,"con":20,"int":5,"wis":12,"cha":13,"sk":"","sv":"Str +7, Con +8, Wis +4","se":"Darkvision 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"136 (13d10+65)","acd":"16 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Hydra","cr":8.0,"ty":"monstrosity","sz":"Huge","ac":15,"hp":172,"sp":"30 ft., swim 30 ft.","str":20,"dex":12,"con":20,"int":2,"wis":10,"cha":7,"sk":"Perception +6","sv":"","se":"Darkvision 60 Ft.","la":"","al":"Unaligned","hpd":"172 (15d12+75)","acd":"15 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Spirit Naga","cr":8.0,"ty":"monstrosity","sz":"Large","ac":15,"hp":75,"sp":"40 ft.","str":18,"dex":17,"con":14,"int":16,"wis":15,"cha":16,"sk":"","sv":"Dex +6, Con +5, Wis +5, Cha +6","se":"Darkvision 60 Ft.","la":"Abyssal, Common","al":"Chaotic Evil","hpd":"75 (10d10+20)","acd":"15 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Tyrannosaurus Rex","cr":8.0,"ty":"beast","sz":"Huge","ac":13,"hp":136,"sp":"50 ft.","str":25,"dex":10,"con":19,"int":2,"wis":12,"cha":9,"sk":"Perception +4","sv":"","se":"","la":"","al":"Unaligned","hpd":"136 (13d12+52)","acd":"13 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Young Bronze Dragon","cr":8.0,"ty":"dragon","sz":"Large","ac":18,"hp":142,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":21,"dex":10,"con":19,"int":14,"wis":13,"cha":17,"sk":"Insight +4, Perception +7, Stealth +3","sv":"Dex +3, Con +7, Wis +4, Cha +6","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"142 (15d10+60)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Young Green Dragon","cr":8.0,"ty":"dragon","sz":"Large","ac":18,"hp":136,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":19,"dex":12,"con":17,"int":16,"wis":13,"cha":15,"sk":"Deception +5, Perception +7, Stealth +4","sv":"Dex +4, Con +6, Wis +4, Cha +5","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"136 (16d10+48)","acd":"18 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Bone Devil","cr":9.0,"ty":"fiend (devil)","sz":"Large","ac":19,"hp":142,"sp":"40 ft., fly 40 ft.","str":18,"dex":16,"con":18,"int":13,"wis":14,"cha":16,"sk":"Deception +7, Insight +6","sv":"Int +5, Wis +6, Cha +7","se":"Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"142 (15d10+60)","acd":"19 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Clay Golem","cr":9.0,"ty":"construct","sz":"Large","ac":14,"hp":133,"sp":"20 ft.","str":20,"dex":9,"con":18,"int":3,"wis":8,"cha":1,"sk":"","sv":"","se":"Darkvision 60 Ft.","la":"Understands The Languages Of Its Creator But Can't Speak","al":"Unaligned","hpd":"133 (14d10+56)","acd":"14 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Cloud Giant","cr":9.0,"ty":"giant","sz":"Huge","ac":14,"hp":200,"sp":"40 ft.","str":27,"dex":10,"con":22,"int":12,"wis":16,"cha":16,"sk":"Insight +7, Perception +7","sv":"Con +10, Wis +7, Cha +7","se":"","la":"Common, Giant","al":"Neutral Good (50%) Or Neutral Evil (50%)","hpd":"200 (16d12+96)","acd":"14 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Fire Giant","cr":9.0,"ty":"giant","sz":"Huge","ac":18,"hp":162,"sp":"30 ft.","str":25,"dex":9,"con":23,"int":10,"wis":14,"cha":13,"sk":"Athletics +11, Perception +6","sv":"Dex +3, Con +10, Cha +5","se":"","la":"Giant","al":"Lawful Evil","hpd":"162 (13d12+78)","acd":"18 (Plate)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Glabrezu","cr":9.0,"ty":"fiend (demon)","sz":"Large","ac":17,"hp":157,"sp":"40 ft.","str":20,"dex":15,"con":21,"int":19,"wis":17,"cha":16,"sk":"","sv":"Str +9, Con +9, Wis +7, Cha +7","se":"Truesight 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"157 (15d10+75)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Treant","cr":9.0,"ty":"plant","sz":"Huge","ac":16,"hp":138,"sp":"30 ft.","str":23,"dex":8,"con":21,"int":12,"wis":16,"cha":12,"sk":"","sv":"","se":"","la":"Common, Druidic, Elvish, Sylvan","al":"Chaotic Good","hpd":"138 (12d12+60)","acd":"16 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Young Blue Dragon","cr":9.0,"ty":"dragon","sz":"Large","ac":18,"hp":152,"sp":"40 ft., burrow 20 ft., fly 80 ft.","str":21,"dex":10,"con":19,"int":14,"wis":13,"cha":17,"sk":"Perception +9, Stealth +4","sv":"Dex +4, Con +8, Wis +5, Cha +7","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"152 (16d10+64)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Young Silver Dragon","cr":9.0,"ty":"dragon","sz":"Large","ac":18,"hp":168,"sp":"40 ft., fly 80 ft.","str":23,"dex":10,"con":21,"int":14,"wis":11,"cha":19,"sk":"Arcana +6, History +6, Perception +8, Stealth +4","sv":"Dex +4, Con +9, Wis +4, Cha +8","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"168 (16d10+80)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Aboleth","cr":10.0,"ty":"aberration","sz":"Large","ac":17,"hp":135,"sp":"10 ft., swim 40 ft.","str":21,"dex":9,"con":15,"int":18,"wis":15,"cha":18,"sk":"History +12, Perception +10","sv":"Con +6, Int +8, Wis +6","se":"Darkvision 120 Ft.","la":"Deep Speech, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"135 (18d10+36)","acd":"17 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Deva","cr":10.0,"ty":"celestial","sz":"Medium","ac":17,"hp":136,"sp":"30 ft., fly 90 ft.","str":18,"dex":18,"con":18,"int":17,"wis":20,"cha":20,"sk":"Insight +9, Perception +9","sv":"Wis +9, Cha +9","se":"Darkvision 120 Ft.","la":"All, Telepathy 120 Ft.","al":"Lawful Good","hpd":"136 (16d8+64)","acd":"17 (Natural Armor)","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Guardian Naga","cr":10.0,"ty":"monstrosity","sz":"Large","ac":18,"hp":127,"sp":"40 ft.","str":19,"dex":18,"con":16,"int":16,"wis":19,"cha":18,"sk":"","sv":"Dex +8, Con +7, Int +7, Wis +8, Cha +8","se":"Darkvision 60 Ft.","la":"Celestial, Common","al":"Lawful Good","hpd":"127 (15d10+45)","acd":"18 (Natural Armor)","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Stone Golem","cr":10.0,"ty":"construct","sz":"Large","ac":17,"hp":178,"sp":"30 ft.","str":22,"dex":9,"con":20,"int":3,"wis":11,"cha":1,"sk":"","sv":"","se":"Darkvision 120 Ft.","la":"Understands The Languages Of Its Creator But Can't Speak","al":"Unaligned","hpd":"178 (17d10+85)","acd":"17 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Young Gold Dragon","cr":10.0,"ty":"dragon","sz":"Large","ac":18,"hp":178,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":23,"dex":14,"con":21,"int":16,"wis":13,"cha":20,"sk":"Insight +5, Perception +9, Persuasion +9, Stealth +6","sv":"Dex +6, Con +9, Wis +5, Cha +9","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"178 (17d10+85)","acd":"18 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Young Red Dragon","cr":10.0,"ty":"dragon","sz":"Large","ac":18,"hp":178,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":23,"dex":10,"con":21,"int":14,"wis":11,"cha":19,"sk":"Perception +8, Stealth +4","sv":"Dex +4, Con +9, Wis +4, Cha +8","se":"Blindsight 30 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"178 (17d10+85)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Behir","cr":11.0,"ty":"monstrosity","sz":"Huge","ac":17,"hp":168,"sp":"50 ft., climb 40 ft.","str":23,"dex":16,"con":18,"int":7,"wis":14,"cha":12,"sk":"Perception +6, Stealth +7","sv":"","se":"Darkvision 90 Ft.","la":"Draconic","al":"Neutral Evil","hpd":"168 (16d12+64)","acd":"17 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Djinni","cr":11.0,"ty":"elemental","sz":"Large","ac":17,"hp":161,"sp":"30 ft., fly 90 ft.","str":21,"dex":15,"con":22,"int":15,"wis":16,"cha":20,"sk":"","sv":"Dex +6, Wis +7, Cha +9","se":"Darkvision 120 Ft.","la":"Auran","al":"Chaotic Good","hpd":"161 (14d10+84)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Efreeti","cr":11.0,"ty":"elemental","sz":"Large","ac":17,"hp":200,"sp":"40 ft., fly 60 ft.","str":22,"dex":12,"con":24,"int":16,"wis":15,"cha":16,"sk":"","sv":"Int +7, Wis +6, Cha +7","se":"Darkvision 120 Ft.","la":"Ignan","al":"Lawful Evil","hpd":"200 (16d10+112)","acd":"17 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Gynosphinx","cr":11.0,"ty":"monstrosity","sz":"Large","ac":17,"hp":136,"sp":"40 ft., fly 60 ft.","str":18,"dex":15,"con":16,"int":18,"wis":18,"cha":18,"sk":"Arcana +12, History +12, Perception +8, Religion +8","sv":"","se":"Truesight 120 Ft.","la":"Common, Sphinx","al":"Lawful Neutral","hpd":"136 (16d10+48)","acd":"17 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Horned Devil","cr":11.0,"ty":"fiend (devil)","sz":"Large","ac":18,"hp":178,"sp":"20 ft., fly 60 ft.","str":22,"dex":17,"con":21,"int":12,"wis":16,"cha":17,"sk":"","sv":"Str +10, Dex +7, Wis +7, Cha +7","se":"Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"178 (17d10+85)","acd":"18 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Remorhaz","cr":11.0,"ty":"monstrosity","sz":"Huge","ac":17,"hp":195,"sp":"30 ft., burrow 20 ft.","str":24,"dex":13,"con":21,"int":4,"wis":10,"cha":5,"sk":"","sv":"","se":"Darkvision 60 Ft., Tremorsense 60 Ft.","la":"","al":"Unaligned","hpd":"195 (17d12+85)","acd":"17 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Roc","cr":11.0,"ty":"monstrosity","sz":"Gargantuan","ac":15,"hp":248,"sp":"20 ft., fly 120 ft.","str":28,"dex":10,"con":20,"int":3,"wis":10,"cha":9,"sk":"Perception +4","sv":"Dex +4, Con +9, Wis +4, Cha +3","se":"","la":"","al":"Unaligned","hpd":"248 (16d20+80)","acd":"15 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Archmage","cr":12.0,"ty":"humanoid (any race)","sz":"Medium","ac":12,"hp":99,"sp":"30 ft.","str":10,"dex":14,"con":12,"int":20,"wis":15,"cha":16,"sk":"Arcana +13, History +13","sv":"Int +9, Wis +6","se":"","la":"Any Six Languages","al":"Any Alignment","hpd":"99 (18d8+18)","acd":"12 (15 With Mage Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Erinyes","cr":12.0,"ty":"fiend (devil)","sz":"Medium","ac":18,"hp":153,"sp":"30 ft., fly 60 ft.","str":18,"dex":16,"con":18,"int":14,"wis":14,"cha":18,"sk":"","sv":"Dex +7, Con +8, Wis +6, Cha +8","se":"Truesight 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"153 (18d8+72)","acd":"18 (Plate)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Adult Brass Dragon","cr":13.0,"ty":"dragon","sz":"Huge","ac":18,"hp":172,"sp":"40 ft., burrow 40 ft., fly 80 ft.","str":23,"dex":10,"con":21,"int":14,"wis":13,"cha":17,"sk":"History +7, Perception +11, Persuasion +8, Stealth +5","sv":"Dex +5, Con +10, Wis +6, Cha +8","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"172 (15d12+75)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Adult White Dragon","cr":13.0,"ty":"dragon","sz":"Huge","ac":18,"hp":200,"sp":"40 ft., burrow 30 ft., fly 80 ft., swim 40 ft.","str":22,"dex":10,"con":22,"int":8,"wis":12,"cha":12,"sk":"Perception +11, Stealth +5","sv":"Dex +5, Con +11, Wis +6, Cha +6","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"200 (16d12+96)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Nalfeshnee","cr":13.0,"ty":"fiend (demon)","sz":"Large","ac":18,"hp":184,"sp":"20 ft., fly 30 ft.","str":21,"dex":10,"con":22,"int":19,"wis":12,"cha":15,"sk":"","sv":"Con +11, Int +9, Wis +6, Cha +7","se":"Truesight 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"184 (16d10+96)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Rakshasa","cr":13.0,"ty":"fiend","sz":"Medium","ac":16,"hp":110,"sp":"40 ft.","str":14,"dex":17,"con":18,"int":13,"wis":16,"cha":20,"sk":"Deception +10, Insight +8","sv":"","se":"Darkvision 60 Ft.","la":"Common, Infernal","al":"Lawful Evil","hpd":"110 (13d8+52)","acd":"16 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Storm Giant","cr":13.0,"ty":"giant","sz":"Huge","ac":16,"hp":230,"sp":"50 ft., swim 50 ft.","str":29,"dex":14,"con":20,"int":16,"wis":18,"cha":18,"sk":"Arcana +8, Athletics +14, History +8, Perception +9","sv":"Str +14, Con +10, Wis +9, Cha +9","se":"","la":"Common, Giant","al":"Chaotic Good","hpd":"230 (20d12+100)","acd":"16 (Scale Mail)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Vampire","cr":13.0,"ty":"undead (shapechanger)","sz":"Medium","ac":16,"hp":144,"sp":"30 ft.","str":18,"dex":18,"con":18,"int":17,"wis":15,"cha":18,"sk":"Perception +7, Stealth +9","sv":"Dex +9, Wis +7, Cha +9","se":"Darkvision 120 Ft.","la":"The Languages It Knew In Life","al":"Lawful Evil","hpd":"144 (17d8+68)","acd":"16 (Natural Armor)","ini":4,"b":"Free Basic Rules (2014)"},{"n":"Adult Black Dragon","cr":14.0,"ty":"dragon","sz":"Huge","ac":19,"hp":195,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":23,"dex":14,"con":21,"int":14,"wis":13,"cha":17,"sk":"Perception +11, Stealth +7","sv":"Dex +7, Con +10, Wis +6, Cha +8","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"195 (17d12+85)","acd":"19 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Adult Copper Dragon","cr":14.0,"ty":"dragon","sz":"Huge","ac":18,"hp":184,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":23,"dex":12,"con":21,"int":18,"wis":15,"cha":17,"sk":"Deception +8, Perception +12, Stealth +6","sv":"Dex +6, Con +10, Wis +7, Cha +8","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"184 (16d12+80)","acd":"18 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Ice Devil","cr":14.0,"ty":"fiend (devil)","sz":"Large","ac":18,"hp":180,"sp":"40 ft.","str":21,"dex":14,"con":18,"int":18,"wis":15,"cha":18,"sk":"","sv":"Dex +7, Con +9, Wis +7, Cha +9","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"180 (19d10+76)","acd":"18 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Adult Bronze Dragon","cr":15.0,"ty":"dragon","sz":"Huge","ac":19,"hp":212,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":25,"dex":10,"con":23,"int":16,"wis":15,"cha":19,"sk":"Insight +7, Perception +12, Stealth +5","sv":"Dex +5, Con +11, Wis +7, Cha +9","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"212 (17d12+102)","acd":"19 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Adult Green Dragon","cr":15.0,"ty":"dragon","sz":"Huge","ac":19,"hp":207,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":23,"dex":12,"con":21,"int":18,"wis":15,"cha":17,"sk":"Deception +8, Insight +7, Perception +12, Persuasion +8, Stealth +6","sv":"Dex +6, Con +10, Wis +7, Cha +8","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"207 (18d12+90)","acd":"19 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Mummy Lord","cr":15.0,"ty":"undead","sz":"Medium","ac":17,"hp":97,"sp":"20 ft.","str":18,"dex":10,"con":17,"int":11,"wis":18,"cha":16,"sk":"History +5, Religion +5","sv":"Con +8, Int +5, Wis +9, Cha +8","se":"Darkvision 60 Ft.","la":"The Languages It Knew In Life","al":"Lawful Evil","hpd":"97 (13d8+39)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Purple Worm","cr":15.0,"ty":"monstrosity","sz":"Gargantuan","ac":18,"hp":247,"sp":"50 ft., burrow 30 ft.","str":28,"dex":7,"con":22,"int":1,"wis":8,"cha":4,"sk":"","sv":"Con +11, Wis +4","se":"Blindsight 30 Ft., Tremorsense 60 Ft.","la":"","al":"Unaligned","hpd":"247 (15d20+90)","acd":"18 (Natural Armor)","ini":-2,"b":"Free Basic Rules (2014)"},{"n":"Adult Blue Dragon","cr":16.0,"ty":"dragon","sz":"Huge","ac":19,"hp":225,"sp":"40 ft., burrow 30 ft., fly 80 ft.","str":25,"dex":10,"con":23,"int":16,"wis":15,"cha":19,"sk":"Perception +12, Stealth +5","sv":"Dex +5, Con +11, Wis +7, Cha +9","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"225 (18d12+108)","acd":"19","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Adult Silver Dragon","cr":16.0,"ty":"dragon","sz":"Huge","ac":19,"hp":243,"sp":"40 ft., fly 80 ft.","str":27,"dex":10,"con":25,"int":16,"wis":13,"cha":21,"sk":"Arcana +8, History +8, Perception +11, Stealth +5","sv":"Dex +5, Con +12, Wis +6, Cha +10","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"243 (18d12+126)","acd":"19 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Iron Golem","cr":16.0,"ty":"construct","sz":"Large","ac":20,"hp":210,"sp":"30 ft.","str":24,"dex":9,"con":20,"int":3,"wis":11,"cha":1,"sk":"","sv":"","se":"Darkvision 120 Ft.","la":"Understands The Languages Of Its Creator But Can't Speak","al":"Unaligned","hpd":"210 (20d10+100)","acd":"20 (Natural Armor)","ini":-1,"b":"Free Basic Rules (2014)"},{"n":"Marilith","cr":16.0,"ty":"fiend (demon)","sz":"Large","ac":18,"hp":189,"sp":"40 ft.","str":18,"dex":20,"con":20,"int":18,"wis":16,"cha":20,"sk":"","sv":"Str +9, Con +10, Wis +8, Cha +10","se":"Truesight 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"189 (18d10+90)","acd":"18 (Natural Armor)","ini":5,"b":"Free Basic Rules (2014)"},{"n":"Planetar","cr":16.0,"ty":"celestial","sz":"Large","ac":19,"hp":200,"sp":"40 ft., fly 120 ft.","str":24,"dex":20,"con":24,"int":19,"wis":22,"cha":25,"sk":"Perception +11","sv":"Con +12, Wis +11, Cha +12","se":"Truesight 120 Ft.","la":"All, Telepathy 120 Ft.","al":"Lawful Good","hpd":"200 (16d10+112)","acd":"19 (Natural Armor)","ini":5,"b":"Free Basic Rules (2014)"},{"n":"Adult Gold Dragon","cr":17.0,"ty":"dragon","sz":"Huge","ac":19,"hp":256,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":27,"dex":14,"con":25,"int":16,"wis":15,"cha":24,"sk":"Insight +8, Perception +14, Persuasion +13, Stealth +8","sv":"Dex +8, Con +13, Wis +8, Cha +13","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"256 (19d12+133)","acd":"19 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Adult Red Dragon","cr":17.0,"ty":"dragon","sz":"Huge","ac":19,"hp":256,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":27,"dex":10,"con":25,"int":16,"wis":13,"cha":21,"sk":"Perception +13, Stealth +6","sv":"Dex +6, Con +13, Wis +7, Cha +11","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"256 (19d12+133)","acd":"19 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Androsphinx","cr":17.0,"ty":"monstrosity","sz":"Large","ac":17,"hp":199,"sp":"40 ft., fly 60 ft.","str":22,"dex":10,"con":20,"int":16,"wis":18,"cha":23,"sk":"Arcana +9, Perception +10, Religion +15","sv":"Dex +6, Con +11, Int +9, Wis +10","se":"Truesight 120 Ft.","la":"Common, Sphinx","al":"Lawful Neutral","hpd":"199 (19d10+95)","acd":"17 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Dragon Turtle","cr":17.0,"ty":"dragon","sz":"Gargantuan","ac":20,"hp":341,"sp":"20 ft., swim 40 ft.","str":25,"dex":10,"con":20,"int":10,"wis":12,"cha":12,"sk":"","sv":"Dex +6, Con +11, Wis +7","se":"Darkvision 120 Ft.","la":"Aquan, Draconic","al":"Neutral","hpd":"341 (22d20+10)","acd":"20 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Balor","cr":19.0,"ty":"fiend (demon)","sz":"Huge","ac":19,"hp":262,"sp":"40 ft., fly 80 ft.","str":26,"dex":15,"con":22,"int":20,"wis":16,"cha":22,"sk":"","sv":"Str +14, Con +12, Wis +9, Cha +12","se":"Truesight 120 Ft.","la":"Abyssal, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"262 (21d12+126)","acd":"19 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Ancient Brass Dragon","cr":20.0,"ty":"dragon","sz":"Gargantuan","ac":20,"hp":297,"sp":"40 ft., burrow 40 ft., fly 80 ft.","str":27,"dex":10,"con":25,"int":16,"wis":15,"cha":19,"sk":"History +9, Perception +14, Persuasion +10, Stealth +6","sv":"Dex +6, Con +13, Wis +8, Cha +10","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"297 (17d20+119)","acd":"20 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ancient White Dragon","cr":20.0,"ty":"dragon","sz":"Gargantuan","ac":20,"hp":333,"sp":"40 ft., burrow 40 ft., fly 80 ft., swim 40 ft.","str":26,"dex":10,"con":26,"int":10,"wis":13,"cha":14,"sk":"Perception +13, Stealth +6","sv":"Dex +6, Con +14, Wis +7, Cha +8","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"333 (18d20+144)","acd":"20 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Pit Fiend","cr":20.0,"ty":"fiend (devil)","sz":"Large","ac":19,"hp":300,"sp":"30 ft., fly 60 ft.","str":26,"dex":14,"con":24,"int":22,"wis":18,"cha":24,"sk":"","sv":"Dex +8, Con +13, Wis +10","se":"Truesight 120 Ft.","la":"Infernal, Telepathy 120 Ft.","al":"Lawful Evil","hpd":"300 (24d10+168)","acd":"19 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Ancient Black Dragon","cr":21.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":367,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":27,"dex":14,"con":25,"int":16,"wis":15,"cha":19,"sk":"Perception +16, Stealth +9","sv":"Dex +9, Con +14, Wis +9, Cha +11","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"367 (21d20+147)","acd":"22 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Ancient Copper Dragon","cr":21.0,"ty":"dragon","sz":"Gargantuan","ac":21,"hp":350,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":27,"dex":12,"con":25,"int":20,"wis":17,"cha":19,"sk":"Deception +11, Perception +17, Stealth +8","sv":"Dex +8, Con +14, Wis +10, Cha +11","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Good","hpd":"350 (20d20+140)","acd":"21 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Lich","cr":21.0,"ty":"undead","sz":"Medium","ac":17,"hp":135,"sp":"30 ft.","str":11,"dex":16,"con":16,"int":20,"wis":14,"cha":16,"sk":"Arcana +18, History +12, Insight +9, Perception +9","sv":"Con +10, Int +12, Wis +9","se":"Truesight 120 Ft.","la":"Common Plus Up To Five Other Languages","al":"Any Evil Alignment","hpd":"135 (18d8+54)","acd":"17 (Natural Armor)","ini":3,"b":"Free Basic Rules (2014)"},{"n":"Solar","cr":21.0,"ty":"celestial","sz":"Large","ac":21,"hp":243,"sp":"50 ft., fly 150 ft.","str":26,"dex":22,"con":26,"int":25,"wis":25,"cha":30,"sk":"Perception +14","sv":"Int +14, Wis +14, Cha +17","se":"Truesight 120 Ft.","la":"All, Telepathy 120 Ft.","al":"Lawful Good","hpd":"243 (18d10+144)","acd":"21 (Natural Armor)","ini":6,"b":"Free Basic Rules (2014)"},{"n":"Ancient Bronze Dragon","cr":22.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":444,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":29,"dex":10,"con":27,"int":18,"wis":17,"cha":21,"sk":"Insight +10, Perception +17, Stealth +7","sv":"Dex +7, Con +15, Wis +10, Cha +12","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"444 (24d20+192)","acd":"22 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ancient Green Dragon","cr":22.0,"ty":"dragon","sz":"Gargantuan","ac":21,"hp":385,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":27,"dex":12,"con":25,"int":20,"wis":17,"cha":19,"sk":"Deception +11, Insight +10, Perception +17, Persuasion +11, Stealth +8","sv":"Dex +8, Con +14, Wis +10, Cha +11","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"385 (22d20+154)","acd":"21 (Natural Armor)","ini":1,"b":"Free Basic Rules (2014)"},{"n":"Ancient Blue Dragon","cr":23.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":481,"sp":"40 ft., burrow 40 ft., fly 80 ft.","str":29,"dex":10,"con":27,"int":18,"wis":17,"cha":21,"sk":"Perception +17, Stealth +7","sv":"Dex +7, Con +15, Wis +10, Cha +12","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Evil","hpd":"481 (26d20+208)","acd":"22 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ancient Silver Dragon","cr":23.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":487,"sp":"40 ft., fly 80 ft.","str":30,"dex":10,"con":29,"int":18,"wis":15,"cha":23,"sk":"Arcana +11, History +11, Perception +16, Stealth +7","sv":"Dex +7, Con +16, Wis +9, Cha +13","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"487 (25d20+225)","acd":"22 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Kraken","cr":23.0,"ty":"monstrosity (titan)","sz":"Gargantuan","ac":18,"hp":472,"sp":"20 ft., swim 60 ft.","str":30,"dex":11,"con":25,"int":22,"wis":18,"cha":20,"sk":"","sv":"Str +17, Dex +7, Con +14, Int +13, Wis +11","se":"Truesight 120 Ft.","la":"Understands Abyssal, Celestial, Infernal, And Primordial But Can't Speak, Telepathy 120 Ft.","al":"Chaotic Evil","hpd":"472 (27d20+189)","acd":"18 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Ancient Gold Dragon","cr":24.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":546,"sp":"40 ft., fly 80 ft., swim 40 ft.","str":30,"dex":14,"con":29,"int":18,"wis":17,"cha":28,"sk":"Insight +10, Perception +17, Persuasion +16, Stealth +9","sv":"Dex +9, Con +16, Wis +10, Cha +16","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Lawful Good","hpd":"546 (28d20+252)","acd":"22 (Natural Armor)","ini":2,"b":"Free Basic Rules (2014)"},{"n":"Ancient Red Dragon","cr":24.0,"ty":"dragon","sz":"Gargantuan","ac":22,"hp":546,"sp":"40 ft., climb 40 ft., fly 80 ft.","str":30,"dex":10,"con":29,"int":18,"wis":15,"cha":23,"sk":"Perception +16, Stealth +7","sv":"Dex +7, Con +16, Wis +9, Cha +13","se":"Blindsight 60 Ft., Darkvision 120 Ft.","la":"Common, Draconic","al":"Chaotic Evil","hpd":"546 (28d20+252)","acd":"22 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"},{"n":"Tarrasque","cr":30.0,"ty":"monstrosity (titan)","sz":"Gargantuan","ac":25,"hp":676,"sp":"40 ft.","str":30,"dex":11,"con":30,"int":3,"wis":11,"cha":11,"sk":"","sv":"Int +5, Wis +9, Cha +9","se":"Blindsight 120 Ft.","la":"","al":"Unaligned","hpd":"676 (33d20+330)","acd":"25 (Natural Armor)","ini":0,"b":"Free Basic Rules (2014)"}];
+var CR_XP    = {"0": 10, "0.125": 25, "0.25": 50, "0.5": 100, "1": 200, "2": 450, "3": 700, "4": 1100, "5": 1800, "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900, "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000, "16": 15000, "17": 18000, "18": 20000, "19": 22000, "20": 25000, "21": 33000, "22": 41000, "23": 50000, "24": 62000, "30": 155000};
+var XP_THRES = {"1": [25, 50, 75, 100], "2": [50, 100, 150, 200], "3": [75, 150, 225, 400], "4": [125, 250, 375, 500], "5": [250, 500, 750, 1000], "6": [300, 600, 900, 1400], "7": [350, 750, 1100, 1700], "8": [450, 900, 1400, 2100], "9": [550, 1100, 1600, 2400], "10": [600, 1200, 1900, 2800], "11": [800, 1600, 2400, 3600], "12": [1000, 2000, 3000, 4500], "13": [1100, 2200, 3400, 5100], "14": [1250, 2500, 3800, 5700], "15": [1400, 2800, 4300, 6400], "16": [1600, 3200, 4800, 7200], "17": [2000, 3900, 5900, 8800], "18": [2100, 4200, 6300, 9500], "19": [2400, 4900, 7300, 10900], "20": [2800, 5700, 8500, 12700]};
+var MULTI    = [[1, 1.0], [2, 1.5], [3, 2.0], [7, 2.5], [11, 3.0], [15, 4.0]];
+var ENV_TYPES= {"forest": ["beast", "fey", "plant", "dragon", "humanoid"], "dungeon": ["undead", "construct", "aberration", "humanoid", "dragon", "fiend"], "mountain": ["dragon", "giant", "humanoid", "beast", "elemental"], "arctic": ["beast", "dragon", "humanoid", "undead"], "underdark": ["aberration", "undead", "humanoid", "monstrosity", "ooze", "fungus"], "coastal": ["humanoid", "beast", "dragon", "undead"], "desert": ["humanoid", "beast", "dragon", "undead", "elemental"], "swamp": ["humanoid", "beast", "undead", "plant", "monstrosity"], "plains": ["humanoid", "beast", "giant", "dragon"], "urban": ["humanoid", "undead", "construct", "fiend"]};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMBAT STATE
+───────────────────────────────────────────────────────────────────────────── */
+var combatants = [];   // [{id,name,type,hp,maxHp,ac,ini,iniMod,roll,dead,monster}]
+var currentIdx = -1;
+var round      = 1;
+var started    = false;
+var nextId     = 1;
+
+function genId(){ return nextId++; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADD COMBATANTS
+───────────────────────────────────────────────────────────────────────────── */
+function addPlayer() {
+  var name   = document.getElementById('p-name').value.trim() || 'Player';
+  var iniMod = parseInt(document.getElementById('p-ini').value) || 0;
+  var maxHp  = parseInt(document.getElementById('p-hp').value)  || 10;
+  combatants.push({id:genId(),name:name,type:'player',hp:maxHp,maxHp:maxHp,ac:10,ini:0,iniMod:iniMod,roll:0,dead:false,monster:null});
+  document.getElementById('p-name').value='';
+  log('Added player: '+name);
+  renderCombatants();
+}
+
+function addMonsterEntry(m, countOverride) {
+  var count  = countOverride || parseInt(document.getElementById('m-count').value)||1;
+  var maxHp  = m.hp || 10;
+  var iniMod = Math.floor(((m.dex||10)-10)/2);
+  for (var i=0;i<count;i++) {
+    var label = count>1 ? m.n+' '+(i+1) : m.n;
+    combatants.push({id:genId(),name:label,type:'monster',hp:maxHp,maxHp:maxHp,ac:m.ac||10,ini:0,iniMod:iniMod,roll:0,dead:false,monster:m});
+  }
+  log('Added '+count+'× '+m.n+' (HP:'+maxHp+', AC:'+m.ac+', CR:'+m.cr+')');
+  renderCombatants();
+  // Reset search
+  document.getElementById('m-search').value='';
+  selectedMonster=null;
+  document.getElementById('ac-list').style.display='none';
+}
+
+var selectedMonster = null;
+
+function addSelectedMonster() {
+  if (!selectedMonster) { alert('Search for and select a monster first.'); return; }
+  addMonsterEntry(selectedMonster);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INITIATIVE
+───────────────────────────────────────────────────────────────────────────── */
+function d20(){ return Math.floor(Math.random()*20)+1; }
+
+function rollInitiative() {
+  if (!combatants.length) { alert('Add some combatants first.'); return; }
+  combatants.forEach(function(c){
+    var r = d20();
+    c.roll = r;
+    c.ini  = r + c.iniMod;
+  });
+  combatants.sort(function(a,b){
+    if(b.ini!==a.ini) return b.ini-a.ini;
+    return b.iniMod-a.iniMod;
+  });
+  currentIdx = 0;
+  round = 1;
+  started = true;
+  log('=== Combat Begin — Round 1 ===','turn');
+  combatants.forEach(function(c){ log(c.name+': rolled '+(c.roll)+' + '+(c.iniMod>=0?'+':'')+c.iniMod+' = '+c.ini); });
+  renderCombatants();
+  updateRoundBanner();
+}
+
+function nextTurn() {
+  if (!started || !combatants.length) return;
+  // Skip dead
+  var alive = combatants.filter(function(c){return !c.dead;});
+  if (!alive.length) { log('All combatants are dead.','dead'); return; }
+  
+  var tries = 0;
+  do {
+    currentIdx = (currentIdx+1) % combatants.length;
+    tries++;
+    if (tries > combatants.length) break;
+  } while (combatants[currentIdx].dead);
+
+  if (currentIdx === 0 || combatants.slice(0,currentIdx).every(function(c){return c.dead;})) {
+    // New round when we wrap
+    round++;
+    log('=== Round '+round+' ===','turn');
+  }
+  var cur = combatants[currentIdx];
+  log('\u25ba '+cur.name+'\u2019s turn','turn');
+  renderCombatants();
+  updateRoundBanner();
+}
+
+function updateRoundBanner(){
+  var cur = started && combatants[currentIdx];
+  var txt = 'Round '+round;
+  if (cur) txt += ' — ' + cur.name + '\u2019s turn';
+  document.getElementById('round-banner').textContent = txt;
+}
+
+function resetCombat(){
+  if (!confirm('Reset combat? All HP and initiative will be reset.')) return;
+  combatants.forEach(function(c){c.hp=c.maxHp;c.dead=false;c.ini=0;c.roll=0;});
+  currentIdx=-1; round=1; started=false;
+  document.getElementById('round-banner').textContent='Round 1 — Press "Roll Initiative" to begin';
+  clearLog();
+  renderCombatants();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DAMAGE / HEAL
+───────────────────────────────────────────────────────────────────────────── */
+function applyDamage(id) {
+  var inp = document.getElementById('dmg-'+id);
+  var val = parseInt(inp.value)||0;
+  if (!val) return;
+  var c = combatants.find(function(x){return x.id===id;});
+  if (!c) return;
+  c.hp = Math.max(0, c.hp - val);
+  if (c.hp === 0 && !c.dead) {
+    c.dead = true;
+    log(c.name+' has fallen! (0 HP)','dead');
+  } else {
+    log(c.name+': -'+val+' HP → '+c.hp+'/'+c.maxHp,'dmg');
+  }
+  inp.value='';
+  renderCombatants();
+}
+
+function applyHeal(id) {
+  var inp = document.getElementById('heal-'+id);
+  var val = parseInt(inp.value)||0;
+  if (!val) return;
+  var c = combatants.find(function(x){return x.id===id;});
+  if (!c) return;
+  var was = c.hp;
+  c.hp = Math.min(c.maxHp, c.hp + val);
+  c.dead = c.hp <= 0;
+  log(c.name+': +'+val+' HP → '+c.hp+'/'+c.maxHp,'heal');
+  inp.value='';
+  renderCombatants();
+}
+
+function removeCombatant(id) {
+  combatants = combatants.filter(function(x){return x.id!==id;});
+  if (currentIdx >= combatants.length) currentIdx = Math.max(0,combatants.length-1);
+  renderCombatants();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────────────────────────────────────── */
+function renderCombatants() {
+  var list = document.getElementById('combatant-list');
+  if (!combatants.length) {
+    list.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--il);font-style:italic;">Add players and monsters, then roll initiative.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  combatants.forEach(function(c, idx) {
+    var pct = c.maxHp > 0 ? Math.max(0, Math.min(100, (c.hp / c.maxHp) * 100)) : 0;
+    var hpColor = pct > 60 ? '#1a5c2a' : pct > 30 ? '#c9973a' : '#8b1a1a';
+    var isActive = started && idx === currentIdx && !c.dead;
+
+    var div = document.createElement('div');
+    div.className = 'combatant ' + c.type + (c.dead ? ' dead' : '') + (isActive ? ' active' : '');
+
+    var top = document.createElement('div');
+    top.className = 'comb-top';
+
+    var dot = document.createElement('div');
+    dot.style.cssText = 'width:10px;height:10px;border-radius:50%;flex-shrink:0;' + (isActive ? 'background:var(--go);animation:pulse 1s infinite;' : '');
+    top.appendChild(dot);
+
+    var iniEl = document.createElement('div');
+    iniEl.className = 'comb-ini';
+    iniEl.textContent = (started && c.ini) ? c.ini : '-';
+    top.appendChild(iniEl);
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'comb-name' + (c.monster && c.monster.str ? ' has-stat' : '');
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = c.name;
+    nameEl.appendChild(nameSpan);
+    if (c.type === 'monster' && c.monster) {
+      var crTag = document.createElement('span');
+      crTag.style.cssText = 'font-size:.65rem;color:var(--il);margin-left:.3rem;';
+      crTag.textContent = 'CR' + c.monster.cr;
+      nameEl.appendChild(crTag);
+      if (c.monster.str) {
+        nameEl.appendChild(buildStatTip(c.monster));
+      }
+    }
+    top.appendChild(nameEl);
+
+    var hpWrap = document.createElement('div');
+    hpWrap.className = 'comb-hp-bar';
+    hpWrap.innerHTML = '<div class="hp-track"><div class="hp-cur" style="color:' + hpColor + '">' + c.hp + '</div><div class="hp-max">/ ' + c.maxHp + '</div></div>'
+      + '<div class="hp-bar"><div class="hp-fill" style="width:' + pct + '%;background:' + hpColor + ';"></div></div>';
+    top.appendChild(hpWrap);
+
+    var acts = document.createElement('div');
+    acts.className = 'comb-actions';
+    if (c.dead) {
+      var ds = document.createElement('span');
+      ds.style.cssText = 'font-size:.72rem;color:#888;';
+      ds.textContent = 'Dead';
+      acts.appendChild(ds);
+    } else {
+      (function(cid) {
+        var di = document.createElement('input');
+        di.type = 'number'; di.className = 'dmg-inp'; di.id = 'dmg-' + cid; di.placeholder = 'dmg'; di.min = '0';
+        di.addEventListener('keydown', function(e) { if (e.keyCode === 13) applyDamage(cid); });
+        var db = document.createElement('button');
+        db.className = 'btn btn-danger btn-sm'; db.textContent = '-HP';
+        db.addEventListener('click', function() { applyDamage(cid); });
+        var hi = document.createElement('input');
+        hi.type = 'number'; hi.className = 'dmg-inp'; hi.id = 'heal-' + cid; hi.placeholder = 'heal'; hi.min = '0';
+        hi.addEventListener('keydown', function(e) { if (e.keyCode === 13) applyHeal(cid); });
+        var hb = document.createElement('button');
+        hb.className = 'btn btn-green btn-sm'; hb.textContent = '+HP';
+        hb.addEventListener('click', function() { applyHeal(cid); });
+        acts.appendChild(di); acts.appendChild(db); acts.appendChild(hi); acts.appendChild(hb);
+      })(c.id);
+    }
+    var rb = document.createElement('button');
+    rb.className = 'btn btn-secondary btn-sm'; rb.title = 'Remove'; rb.textContent = 'X';
+    (function(cid) { rb.addEventListener('click', function() { removeCombatant(cid); }); })(c.id);
+    acts.appendChild(rb);
+    top.appendChild(acts);
+    div.appendChild(top);
+    list.appendChild(div);
+  });
+}
+
+function buildStatTip(m) {
+  var tip = document.createElement('div');
+  tip.className = 'stat-tooltip';
+  var html = '<h4>' + esc(m.n) + ' (CR ' + m.cr + ')</h4>';
+  html += '<div style="font-size:.72rem;color:rgba(244,232,193,.5);margin-bottom:.4rem;">' + esc(m.sz||'') + ' ' + esc(m.ty||'') + ' - ' + esc(m.al||'') + '</div>';
+  html += '<div style="font-size:.78rem;margin-bottom:.35rem;"><strong>AC</strong> ' + esc(String(m.acd||m.ac||'')) + ' &nbsp;<strong>HP</strong> ' + esc(String(m.hpd||m.hp||'')) + ' &nbsp;<strong>Speed</strong> ' + esc(m.sp||'') + '</div>';
+  html += '<div class="stat-row">';
+  [['STR','str'],['DEX','dex'],['CON','con'],['INT','int'],['WIS','wis'],['CHA','cha']].forEach(function(p) {
+    var val = parseInt(m[p[1]]) || 10;
+    var mod = Math.floor((val - 10) / 2);
+    html += '<div class="stat-block"><div class="sv">' + p[0] + '</div><div class="vl">' + val + ' (' + (mod >= 0 ? '+' : '') + mod + ')</div></div>';
+  });
+  html += '</div>';
+  if (m.sv) html += '<div style="font-size:.7rem;margin-top:.15rem;"><strong>Saves</strong> ' + esc(m.sv) + '</div>';
+  if (m.sk) html += '<div style="font-size:.7rem;"><strong>Skills</strong> ' + esc(m.sk) + '</div>';
+  if (m.se) html += '<div style="font-size:.7rem;"><strong>Senses</strong> ' + esc(m.se) + '</div>';
+  if (m.la) html += '<div style="font-size:.7rem;"><strong>Languages</strong> ' + esc(m.la) + '</div>';
+  tip.innerHTML = html;
+  return tip;
+}
+
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOG
+───────────────────────────────────────────────────────────────────────────── */
+function log(msg, cls) {
+  var l = document.getElementById('combat-log');
+  var d = document.createElement('div');
+  d.className='log-entry'+(cls?' '+cls:'');
+  d.textContent=msg;
+  l.appendChild(d);
+  l.scrollTop=l.scrollHeight;
+}
+function clearLog(){
+  var l=document.getElementById('combat-log');
+  l.innerHTML='<div class="log-entry">Combat reset.</div>';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MONSTER AUTOCOMPLETE
+───────────────────────────────────────────────────────────────────────────── */
+var acHighlight = -1;
+
+function monsterSearch() {
+  var q = document.getElementById('m-search').value.trim().toLowerCase();
+  var list = document.getElementById('ac-list');
+  if (!q) { list.style.display='none'; return; }
+  var results = MONSTERS.filter(function(m){ return m.n.toLowerCase().indexOf(q)!==-1; }).slice(0,12);
+  if (!results.length) { list.style.display='none'; return; }
+  list.innerHTML='';
+  results.forEach(function(m,i){
+    var div=document.createElement('div');
+    div.className='ac-item';
+    div.innerHTML='<span>'+esc(m.n)+'</span><span class="ac-cr">CR '+m.cr+' '+m.ty+'</span>';
+    div.addEventListener('mousedown',function(e){e.preventDefault(); selectMonster(m);});
+    list.appendChild(div);
+  });
+  list.style.display='block';
+  acHighlight=-1;
+}
+
+function acKeydown(e) {
+  var list = document.getElementById('ac-list');
+  var items = list.querySelectorAll('.ac-item');
+  if (e.key==='ArrowDown'){e.preventDefault();acHighlight=Math.min(acHighlight+1,items.length-1);highlightAc(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();acHighlight=Math.max(acHighlight-1,0);highlightAc(items);}
+  else if(e.key==='Enter'){e.preventDefault();if(acHighlight>=0&&items[acHighlight]){items[acHighlight].dispatchEvent(new Event('mousedown'));}else if(selectedMonster){addSelectedMonster();}}
+  else if(e.key==='Escape'){list.style.display='none';}
+}
+function highlightAc(items){
+  items.forEach(function(el,i){el.style.background=i===acHighlight?'rgba(201,151,58,.2)':'';});
+}
+function selectMonster(m){
+  selectedMonster=m;
+  document.getElementById('m-search').value=m.n;
+  document.getElementById('ac-list').style.display='none';
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.autocomplete-wrap')) document.getElementById('ac-list').style.display='none';
+});
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ENCOUNTER GENERATOR
+───────────────────────────────────────────────────────────────────────────── */
+var lastEncounter = [];
+var lastEncParams = {};
+
+function showEncTab(t){
+  document.querySelectorAll('.tb2').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.tab-pnl').forEach(function(p){p.classList.remove('on');});
+  document.querySelector('.tb2[onclick*="'+t+'"]').classList.add('on');
+  document.getElementById('enc-'+t).classList.add('on');
+}
+
+function crFloat(cr){
+  var s=String(cr);
+  if(s==='1/8') return 0.125;
+  if(s==='1/4') return 0.25;
+  if(s==='1/2') return 0.5;
+  return parseFloat(s)||0;
+}
+
+function getMultiplier(n){
+  if(n<=0) return 1;
+  for(var i=MULTI.length-1;i>=0;i--){ if(n>=MULTI[i][0]) return MULTI[i][1]; }
+  return 1;
+}
+
+function difficultyLabel(xp, partySize, level) {
+  var t = XP_THRES[level] || XP_THRES[1];
+  var easy=t[0]*partySize, med=t[1]*partySize, hard=t[2]*partySize, deadly=t[3]*partySize;
+  if(xp<easy) return {d:'Trivial',c:'trivial'};
+  if(xp<med)  return {d:'Easy',c:'easy'};
+  if(xp<hard) return {d:'Medium',c:'medium'};
+  if(xp<deadly)return{d:'Hard',c:'hard'};
+  return {d:'Deadly',c:'deadly'};
+}
+
+function generateEncounter() {
+  var partySize = parseInt(document.getElementById('enc-party').value)||4;
+  var level     = parseInt(document.getElementById('enc-level').value)||5;
+  var diffSel   = document.getElementById('enc-diff').value;
+  var env       = document.getElementById('enc-env').value;
+
+  var diffMap   = {easy:0,medium:1,hard:2,deadly:3,random:Math.floor(Math.random()*4)};
+  var diffIdx   = diffMap[diffSel];
+  if(diffSel==='random') diffIdx=Math.floor(Math.random()*4);
+  var diffNames = ['Easy','Medium','Hard','Deadly'];
+
+  var t = XP_THRES[level]||XP_THRES[1];
+  var budget = t[diffIdx]*partySize;
+
+  lastEncParams = {partySize,level,diffSel,env};
+
+  // Filter monsters by environment
+  var pool = MONSTERS.slice();
+  if(env!=='any'){
+    var envTypes=ENV_TYPES[env]||[];
+    pool=pool.filter(function(m){
+      var ty=(m.ty||'').toLowerCase();
+      return envTypes.some(function(et){return ty.indexOf(et)!==-1;});
+    });
+    if(pool.length<5) pool=MONSTERS.slice(); // fallback
+  }
+
+  // Only monsters with full stat blocks
+  pool=pool.filter(function(m){return m.ac&&m.hp&&m.cr>0;});
+
+  // Try to build an encounter within budget
+  var enc = buildEncounterFromBudget(pool, budget, partySize);
+  lastEncounter = enc;
+  showEncResult(enc, partySize, level, diffNames[diffIdx]);
+}
+
+function buildEncounterFromBudget(pool, budget, partySize) {
+  // Try different monster counts (1..8) and pick a combination that fits
+  var best = [];
+  var maxTries = 40;
+
+  for (var t=0;t<maxTries;t++) {
+    // Pick a random monster from pool
+    var m = pool[Math.floor(Math.random()*pool.length)];
+    var mxp = CR_XP[m.cr]||10;
+    
+    // How many can we fit?
+    var maxCount = 1;
+    for (var n=1;n<=12;n++) {
+      var adj = mxp * n * getMultiplier(n);
+      if(adj <= budget*1.2) maxCount=n;
+      else break;
+    }
+    var count = Math.max(1,Math.min(maxCount, Math.round(budget/(mxp*getMultiplier(maxCount)))+1));
+    count = Math.min(count,12);
+
+    var adjXP = mxp * count * getMultiplier(count);
+    if (adjXP >= budget*0.6 && adjXP <= budget*1.3) {
+      // Good match — maybe add a second monster type for variety
+      var result = [{monster:m, count:count}];
+      if (count > 2 && Math.random()>0.5) {
+        // Split: reduce first monster, add a boss
+        var half = Math.max(1,Math.floor(count/2));
+        var remaining = budget - mxp*half*getMultiplier(half);
+        var boss = pool.filter(function(m2){
+          var bxp=CR_XP[m2.cr]||10;
+          return m2.n!==m.n && bxp<=remaining*1.4 && bxp>=remaining*0.3;
+        });
+        if (boss.length) {
+          var b = boss[Math.floor(Math.random()*boss.length)];
+          result = [{monster:m,count:half},{monster:b,count:1}];
+        }
+      }
+      if (result.length > best.length || (adjXP>=budget*0.7&&adjXP<=budget*1.1)) {
+        best = result;
+        if (adjXP>=budget*0.7 && adjXP<=budget*1.1) break;
+      }
+    }
+  }
+
+  // Fallback: just pick one monster
+  if (!best.length) {
+    var fb = pool[Math.floor(Math.random()*pool.length)];
+    best = [{monster:fb,count:1}];
+  }
+  return best;
+}
+
+function generateManual() {
+  var crSel  = document.getElementById('enc-cr').value;
+  var typSel = document.getElementById('enc-type').value;
+  var num    = parseInt(document.getElementById('enc-num').value)||1;
+  var partySize = parseInt(document.getElementById('enc-party').value)||4;
+  var level     = parseInt(document.getElementById('enc-level').value)||5;
+
+  var pool = MONSTERS.filter(function(m){return m.ac&&m.hp;});
+  if(crSel!=='any'){
+    var crF=parseFloat(crSel);
+    pool=pool.filter(function(m){return Math.abs(m.cr-crF)<0.01;});
+  }
+  if(typSel!=='any'){
+    pool=pool.filter(function(m){return (m.ty||'').toLowerCase().indexOf(typSel)!==-1;});
+  }
+  if(!pool.length){alert('No monsters match those filters.');return;}
+
+  var m = pool[Math.floor(Math.random()*pool.length)];
+  lastEncounter=[{monster:m,count:num}];
+  lastEncParams={partySize,level};
+  var totalXP = (CR_XP[m.cr]||10)*num*getMultiplier(num);
+  var diff=difficultyLabel(totalXP,partySize,level);
+  showEncResult(lastEncounter, partySize, level, diff.d);
+}
+
+function showEncResult(enc, partySize, level, diffName) {
+  var totalRawXP=0, totalAdjXP=0, totalCount=0;
+  enc.forEach(function(e){
+    var mxp=CR_XP[e.monster.cr]||10;
+    totalRawXP+=mxp*e.count;
+    totalCount+=e.count;
+  });
+  var multi=getMultiplier(totalCount);
+  totalAdjXP=Math.round(totalRawXP*multi);
+  var diff=difficultyLabel(totalAdjXP,partySize,level);
+
+  var html='';
+  enc.forEach(function(e){
+    var m=e.monster;
+    var mxp=CR_XP[m.cr]||10;
+    html+='<div class="enc-monster-row">'
+      +'<div class="enc-monster-name">'
+        +esc(e.count>1?e.count+'× ':'')+esc(m.n)
+        +buildStatTooltip(m)
+      +'</div>'
+      +'<span style="font-size:.75rem;color:var(--il);white-space:nowrap;">CR '+m.cr+' · '+(mxp*e.count).toLocaleString()+' XP</span>'
+    +'</div>';
+  });
+  document.getElementById('enc-monsters').innerHTML=html;
+  document.getElementById('enc-title').textContent=diffName+' Encounter ('+partySize+' players, Level '+level+')';
+
+  // XP bar
+  var t=XP_THRES[level]||XP_THRES[1];
+  var deadlyThresh=t[3]*partySize;
+  var pct=Math.min(100,(totalAdjXP/deadlyThresh)*100);
+  var xpHtml='<div style="display:flex;justify-content:space-between;margin-bottom:.2rem;">'
+    +'<span>Adjusted XP: <strong>'+totalAdjXP.toLocaleString()+'</strong> (×'+multi+' multiplier)</span>'
+    +'<span class="difficulty-badge diff-'+diff.c+'">'+diff.d+'</span>'
+    +'</div>'
+    +'<div class="xp-bar-wrap"><div class="xp-bar" style="width:'+pct+'%;background:'+({trivial:'#666',easy:'#1a5c2a',medium:'#c9973a',hard:'#b85000',deadly:'#8b1a1a'}[diff.c]||'#8b1a1a')+'"></div></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-top:.15rem;">'
+    +'<span style="color:var(--green)">Easy: '+(t[0]*partySize).toLocaleString()+'</span>'
+    +'<span>Medium: '+(t[1]*partySize).toLocaleString()+'</span>'
+    +'<span>Hard: '+(t[2]*partySize).toLocaleString()+'</span>'
+    +'<span style="color:var(--cr)">Deadly: '+(t[3]*partySize).toLocaleString()+'</span>'
+    +'</div>';
+  document.getElementById('xp-meter').innerHTML=xpHtml;
+
+  document.getElementById('enc-result').style.display='block';
+  updatePartyBudget();
+}
+
+function buildStatTooltip(m){
+  if(!m.str) return '';
+  var html='<div class="stat-tooltip">'
+    +'<h4>'+m.n+'</h4>'
+    +'<div style="font-size:.72rem;color:rgba(244,232,193,.5);margin-bottom:.35rem;">'+m.sz+' '+m.ty+' · '+m.al+'</div>'
+    +'<div style="margin-bottom:.3rem;font-size:.78rem;"><strong>AC</strong> '+m.acd+' &nbsp; <strong>HP</strong> '+m.hpd+' &nbsp; <strong>Speed</strong> '+m.sp+'</div>'
+    +'<div class="stat-row">';
+  ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(s,i){
+    var key=['str','dex','con','int','wis','cha'][i];
+    var val=parseInt(m[key])||10;
+    var mod=Math.floor((val-10)/2);
+    html+='<div class="stat-block"><div class="sv">'+s+'</div><div class="vl">'+val+' ('+(mod>=0?'+':'')+mod+')</div></div>';
+  });
+  html+='</div>';
+  if(m.sv) html+='<div style="font-size:.7rem;margin-top:.2rem;"><strong>Saves</strong> '+m.sv+'</div>';
+  if(m.sk) html+='<div style="font-size:.7rem;"><strong>Skills</strong> '+m.sk+'</div>';
+  if(m.se) html+='<div style="font-size:.7rem;"><strong>Senses</strong> '+m.se+'</div>';
+  html+='</div>';
+  return html;
+}
+
+function rerollEncounter(){
+  if(lastEncParams.diffSel!==undefined) generateEncounter();
+  else generateManual();
+}
+
+function addEncounterToTracker(){
+  if(!lastEncounter.length) return;
+  lastEncounter.forEach(function(e){ addMonsterEntry(e.monster, e.count); });
+  log('Added encounter to tracker: '+lastEncounter.map(function(e){return e.count+'× '+e.monster.n;}).join(', '));
+}
+
+function updatePartyBudget(){
+  var partySize=parseInt(document.getElementById('enc-party').value)||4;
+  var level=parseInt(document.getElementById('enc-level').value)||5;
+  var t=XP_THRES[level]||XP_THRES[1];
+  var html='<table style="width:100%;font-size:.8rem;border-collapse:collapse;">';
+  ['Easy','Medium','Hard','Deadly'].forEach(function(d,i){
+    html+='<tr><td style="padding:.15rem 0;color:var(--il);">'+d+'</td>'
+      +'<td style="text-align:right;font-weight:600;color:var(--ink);">'+(t[i]*partySize).toLocaleString()+' XP</td></tr>';
+  });
+  html+='</table>';
+  document.getElementById('party-budget').innerHTML=html;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILS
+───────────────────────────────────────────────────────────────────────────── */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Init
+updatePartyBudget();
+document.getElementById('enc-party').addEventListener('input',updatePartyBudget);
+document.getElementById('enc-level').addEventListener('change',updatePartyBudget);
+</script>
+</body>
+</html>
