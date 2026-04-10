@@ -3,772 +3,335 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Character Forge | Generators</title>
+<title>Character Forge | DM Generators</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--p:#f4e8c1;--pd:#e8d5a0;--ink:#1a1209;--il:#3d2b1a;--cr:#8b1a1a;--crl:#b52a2a;--go:#c9973a;--gl:#e8b84b;--green:#1a5c2a;--bg:#1a1209;}
+:root{--p:#f4e8c1;--pd:#e8d5a0;--ink:#1a1209;--il:#3d2b1a;--cr:#8b1a1a;--crl:#b52a2a;--go:#c9973a;--gl:#e8b84b;--bg:#1a1209;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 20%,rgba(139,26,26,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(201,151,58,.08) 0%,transparent 60%);min-height:100vh;font-family:"Crimson Pro",serif;color:var(--ink);padding:2rem 1rem 4rem;}
 .hdr{text-align:center;margin-bottom:2rem;}
 .hdr h1{font-family:"Cinzel",serif;font-weight:900;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--gl);letter-spacing:.08em;text-shadow:0 2px 24px rgba(201,151,58,.4);}
 .hdr p{color:var(--pd);font-style:italic;font-size:1.05rem;margin-top:.3rem;opacity:.7;}
-.dv{width:280px;height:2px;margin:.8rem auto;background:linear-gradient(90deg,transparent,var(--go),transparent);position:relative;}
-.dv::before{content:"\2694";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--bg);padding:0 .6rem;color:var(--go);}
+.dv{width:280px;height:2px;margin:.8rem auto;background:linear-gradient(90deg,transparent,var(--go),transparent);}
 .back{display:inline-block;margin-bottom:1rem;font-family:"Cinzel",serif;font-size:.7rem;letter-spacing:.1em;color:var(--go);text-decoration:none;opacity:.7;}
 .back:hover{opacity:1;}
-.shell{max-width:1000px;margin:0 auto;background:var(--p);border-radius:4px;box-shadow:0 0 0 3px var(--go),0 0 0 6px var(--cr),0 8px 48px rgba(0,0,0,.7);overflow:hidden;}
+.shell{max-width:1040px;margin:0 auto;background:var(--p);border-radius:4px;box-shadow:0 0 0 3px var(--go),0 0 0 6px var(--cr),0 8px 48px rgba(0,0,0,.7);overflow:hidden;}
 .tabs{display:flex;background:rgba(26,18,9,.96);border-bottom:2px solid var(--go);overflow-x:auto;}
-.tb{flex:1;min-width:100px;padding:.75rem .35rem;font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(244,232,193,.5);background:transparent;border:none;cursor:pointer;transition:all .18s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.tb{flex:1;min-width:90px;padding:.75rem .3rem;font-family:"Cinzel",serif;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;color:rgba(244,232,193,.5);background:transparent;border:none;cursor:pointer;transition:all .18s;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
 .tb:hover{color:var(--gl);}
 .tb.on{color:var(--gl);border-bottom-color:var(--go);}
-.tb .ti{display:block;font-size:1.1rem;margin-bottom:.18rem;}
-.panel{display:none;padding:1.6rem 1.8rem 2rem;}
+.tb .ti{display:block;font-size:1rem;margin-bottom:.15rem;}
+.panel{display:none;padding:1.5rem 1.8rem 2rem;}
 .panel.on{display:block;}
-.sec{font-family:"Cinzel",serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cr);margin-bottom:.55rem;padding-bottom:.3rem;border-bottom:1px solid rgba(139,26,26,.18);}
-.hint{font-size:.85rem;color:var(--il);font-style:italic;margin-bottom:.9rem;line-height:1.5;}
-/* Controls */
+.sec{font-family:"Cinzel",serif;font-size:.63rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cr);margin-bottom:.55rem;padding-bottom:.28rem;border-bottom:1px solid rgba(139,26,26,.18);}
+.hint{font-size:.86rem;color:var(--il);font-style:italic;margin-bottom:.9rem;line-height:1.5;}
 .row{display:flex;gap:.6rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.8rem;}
 .field{flex:1;min-width:100px;}
 label{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cr);display:block;margin-bottom:.25rem;}
-select,input{padding:.45rem .65rem;border:1px solid rgba(139,26,26,.28);border-radius:3px;background:rgba(248,237,205,.7);font-family:"Crimson Pro",serif;font-size:.92rem;color:var(--ink);outline:none;width:100%;}
+select,input{padding:.44rem .62rem;border:1px solid rgba(139,26,26,.28);border-radius:3px;background:rgba(248,237,205,.7);font-family:"Crimson Pro",serif;font-size:.92rem;color:var(--ink);outline:none;width:100%;}
 select:focus,input:focus{border-color:var(--cr);}
-.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1.1rem;font-family:"Cinzel",serif;font-size:.65rem;letter-spacing:.09em;border-radius:3px;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap;}
-.btn-primary{background:var(--cr);color:var(--p);border-color:var(--go);}
-.btn-primary:hover{background:var(--crl);}
-.btn-secondary{background:transparent;color:var(--cr);border-color:rgba(139,26,26,.32);}
-.btn-secondary:hover{background:rgba(139,26,26,.07);}
-.btn-wide{width:100%;justify-content:center;margin-bottom:.5rem;}
-/* Result card */
-.result{background:rgba(201,151,58,.06);border:1px solid rgba(201,151,58,.25);border-radius:4px;padding:1rem 1.2rem;margin-top:.9rem;display:none;}
-.result.show{display:block;}
-.result-title{font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go);margin-bottom:.5rem;}
-.result-body{font-size:.95rem;line-height:1.65;color:var(--ink);}
-.result-body h3{font-family:"Cinzel",serif;font-size:1rem;color:var(--cr);margin:.6rem 0 .25rem;}
-.result-body .lbl{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cr);display:block;margin-top:.5rem;}
-.result-body p{margin:.15rem 0;}
-.result-body .aside{font-size:.82rem;color:var(--il);font-style:italic;margin-top:.3rem;}
-.spinner{display:inline-block;width:1rem;height:1rem;border:2px solid rgba(139,26,26,.2);border-top-color:var(--cr);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:.4rem;}
-@keyframes spin{to{transform:rotate(360deg);}}
-/* Trinket grid */
-.trinket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-top:.8rem;}
-.trinket-card{background:rgba(248,237,205,.6);border:1px solid rgba(139,26,26,.14);border-radius:3px;padding:.55rem .75rem;font-size:.88rem;line-height:1.4;}
-.trinket-card .t-num{font-family:"Cinzel",serif;font-size:.58rem;color:var(--il);opacity:.5;}
-/* Game board */
-.game-area{background:rgba(26,18,9,.04);border:1px solid rgba(139,26,26,.18);border-radius:4px;padding:1rem 1.2rem;margin-top:.8rem;}
-.dice-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0;}
-.die{width:3rem;height:3rem;display:flex;align-items:center;justify-content:center;font-family:"Cinzel",serif;font-size:1.2rem;font-weight:700;background:var(--p);border:2px solid rgba(139,26,26,.3);border-radius:6px;color:var(--cr);transition:all .3s;}
-.die.rolling{animation:shake .3s;}
-@keyframes shake{0%,100%{transform:rotate(0);}25%{transform:rotate(-8deg);}75%{transform:rotate(8deg);}}
-.score-board{display:flex;gap:1rem;margin:.6rem 0;flex-wrap:wrap;}
-.score-box{text-align:center;background:rgba(248,237,205,.6);border:1px solid rgba(139,26,26,.15);border-radius:4px;padding:.4rem .8rem;min-width:80px;}
-.score-label{font-family:"Cinzel",serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--il);}
-.score-val{font-family:"Cinzel",serif;font-size:1.1rem;font-weight:700;color:var(--cr);}
-.game-log{max-height:120px;overflow-y:auto;font-size:.82rem;color:var(--il);margin-top:.5rem;background:rgba(0,0,0,.03);border-radius:3px;padding:.4rem .6rem;}
-.game-log p{border-bottom:1px solid rgba(139,26,26,.05);padding:.1rem 0;}
-.tag{display:inline-block;font-size:.7rem;padding:.1rem .45rem;border-radius:99px;border:1px solid rgba(139,26,26,.2);color:var(--il);margin:.1rem;}
-@media(max-width:600px){.panel{padding:1.1rem 1rem 1.5rem;}.tb .ti{display:none;}.tb{font-size:.6rem;padding:.6rem .3rem;}}
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.48rem 1.1rem;font-family:"Cinzel",serif;font-size:.65rem;letter-spacing:.09em;border-radius:3px;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap;}
+.btn-p{background:var(--cr);color:var(--p);border-color:var(--go);}
+.btn-p:hover{background:var(--crl);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.55rem;margin-top:.8rem;}
+.card{background:rgba(248,237,205,.6);border:1px solid rgba(139,26,26,.14);border-radius:3px;padding:.6rem .8rem;font-size:.88rem;line-height:1.45;}
+.card .cn{font-family:"Cinzel",serif;font-size:.58rem;color:var(--il);opacity:.45;}
+.res{background:rgba(201,151,58,.06);border:1px solid rgba(201,151,58,.25);border-radius:4px;padding:1rem 1.2rem;margin-top:.9rem;display:none;}
+.res.show{display:block;}
+.res-t{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go);margin-bottom:.55rem;}
+.res-body{font-size:.93rem;line-height:1.65;color:var(--ink);}
+.res-body h3{font-family:"Cinzel",serif;font-size:1rem;color:var(--cr);margin:.6rem 0 .2rem;}
+.lbl{font-family:"Cinzel",serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cr);display:block;margin-top:.55rem;}
+.res-body p{margin:.12rem 0;}
+.res-body ul{margin:.2rem 0 .2rem 1rem;}
+.res-body li{margin:.1rem 0;}
+.aside{font-size:.82rem;color:var(--il);font-style:italic;margin-top:.25rem;}
+.game-card{border:1px solid rgba(139,26,26,.2);border-radius:4px;padding:1rem 1.2rem;margin-top:.8rem;}
+.game-card h3{font-family:"Cinzel",serif;font-size:.9rem;color:var(--cr);margin-bottom:.45rem;}
+.game-card .rules{font-size:.88rem;line-height:1.6;color:var(--ink);margin-bottom:.6rem;}
+.game-card .rolls{padding:.6rem .8rem;background:rgba(139,26,26,.05);border-radius:3px;font-size:.85rem;}
+.game-card .rolls b{color:var(--cr);}
+@media(max-width:600px){.panel{padding:1.1rem 1rem 1.5rem;}.tb .ti{display:block;font-size:.85rem;}.tb{font-size:.52rem;}}
 </style>
 </head>
 <body>
 <div class="hdr"><h1>Character Forge</h1><div class="dv"></div><p>DM Generators</p></div>
-<div style="max-width:1000px;margin:0 auto 1rem"><a href="index.html" class="back">\u2190 Back to Home</a></div>
+<div style="max-width:1040px;margin:0 auto 1rem"><a href="index.html" class="back">&#8592; Back to Home</a></div>
 <div class="shell">
 <div class="tabs">
-  <button class="tb on" onclick="showTab('trinkets')"><span class="ti">\uD83D\uDDD1</span>Trinkets</button>
-  <button class="tb" onclick="showTab('npc')"><span class="ti">\uD83E\uDDD9</span>NPC &amp; Quests</button>
-  <button class="tb" onclick="showTab('books')"><span class="ti">\uD83D\uDCDA</span>Books &amp; Lore</button>
-  <button class="tb" onclick="showTab('town')"><span class="ti">\uD83C\uDFD8</span>Town &amp; Tavern</button>
-  <button class="tb" onclick="showTab('games')"><span class="ti">\uD83C\uDFB2</span>Tavern Games</button>
+  <button class="tb on" onclick="showTab('trinkets')"><span class="ti">&#128465;</span>Trinkets</button>
+  <button class="tb" onclick="showTab('npc')"><span class="ti">&#129497;</span>NPCs</button>
+  <button class="tb" onclick="showTab('quests')"><span class="ti">&#128196;</span>Quests</button>
+  <button class="tb" onclick="showTab('books')"><span class="ti">&#128218;</span>Books</button>
+  <button class="tb" onclick="showTab('town')"><span class="ti">&#127960;</span>Town</button>
+  <button class="tb" onclick="showTab('games')"><span class="ti">&#127922;</span>Games</button>
 </div>
 
-<!-- ═══════════════════════ TRINKETS ═══════════════════════ -->
 <div class="panel on" id="panel-trinkets">
   <div class="sec">Useless Stuff Generator</div>
-  <p class="hint">Roll for mundane junk, curiosities, and personal effects a player might find looting a body, rummaging through a drawer, or poking around a campsite. None of it is valuable. All of it is interesting.</p>
+  <p class="hint">Roll for mundane junk found while looting a body, a drawer, or a campsite. Nothing valuable. Everything interesting.</p>
   <div class="row">
-    <div class="field"><label>How many</label>
-      <select id="t-count"><option>1</option><option>3</option><option selected>5</option><option>10</option><option>20</option></select>
-    </div>
+    <div class="field"><label>Count</label>
+      <select id="t-count"><option>1</option><option>3</option><option selected>5</option><option>10</option><option>20</option></select></div>
     <div class="field"><label>Source</label>
-      <select id="t-source">
-        <option value="any">Any</option><option value="humanoid">Humanoid / Bandit</option>
+      <select id="t-src"><option value="any">Any</option><option value="humanoid">Bandit / Humanoid</option>
         <option value="noble">Noble / Merchant</option><option value="cultist">Cultist / Villain</option>
-        <option value="traveler">Traveler / Pilgrim</option><option value="dungeon">Dungeon Detritus</option>
-        <option value="nature">Nature / Beast Lair</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" onclick="rollTrinkets()">\uD83C\uDFB2 Roll Junk</button>
+        <option value="traveler">Traveler</option><option value="dungeon">Dungeon Detritus</option>
+        <option value="nature">Beast Lair / Nature</option></select></div>
+    <button class="btn btn-p" onclick="rollTrinkets()">&#127922; Roll</button>
   </div>
-  <div class="trinket-grid" id="trinket-output"></div>
+  <div class="card-grid" id="trinket-out"></div>
 </div>
 
-<!-- ═══════════════════════ NPC & QUESTS ═══════════════════════ -->
 <div class="panel" id="panel-npc">
-  <div class="sec">NPC &amp; Quest Hook Generator</div>
-  <p class="hint">Generates a named NPC with a background and personality, plus a quest hook, motivation, and rumor — ready to drop into any scene.</p>
+  <div class="sec">NPC Generator</div>
+  <p class="hint">Generate a named NPC with appearance, background, personality, and a secret.</p>
   <div class="row">
-    <div class="field"><label>NPC Role</label>
-      <select id="npc-role">
-        <option value="any">Any Role</option>
+    <div class="field"><label>Role</label>
+      <select id="npc-role"><option value="any">Any</option>
         <option>Innkeeper</option><option>Merchant</option><option>Guard Captain</option>
-        <option>Wizard</option><option>Priest</option><option>Thief</option>
-        <option>Noble</option><option>Farmer</option><option>Hermit</option>
-        <option>Bard</option><option>Blacksmith</option><option>Healer</option>
-        <option>Sailor</option><option>Spy</option><option>Bounty Hunter</option>
-      </select>
-    </div>
-    <div class="field"><label>Tone</label>
-      <select id="npc-tone">
-        <option value="any">Any Tone</option>
-        <option>Friendly &amp; helpful</option><option>Suspicious &amp; guarded</option>
-        <option>Desperate &amp; fearful</option><option>Greedy &amp; scheming</option>
-        <option>Wise &amp; cryptic</option><option>Cheerful &amp; oblivious</option>
-        <option>Bitter &amp; resentful</option><option>Loyal to a fault</option>
-      </select>
-    </div>
-    <div class="field"><label>Setting</label>
-      <select id="npc-setting">
-        <option value="any">Any Setting</option>
-        <option>Frontier town</option><option>City slums</option><option>Noble court</option>
-        <option>Wilderness road</option><option>Port city</option><option>Underground</option>
-      </select>
-    </div>
+        <option>Wizard</option><option>Priest</option><option>Thief</option><option>Noble</option>
+        <option>Farmer</option><option>Hermit</option><option>Bard</option>
+        <option>Blacksmith</option><option>Healer</option><option>Sailor</option>
+        <option>Spy</option><option>Bounty Hunter</option></select></div>
+    <div class="field"><label>Personality</label>
+      <select id="npc-tone"><option value="any">Any</option>
+        <option>Friendly</option><option>Suspicious</option><option>Desperate</option>
+        <option>Greedy</option><option>Wise</option><option>Cheerful</option>
+        <option>Bitter</option><option>Loyal</option></select></div>
+    <button class="btn btn-p" onclick="genNPC()">&#127922; Generate</button>
   </div>
-  <button class="btn btn-primary btn-wide" onclick="generateNPC()">\uD83E\uDDD9 Generate NPC &amp; Quest</button>
-  <div class="result" id="npc-result">
-    <div class="result-title">\uD83E\uDDD9 NPC Profile</div>
-    <div class="result-body" id="npc-body"></div>
-  </div>
+  <div class="res" id="npc-res"><div class="res-t">&#129497; NPC Profile</div><div class="res-body" id="npc-body"></div></div>
 </div>
 
-<!-- ═══════════════════════ BOOKS & LORE ═══════════════════════ -->
+<div class="panel" id="panel-quests">
+  <div class="sec">Quest Hook Generator</div>
+  <p class="hint">Generate a quest hook with giver, setting, complication, twist, and reward.</p>
+  <div class="row">
+    <div class="field"><label>Type</label>
+      <select id="q-type"><option value="any">Any</option>
+        <option>Rescue</option><option>Retrieval</option><option>Assassination</option>
+        <option>Escort</option><option>Investigation</option><option>Defense</option>
+        <option>Exploration</option><option>Heist</option></select></div>
+    <div class="field"><label>Setting</label>
+      <select id="q-set"><option value="any">Any</option>
+        <option>City slums</option><option>Frontier town</option><option>Noble court</option>
+        <option>Wilderness road</option><option>Port city</option><option>Dungeon</option>
+        <option>Ancient ruin</option></select></div>
+    <button class="btn btn-p" onclick="genQuest()">&#127922; Generate</button>
+  </div>
+  <div class="res" id="q-res"><div class="res-t">&#128196; Quest Hook</div><div class="res-body" id="q-body"></div></div>
+</div>
+
 <div class="panel" id="panel-books">
   <div class="sec">Books &amp; Lore Generator</div>
-  <p class="hint">The players find a book, a scroll, or a carved tablet. What does it say? Generate flavourful one-paragraph lore entries grounded in D&amp;D cosmology.</p>
+  <p class="hint">The players find a book. What does it say? D&amp;D lore grounded in the SRD cosmology.</p>
   <div class="row">
     <div class="field"><label>Subject</label>
-      <select id="book-subject">
-        <option value="any">Any Subject</option>
-        <option>The Nine Hells</option><option>The Abyss &amp; demons</option>
-        <option>Ancient civilizations</option><option>Dragons &amp; dragonkind</option>
-        <option>The Feywild</option><option>The Shadowfell</option>
-        <option>Undead &amp; necromancy</option><option>Divine pantheons</option>
-        <option>Arcane magic &amp; schools</option><option>The Far Realm</option>
-        <option>Planar cosmology</option><option>Famous wizards</option>
-        <option>Monster ecology</option><option>Lost kingdoms</option>
-        <option>Natural philosophy</option>
-      </select>
-    </div>
-    <div class="field"><label>Book Type</label>
-      <select id="book-type">
-        <option value="any">Any Type</option>
+      <select id="bk-sub"><option value="any">Any</option>
+        <option>The Nine Hells</option><option>The Abyss</option><option>Ancient empires</option>
+        <option>Dragons</option><option>The Feywild</option><option>The Shadowfell</option>
+        <option>Undead and necromancy</option><option>Divine pantheons</option>
+        <option>Arcane theory</option><option>The Far Realm</option>
+        <option>Planar cosmology</option><option>Famous mages</option>
+        <option>Monster ecology</option><option>Lost kingdoms</option></select></div>
+    <div class="field"><label>Format</label>
+      <select id="bk-fmt"><option value="any">Any</option>
         <option>Academic treatise</option><option>Personal journal</option>
-        <option>Religious scripture</option><option>Traveler's account</option>
-        <option>Propaganda pamphlet</option><option>Children's tale</option>
-        <option>Encrypted notes</option><option>Poetry collection</option>
+        <option>Religious scripture</option><option>Traveller's account</option>
         <option>Field manual</option><option>Prophecy text</option>
-      </select>
-    </div>
-    <div class="field"><label>Condition</label>
-      <select id="book-condition">
-        <option value="any">Any</option>
-        <option>Pristine</option><option>Water-damaged</option>
-        <option>Burnt at the edges</option><option>Half-translated</option>
-        <option>Written in blood</option><option>Encrypted</option>
-        <option>Illustrated</option><option>Incomplete — missing chapters</option>
-      </select>
-    </div>
+        <option>Children's tale</option><option>Poetry collection</option>
+        <option>Collected correspondence</option></select></div>
+    <button class="btn btn-p" onclick="genBook()">&#127922; Generate</button>
   </div>
-  <button class="btn btn-primary btn-wide" onclick="generateBook()">\uD83D\uDCDA Generate Book</button>
-  <div class="result" id="book-result">
-    <div class="result-title">\uD83D\uDCDA Found Item</div>
-    <div class="result-body" id="book-body"></div>
-  </div>
+  <div class="res" id="bk-res"><div class="res-t">&#128218; Found Book</div><div class="res-body" id="bk-body"></div></div>
 </div>
 
-<!-- ═══════════════════════ TOWN & TAVERN ═══════════════════════ -->
 <div class="panel" id="panel-town">
-  <div class="sec">Town &amp; Tavern Generator</div>
-  <p class="hint">Generate a fully fleshed-out location: who is here, what is for sale, what rumours are circulating, and what is happening right now.</p>
+  <div class="sec">Town &amp; Tavern Snapshot</div>
+  <p class="hint">Generate a location with named NPCs, what is for sale, active scenes, and rumors.</p>
   <div class="row">
-    <div class="field"><label>Location Type</label>
-      <select id="town-type">
-        <option>Roadside tavern</option><option>Town market square</option>
+    <div class="field"><label>Location</label>
+      <select id="tw-loc"><option value="any">Any</option>
+        <option>Roadside tavern</option><option>Town market</option>
         <option>Frontier fort</option><option>Port district</option>
-        <option>Underground thieves guild hall</option><option>Noble manor</option>
-        <option>Village green</option><option>Wizard tower</option>
-        <option>Temple district</option><option>Pirate cove</option>
-      </select>
-    </div>
+        <option>Thieves guild hall</option><option>Noble manor</option>
+        <option>Village green</option><option>Temple district</option></select></div>
     <div class="field"><label>Atmosphere</label>
-      <select id="town-atm">
-        <option value="any">Any</option>
-        <option>Lively &amp; festive</option><option>Tense &amp; suspicious</option>
-        <option>Downtrodden &amp; poor</option><option>Wealthy &amp; corrupt</option>
-        <option>Haunted by recent tragedy</option><option>Under military occupation</option>
-        <option>Bustling trade hub</option><option>Secretive &amp; closed off</option>
-      </select>
-    </div>
+      <select id="tw-atm"><option value="any">Any</option>
+        <option>Festive</option><option>Tense</option><option>Downtrodden</option>
+        <option>Wealthy</option><option>Haunted by tragedy</option>
+        <option>Occupied by soldiers</option><option>Thriving trade</option></select></div>
+    <button class="btn btn-p" onclick="genTown()">&#127922; Generate</button>
   </div>
-  <button class="btn btn-primary btn-wide" onclick="generateTown()">\uD83C\uDFD8 Generate Location</button>
-  <div class="result" id="town-result">
-    <div class="result-title">\uD83C\uDFD8 Location Report</div>
-    <div class="result-body" id="town-body"></div>
-  </div>
+  <div class="res" id="tw-res"><div class="res-t">&#127960; Location Report</div><div class="res-body" id="tw-body"></div></div>
 </div>
 
-<!-- ═══════════════════════ TAVERN GAMES ═══════════════════════ -->
 <div class="panel" id="panel-games">
   <div class="sec">Tavern Mini-Games</div>
-  <p class="hint">Pick a game and play it directly. Skill checks use the displayed DC — ask your DM if a proficiency applies. Stakes and bets are up to the table.</p>
+  <p class="hint">Pick a game and read the rules. All dice are rolled physically at the table.</p>
   <div class="row">
     <div class="field"><label>Game</label>
-      <select id="game-sel" onchange="loadGame()">
-        <option value="dragon">Dragon's Teeth (dice)</option>
-        <option value="cups">Three Cups (bluff)</option>
-        <option value="fingers">Finger Fives (speed)</option>
-        <option value="tower">Tower of Coins (dex)</option>
-        <option value="riddle">The Riddler's Wager (int)</option>
-        <option value="arm">Arm of the Bear (str)</option>
+      <select id="gm-sel" onchange="showGame()">
+        <option value="dragon">Dragon's Teeth (bluffing dice)</option>
+        <option value="cups">Three Cups (shell game)</option>
+        <option value="arm">Arm of the Bear (arm wrestling)</option>
+        <option value="riddle">The Riddler's Wager</option>
+        <option value="tower">Tower of Coins (dexterity)</option>
+        <option value="fingers">Finger Fives (speed guessing)</option>
       </select>
     </div>
   </div>
-  <div class="game-area" id="game-area"></div>
+  <div id="game-display"></div>
 </div>
-
-</div><!-- /shell -->
-
-<div style="max-width:1000px;margin:1rem auto 0;text-align:center;font-size:.74rem;color:rgba(244,232,193,.28);font-style:italic;font-family:'Crimson Pro',serif;">
-  NPC, book, and town content generated by Claude AI on demand. Trinkets and games run locally.
 </div>
 
 <script>
-/* ─── TAB SWITCHER ─────────────────────────────────────────────────────────── */
-function showTab(id) {
+var TRINKETS={"humanoid":["A bent copper coin with a strange sigil filed into it","A love letter never sent, in faded ink","Three teeth strung on a leather cord","Half a map with the other half missing","A flask still warm, containing something herbal","A wanted poster for someone who looks like one of the PCs","A child's drawing of a dragon, signed Marta","Seven dice, all showing sixes","A sock with a hole, inexplicably laundered","A receipt for one barrel of eels","A key that fits no lock anyone has seen","Pressed flowers between two wax-sealed parchment sheets","A tiny bottle of ink that smells of lavender","A religious pamphlet with blasphemies scrawled in the margins","A list of names with half crossed out","A locket containing a portrait of a goat","A thumb-sized carved wooden bear","A note reading: Do not let them find the third one","A small mirror, cracked diagonally","A single earring shaped like a crescent moon"],"noble":["A monogrammed silk handkerchief initialed V.T.H.","A theatre programme from six months ago","A half-finished complaint letter to the city watch","A signet ring stamp with no ring","A tiny vial of perfume, nearly empty","A losing betting slip from a horse race","A list of small debts owed to the same name","A dried rose petal in a velvet pouch","A very convincing fake gemstone","An invitation to a party that happened last year","A miniature ivory chess queen","A wax seal depicting a fish swallowing a sword","A tailor's receipt for alterations never collected","A tiny portrait of someone stern","A monocle with no prescription","A small notebook full of now-embarrassing gossip"],"cultist":["A tooth carved into the shape of an eye","Three black candle stubs bound with wire","A list of names paired with astronomical events","A small idol of featureless stone, oddly warm","A mirror that reflects light strangely","A dried herb bundle smelling faintly of rot","Parchment with a circle of the same name repeated","A coded letter referencing the third convergence","A medallion bearing a symbol no scholar recognises","Dried fungi ground into powder in a paper envelope","A small doll wrapped in black thread","An iron ring that feels heavier than it should","A map of the moon's phases for the next decade","A brass compass that does not point north","A journal with the last ten pages torn out","A clay tablet inscribed with something written backwards"],"traveler":["A road-worn boot-polishing kit, nearly empty","A folded map of a place no one recognises","Three copper coins from three different countries","A smooth river stone, handled for years","A wooden comb with two teeth missing","A travel journal written in terrible poetry","Half a stick of dried meat, still edible probably","A foreign coin kept lucky-side up by habit","A needle and thread kit, well-used","A small collection of pressed leaves","A letter of introduction to someone already dead","A handwritten recipe in an unknown language","A canteen with something at the bottom that is not water","A small unfinished horse figurine","A chipped prayer bead string","A road toll receipt dated three months ago"],"dungeon":["A crumbled brick with a face scratched into it","A piece of rope frayed at both ends","A torch stub burnt to almost nothing","An iron spike, slightly bent","A pottery shard painted in an unplaceable style","A dried rat, carefully preserved","A piece of chalk worn to a nub","A ball of string with more knots than string","A corroded coin of uncertain denomination","A rusty hook with no clear purpose","A moth-eaten sack containing only dust","A broken lantern with the lens intact","A stone tile carefully removed from a floor","A collection of small bones arranged deliberately","A damp scroll with partial text remaining","A pickaxe head with no handle"],"nature":["A bird skull, bleached and small","A nest woven with unusual care, now empty","Fur caught on a sharp twig, soft and unusual","A dried honeycomb section with no honey","Three smooth pebbles painted with dots","A fragment of shed antler","A seed pod that rattles when shaken","A coil of shed snakeskin","A large feather from no known bird species","A dried mushroom cluster strung on vine","A chunk of amber containing a tiny fly","A piece of bark with claw marks tallied into it","A tiny empty turtle shell","River clay hardened into a rough shape","A piece of obsidian chipped into an imperfect circle","An empty wasp nest, still intact"],"any":["A bent copper coin with a strange sigil filed into it","A love letter never sent, in faded ink","Three teeth strung on a leather cord","Half a map with the other half missing","A flask still warm, containing something herbal","A wanted poster for someone who looks like one of the PCs","A child's drawing of a dragon, signed Marta","Seven dice, all showing sixes","A sock with a hole, inexplicably laundered","A receipt for one barrel of eels","A key that fits no lock anyone has seen","Pressed flowers between two wax-sealed parchment sheets","A tiny bottle of ink that smells of lavender","A religious pamphlet with blasphemies scrawled in the margins","A list of names with half crossed out","A locket containing a portrait of a goat","A thumb-sized carved wooden bear","A note reading: Do not let them find the third one","A small mirror, cracked diagonally","A single earring shaped like a crescent moon","A monogrammed silk handkerchief initialed V.T.H.","A theatre programme from six months ago","A half-finished complaint letter to the city watch","A signet ring stamp with no ring","A tiny vial of perfume, nearly empty","A losing betting slip from a horse race","A list of small debts owed to the same name","A dried rose petal in a velvet pouch","A very convincing fake gemstone","An invitation to a party that happened last year","A miniature ivory chess queen","A wax seal depicting a fish swallowing a sword","A tailor's receipt for alterations never collected","A tiny portrait of someone stern","A monocle with no prescription","A small notebook full of now-embarrassing gossip","A tooth carved into the shape of an eye","Three black candle stubs bound with wire","A list of names paired with astronomical events","A small idol of featureless stone, oddly warm","A mirror that reflects light strangely","A dried herb bundle smelling faintly of rot","Parchment with a circle of the same name repeated","A coded letter referencing the third convergence","A medallion bearing a symbol no scholar recognises","Dried fungi ground into powder in a paper envelope","A small doll wrapped in black thread","An iron ring that feels heavier than it should","A map of the moon's phases for the next decade","A brass compass that does not point north","A journal with the last ten pages torn out","A clay tablet inscribed with something written backwards","A road-worn boot-polishing kit, nearly empty","A folded map of a place no one recognises","Three copper coins from three different countries","A smooth river stone, handled for years","A wooden comb with two teeth missing","A travel journal written in terrible poetry","Half a stick of dried meat, still edible probably","A foreign coin kept lucky-side up by habit","A needle and thread kit, well-used","A small collection of pressed leaves","A letter of introduction to someone already dead","A handwritten recipe in an unknown language","A canteen with something at the bottom that is not water","A small unfinished horse figurine","A chipped prayer bead string","A road toll receipt dated three months ago","A crumbled brick with a face scratched into it","A piece of rope frayed at both ends","A torch stub burnt to almost nothing","An iron spike, slightly bent","A pottery shard painted in an unplaceable style","A dried rat, carefully preserved","A piece of chalk worn to a nub","A ball of string with more knots than string","A corroded coin of uncertain denomination","A rusty hook with no clear purpose","A moth-eaten sack containing only dust","A broken lantern with the lens intact","A stone tile carefully removed from a floor","A collection of small bones arranged deliberately","A damp scroll with partial text remaining","A pickaxe head with no handle","A bird skull, bleached and small","A nest woven with unusual care, now empty","Fur caught on a sharp twig, soft and unusual","A dried honeycomb section with no honey","Three smooth pebbles painted with dots","A fragment of shed antler","A seed pod that rattles when shaken","A coil of shed snakeskin","A large feather from no known bird species","A dried mushroom cluster strung on vine","A chunk of amber containing a tiny fly","A piece of bark with claw marks tallied into it","A tiny empty turtle shell","River clay hardened into a rough shape","A piece of obsidian chipped into an imperfect circle","An empty wasp nest, still intact"]};
+var NPC_DATA={"first_m":["Aldric","Brom","Cador","Desmond","Edric","Fenwick","Gorin","Harwick","Jorath","Keldan","Lorcan","Maddox","Norvin","Oswin","Phelan","Radulf","Sever","Torben","Ulric","Vance","Aldous","Bertram","Cedric","Darian","Elias","Rolf","Sven","Tomas","Willem","Yorath"],"first_f":["Aelindra","Brynn","Callista","Dara","Elspeth","Fiona","Gwyneira","Hessa","Isadora","Jaina","Kira","Lirien","Maren","Nessa","Ophelia","Petra","Rowena","Seraphina","Talia","Una","Vesper","Willa","Amara","Beldra","Cessa","Delvina","Evra","Mira","Rhea","Selene"],"last":["Ashvale","Blackthorn","Coldwater","Dunmore","Everstep","Farrow","Greymantle","Holt","Ironwood","Kettrick","Longshadow","Muirfield","Nighthollow","Oldbury","Prentice","Redstone","Saltmarsh","Thornwall","Underhill","Vane","Whitlock","Yarrow","Crestfall","Drake","Elwood","Forge","Gallows","Hawke","Inkwell","Jast"],"appearance":["Weathered face and calloused hands that tell of hard years","Unusually tall with piercing grey eyes and a permanent squint","Missing two fingers on the left hand, never explains why","Speaks in a low voice and never quite meets your gaze","Elaborately tattooed arms, mostly covered by sleeves","Limps slightly on the right leg but never mentions it","Impeccably dressed despite clearly modest means","Hair gone white young; claims it happened in one night","A scar runs from ear to jaw on the left side","Laughs too loudly at their own jokes","Carries the faint smell of woodsmoke everywhere","Fidgets constantly with a copper ring, never removes it"],"background":["Spent seven years at sea before returning home to a family that had moved on","Trained as a priest but lost faith after surviving something they will not name","Grew up in the capital, fled after a scandal that was not entirely their fault","Was a soldier in the last war; wears no insignia and prefers it that way","Inherited a small business and ran it into the ground; has been clawing back ever since","Claims to have met a dragon once. The story changes every time.","Studied magic for three years before realising they had no talent for it","Lost everything in a fire twelve years ago. Started again from nothing.","Has three children in three different cities, none of them know about the others","Was a thief, then caught, then pardoned, and is trying very hard to go straight"],"personality":["Speaks bluntly and takes it badly when others do the same","Warm and generous to a fault; would give their last coin to a stranger","Never disagrees openly but finds quiet ways to undermine decisions they dislike","Laughs at danger and takes everything else very seriously","Painfully honest, not as a virtue, just as an unfortunate trait","Polite to the point of seeming cold; emotions run deep but never surface","Makes every conversation feel like a negotiation, even casual ones","Generous with stories, stingy with facts"],"secret":["Owes a significant debt to a dangerous person and is running out of time","Was present when something terrible happened and did nothing to stop it","Has been sending information to a rival faction for months","Knows the location of something valuable and has told no one","Is not who they say they are; the real person of that name died years ago","Is sick, and has not told anyone, and does not plan to","Recently found something they should have handed in and kept it instead","Is in love with someone entirely inappropriate and is handling it badly"]};
+var QUEST_DATA={"hooks":{"Rescue":["A merchant's daughter was taken by a cult operating from the old mill north of town","A captured knight sits in the dungeon of a lord who refuses release without payment","A group of children followed a mysterious figure into the forest three days ago","A wizard's apprentice vanished mid-experiment; the workshop is still active and dangerous"],"Retrieval":["A signet ring was stolen from a dying noble who needs it to seal his will before midnight","An ancient tome was sold by mistake at an estate auction and the new owner refuses return","A stolen relic is being auctioned in the black market tonight","The town's deed of ownership is in hands of someone who intends to contest it in court"],"Assassination":["A tax collector has been bleeding the village dry for years and certain people want it stopped","A rival merchant is about to testify against a local guild and they would prefer silence","A dangerous cult leader is raising followers in the slums and the guard will not act","An informant who knows too much is about to flee the city"],"Escort":["A merchant needs goods delivered through bandit territory, no questions asked","A witness must reach the capital alive to testify at a trial that will embarrass powerful people","An elderly priest is making a pilgrimage on foot and is being followed","A prisoner transfer went wrong and the players are the only ones who can finish it"],"Investigation":["Three merchants have died the same way in a month. The guard calls it coincidence.","A respected figure has been behaving strangely since returning from a journey north","Livestock are dying near the forest edge and the farmers are getting desperate","A ghost has been seen at the crossroads. Three travellers have disappeared there this month."],"Defense":["A village has received a threatening letter. The lord will not send soldiers in time.","A caravan carrying something valuable has already been attacked twice","The town's well has been poisoned. Someone will try again tonight.","A siege is coming in three days. The garrison has deserted."],"Exploration":["An old map found in an estate sale points to a location no one can identify","A mine collapsed. The workers inside are still alive, a miner's child is certain.","A ship ran aground on an island not on any chart","The road through the pass has been closed for two weeks with no explanation"],"Heist":["Evidence that would free a wrongfully convicted prisoner is locked in the magistrate's office","Something was smuggled into the city and needs to be removed before inspection","A corrupt official keeps a ledger that would end his career, locked in his office","Someone needs to get into a private auction they were not invited to"]},"givers":["A nervous merchant who sweats through everything and keeps looking at the door","An elderly woman with surprisingly sharp eyes and a walking stick she does not seem to need","A guard captain who makes clear this conversation is not official","A child who delivers a message and refuses to say who sent them","A priest who frames everything as a spiritual duty but is clearly terrified","A well-dressed stranger who has been watching the party for an hour before approaching","A gruff dwarf who apologises for asking and then asks anyway","A hooded figure who leaves a coin purse on the table without making eye contact"],"obstacles":["The obvious route is watched by people who are not what they seem","A faction with opposing interests is already working on the same problem","Someone the party trusts is involved in a way they are about to discover","The situation is not what it appeared to be at the start","Getting to the target requires passing through someone else's territory","The timeline is much shorter than expected, something has been moved forward"],"twists":["The person who hired them has lied about why they want this done","The target is not guilty of what they are accused of","A third party is manipulating both sides and benefits from the players being involved","The object or person being sought is not where they were told","Something the party did previously is directly connected to this situation","The resolution requires choosing between two people with legitimate claims"],"rewards":["Gold, straightforward, paid half up front, no questions asked","A favour from someone with actual influence","A piece of equipment that belonged to someone interesting","Access to information that solves a different problem","A contact who opens a door they did not know was closed","Reputation of the kind that makes future dealings easier here"]};
+var BOOK_DATA={"subjects":{"The Nine Hells":["Detailed taxonomy of the Nine Layers from Avernus to Nessus, with notes on each archdevil's preferred method of soul corruption","A merchant's account of bartering for information in Dis, the City of Iron. He claims to have walked out with his soul intact, though he seems uncertain.","Theological argument that the Nine Hells are not evil but merely ordered, and that mortals misunderstand the nature of the contract"],"The Abyss":["Rambling account of a sorcerer who briefly visited the Abyss and returned, mostly coherent. The final chapter is in a different hand.","Catalogue of 47 named demon princes with descriptions of their symbols and cults. Several pages are deliberately torn out.","A treatise arguing that the Abyss predates even the gods, and that demons are not fallen but primordial"],"Ancient empires":["History of the Netherese arcanists and their floating cities. The author is clearly sympathetic and the text ends abruptly mid-sentence.","Administrative records from a pre-Spellplague city cataloguing taxes, markets, and public works. Unexpectedly fascinating.","A field archaeologist's notes on a ruin site, mixing scholarly observation with increasing personal dread"],"Dragons":["Naturalist study of dragon hoarding behaviour, arguing dragons collect treasure not for wealth but as identity expression","Account of a paladin who negotiated a truce with an ancient dragon. The terms are not disclosed. The paladin is described as changed on returning.","A half-dragon's memoir, written in both Common and Draconic in alternating paragraphs. The translations do not match."],"The Feywild":["Guide to navigating the Feywild by a gnome who spent forty years there and returned to find three years had passed","Collection of fey contracts, each annotated with loopholes a mortal could theoretically exploit. Several annotations warn against trying.","A bard's account of a night spent in a fey court, poetic, beautiful, and clearly missing several hours of memory"],"The Shadowfell":["Theological study of the Shadowfell as the echo of death that all things cast, written by a priest who later disappeared","A necromancer's field notes on harvesting shadow-touched materials, written with disturbing practicality","Account of a paladin's journey through the Shadowfell seeking a lost soul. They found it, but the ending is ambiguous."],"Undead and necromancy":["Philosophical defence of necromancy as merely a different relationship with death, written with obvious personal stake","Practical manual for a town watch on identifying and dealing with undead incursions, written by someone who has seen too many","A lich's autobiography, covering the first seventy years before lichdom was achieved. Surprisingly readable."],"Divine pantheons":["Comparative study of creation myths across twelve religions, noting uncomfortable similarities the author tries to explain away","A heretic's argument that the gods are not divine but merely powerful, and that the distinction matters","Devotional text for a minor god of travellers, sincere and practical, with prayers for every kind of road condition"],"Arcane theory":["Foundational text arguing the Weave is not a resource but a relationship, controversial in academic circles","A failed wizard's notes on why magic would not work for them, which accidentally contain several genuine insights","Collected correspondence between two archmages who disagreed about everything for thirty years and became each other's best critics"],"The Far Realm":["A single scholar's attempt to categorise Far Realm entities. The later chapters become increasingly incoherent.","Fragmentary account of a planar expedition that touched the Far Realm's edge. Most did not return. The account does not explain what happened to the rest.","Warning text in four languages about a specific location. The warnings become more urgent with each translation."],"Planar cosmology":["The Great Wheel explained for non-scholars. Accessible, friendly, and wrong in at least three significant ways.","Philosophical meditation on what it means to exist on a plane, using a traveller metaphor throughout","A map of the planes with annotations. The annotations contradict each other. Some are in different handwriting."],"Famous mages":["Biography of Mordenkainen, clearly written by an admirer who had access to unreliable sources","A collection of attributed quotes from Tasha's early career. Scholars dispute most of them.","Memoir of an archmage's apprentice, focusing on the tedium and administrative chaos of running a tower"],"Monster ecology":["Field study of beholder social structures, or the lack thereof, since beholders mostly try to kill each other","A druid's affectionate study of owlbear behaviour, arguing they are unfairly maligned and merely territorial","Practical guide to identifying which type of giant you are dealing with before they notice you"],"Lost kingdoms":["Account of an expedition to find ruins of a pre-human civilisation. They found something. The final entry is strange.","Administrative history of a kingdom that vanished without war, plague, or recorded disaster, which the author finds more troubling than any of those","A collection of folk songs from a destroyed culture, collected before the last speakers died. Most songs are about leaving."]},"conditions":["The cover bears a library seal from a city that no longer exists","Several pages are water-damaged and the text is partially illegible in key sections","The margins are full of annotations in a different hand, sometimes agreeing violently","The final chapter is written in a different ink, suggesting it was added later","It has been rebound at least twice; some pages are clearly not original","Someone has underlined certain passages and written THIS in the margin repeatedly"],"formats":["Academic treatise","Personal journal","Religious scripture","Traveller's account","Field manual","Prophecy text","Children's tale","Poetry collection","Collected correspondence"]};
+var TOWN_DATA={"names":{"Roadside tavern":["The Broken Wheel","The Muddy Boot","The Wanderer's Rest","The Horseshoe","The Last Mile","The Creaking Sign"],"Town market":["The Saltmarket","Coppergate Market","The Exchange","Lower Market","The Yard"],"Frontier fort":["Fort Greywall","Thornpost","The Garrison","Coldwatch","Fort Ember"],"Port district":["The Quayside","Harbourgate","The Docks","Fisherman's Wharf","Salt Row"],"Thieves guild hall":["The back room of a respectable money-changer","Beneath a legitimate chandlery","Inside a private members club with no visible sign"],"Noble manor":["Ashvale House","Thornwall Estate","Redstone Manor","The Grange"],"Village green":["Millford Green","Thornwick Common","The Square","Harrow Green"],"Temple district":["The Sacred Quarter","Pilgrim's Row","Temple Row","The Precinct"]},"impressions":{"Festive":["Laughter and music spill out before you even open the door. Someone has won a bet, or thinks they have.","The smell of roasting meat and spilled ale hits you at twenty paces. Tonight someone is celebrating."],"Tense":["Conversation stops when you enter and resumes quietly after a moment of appraisal.","Two groups are seated at opposite ends of the room, studiously not looking at each other."],"Downtrodden":["The place is clean but barely. Everything has been repaired at least once.","People keep their eyes down. The fire is small and the food is plain."],"Wealthy":["The furniture is too good for the location. So are some of the people in it.","Everything here costs more than it should and everyone pretends not to notice."],"Haunted by tragedy":["A name is mentioned that makes everyone go quiet for a moment. No one explains.","Someone is drinking alone at the bar and refuses company with remarkable efficiency."],"Occupied by soldiers":["Soldiers sit in groups. The locals serve them politely and hate it.","The ratio of weapons to food is uncomfortable."],"Thriving trade":["The room is packed and everyone is talking about prices and routes.","Three separate deals are being negotiated at three separate tables right now."]},"npcs":["Harro the owner, who has heard every story and believes none of them","Sela, a courier waiting for a reply that is two days overdue","Old Brant, who sits in the same corner every day and notices everything","Mirra, a healer passing through, looking for something she will not name","Corporal Dace, who is off duty and trying to stay that way","Fenwick, a merchant delayed by circumstances for four days","A bard named Syr who performs every night and collects secrets like coins","The blacksmith's apprentice, running an errand and in no hurry to return","A minor noble travelling incognito and doing it badly","A retired adventurer who offers advice no one asked for but is usually right"],"forsale":["Hot stew, bread, and a local ale for 5 sp","A room for the night: 5 sp shared or 1 gp private","A horse and stabling arranged through a contact: 50 gp","Information on the road ahead: 1 gp for yesterday's news, 5 gp for today's","Use of the common bath: 2 sp","A sealed letter delivered to the next town: 5 sp","Directions that are guaranteed accurate to within two days ago","Passage on a cart heading south: 1 sp per day"],"events":["Two men are on the edge of a fight over something trivial that is not what it is actually about","A traveller has just arrived with news that has not reached the town yet","Someone is trying to sell something that is clearly not theirs to sell","A child is looking for a parent who left to get something an hour ago","A deal is being made at a corner table that will be regretted by at least one party","Someone recognises someone else and both are pretending not to notice","A horse outside is about to wander off","The meal that arrived is not what was promised and someone objects loudly"],"rumors":["The road east has been closed for a week. Official word is flooding. People say something else.","A merchant paid for his room in coins that were later found to be fake. He was gone by morning.","The lord's tax collector has not been seen in five days. His horse came back without him.","There is a reward posted for a red-haired woman last seen three days ago. The poster does not say why.","Something has been killing livestock on the western farms. Not wolves. The wounds are wrong.","A map was found in the river. Someone bought it immediately and left town that afternoon."]};
+var GAMES_DATA=[{"id":"dragon","name":"Dragon's Teeth","icon":"&#127922;","desc":"A bluffing dice game played with 5d6 per player. Each player rolls their dice secretly. Players take turns declaring a poker-style hand that exists across all players' dice combined. Each declaration must be higher than the last. A player may call liar instead of raising. Called out: reveal all dice. Liar loses a coin. True claim: caller loses a coin. First to 0 coins loses.","rolls":[{"action":"Declare a hand honestly","check":"No roll required"},{"action":"Bluff convincingly","check":"DC 12 CHA (Deception) or give a visible tell"},{"action":"Detect a bluff","check":"DC 12 WIS (Insight) for a feeling, not certainty"},{"action":"Cheat by palming dice","check":"DC 14 DEX (Sleight of Hand) vs DC 14 Passive Perception of all watchers"}]},{"id":"cups","name":"Three Cups","icon":"&#127871;","desc":"A shell game. A coin is hidden under one of three cups and shuffled. Players bet on which cup holds the coin. The dealer almost always cheats. Win: double the bet. Lose: forfeit the bet.","rolls":[{"action":"Track the coin through the shuffle","check":"DC 15 WIS (Perception) to see the true cup"},{"action":"Spot the dealer cheating","check":"DC 13 WIS (Perception) to see the palm"},{"action":"Distract the dealer to cheat","check":"DC 13 CHA (Deception) vs dealer's Passive Insight"},{"action":"Force a reveal by intimidation","check":"DC 15 CHA (Intimidation), works once, causes trouble"}]},{"id":"arm","name":"Arm of the Bear","icon":"&#128170;","desc":"Classic arm wrestling. Two contestants lock hands across a table. First to pin the opponent's hand wins the match. Stakes are set before the match begins.","rolls":[{"action":"Each round of wrestling","check":"Opposed STR (Athletics). Best of 3 rounds wins."},{"action":"Psych out the opponent","check":"DC 13 CHA (Intimidation) gives them Disadvantage next roll"},{"action":"Spot a mechanical advantage","check":"DC 12 WIS (Perception) before the match starts"},{"action":"Cheat by bracing your foot","check":"DC 12 DEX (Sleight of Hand) vs spectators' Passive Perception"}]},{"id":"riddle","name":"The Riddler's Wager","icon":"&#129300;","desc":"A tavern riddler poses a riddle and sets a wager. The player has one guess with no rolls. Wrong: pay. Right: double it. Riddles repeat until one party is broke or bored.","rolls":[{"action":"Answer without help","check":"No roll, use your brain"},{"action":"Ask for a hint","check":"DC 12 INT (Investigation or History) for a category hint"},{"action":"Stall for time","check":"DC 11 CHA (Persuasion) for a short break"},{"action":"Recall a similar riddle","check":"DC 14 INT (History) for a strong hint, not the answer"}]},{"id":"tower","name":"Tower of Coins","icon":"&#129689;","desc":"Stack coins one at a time on the back of your hand. After each coin, stop and bank your stack or push for one more. Tower falls: lose everything. Highest stack wins the pot.","rolls":[{"action":"Add each coin","check":"DC 10 DEX, increasing by 1 per coin already stacked"},{"action":"Add a coin while drunk or on bad surface","check":"+3 to the DC"},{"action":"Distract a player mid-stack","check":"DC 11 CHA (Performance) vs their Passive Perception for Disadvantage"},{"action":"Recover a wobbling tower","check":"DC 14 DEX reaction, once per turn"}]},{"id":"fingers","name":"Finger Fives","icon":"&#129310;","desc":"Two players simultaneously reveal 0 to 5 fingers and guess the combined total. Correct guess: score a point. Both correct or both wrong: no points. First to 5 wins. Fast rounds.","rolls":[{"action":"Read the opponent before revealing","check":"DC 12 WIS (Insight) gives plus or minus 1 on your guess"},{"action":"Detect their patterns over time","check":"DC 14 WIS (Insight) after 3+ rounds reveals a general tell"},{"action":"Fake a reveal to read their reaction","check":"DC 12 CHA (Deception) vs their Passive Insight"}]}];
+/* ── TABS ───────────────────────────────────────────────────────────────────── */
+function showTab(id){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
   document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('on');});
   document.getElementById('panel-'+id).classList.add('on');
-  var ids=['trinkets','npc','books','town','games'];
+  var ids=['trinkets','npc','quests','books','town','games'];
   var btns=document.querySelectorAll('.tb');
-  if(btns[ids.indexOf(id)]) btns[ids.indexOf(id)].classList.add('on');
-  if(id==='games') loadGame();
+  var i=ids.indexOf(id);
+  if(btns[i]) btns[i].classList.add('on');
 }
 
-/* ─── CLAUDE API HELPER ────────────────────────────────────────────────────── */
-async function askClaude(systemPrompt, userPrompt, outputEl, titleEl) {
-  outputEl.innerHTML = '<span class="spinner"></span> Generating\u2026';
-  if(titleEl) titleEl.style.display='block';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{role:'user', content: userPrompt}]
-      })
-    });
-    const data = await res.json();
-    const text = data.content && data.content[0] && data.content[0].text ? data.content[0].text : 'No response.';
-    outputEl.innerHTML = text;
-    return text;
-  } catch(e) {
-    outputEl.innerHTML = '<em style="color:var(--cr);">Error: ' + e.message + '</em>';
+/* ── UTILS ──────────────────────────────────────────────────────────────────── */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function picks(arr,n){ var s=arr.slice().sort(function(){return Math.random()-.5;}); return s.slice(0,n); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ══ TRINKETS ═══════════════════════════════════════════════════════════════ */
+function rollTrinkets(){
+  var n=parseInt(document.getElementById('t-count').value)||5;
+  var src=document.getElementById('t-src').value;
+  var pool=TRINKETS[src]||TRINKETS['any'];
+  var picked=picks(pool,Math.min(n,pool.length));
+  if(picked.length<n){
+    var extra=picks(pool,n-picked.length);
+    picked=picked.concat(extra);
   }
-}
-
-/* ═══════════════════════ TRINKETS ═══════════════════════════════════════════ */
-var TRINKETS = {
-  humanoid: [
-    'A bent copper coin with a strange sigil filed into it','A love letter, never sent, in faded ink',
-    'Three teeth strung on a leather cord','Half a map with the other half missing',
-    'A flask still warm, containing something herbal','A wanted poster — for someone who looks like one of the PCs',
-    'A child\'s drawing of a dragon, signed "Marta"','Seven dice, all showing sixes',
-    'A sock with a hole in the toe, inexplicably laundered','A receipt for "one barrel of eels"',
-    'A key that fits no lock anyone has seen','Pressed flowers between two wax-sealed parchment sheets',
-    'A tiny bottle of ink that smells of lavender','A religious pamphlet with blasphemies scrawled in the margins',
-    'A list of names with half of them crossed out','A locket containing a portrait of a goat',
-    'A thumb-sized carved wooden figure of a bear','A note reading: "Don\'t let them find the third one"',
-    'A small mirror, cracked diagonally','A single earring shaped like a crescent moon'
-  ],
-  noble: [
-    'A monogrammed handkerchief, silk, initialed "V.T.H."','A theatre programme from six months ago',
-    'A half-finished letter of complaint to the city watch','A signet ring stamp with no ring',
-    'A tiny vial of perfume, nearly empty','A betting slip from a horse race, losing side',
-    'A list of debts owed — all small amounts, all to the same name','A dried rose petal in a velvet pouch',
-    'A fake gemstone that looks very convincing','An invitation to a party that happened last year',
-    'A miniature chess piece, queen, made of ivory','A wax seal stamp depicting a fish swallowing a sword',
-    'A tailor\'s receipt for alterations never collected','A tiny portrait of someone stern-looking',
-    'A monocle with no prescription','A small notebook full of gossip, now embarrassing'
-  ],
-  cultist: [
-    'A tooth carved into the shape of an eye','Black candle stubs, three of them, bound with wire',
-    'A list of names and corresponding astronomical events','A small idol of featureless stone that is oddly warm',
-    'A mirror that reflects light strangely','A dried herb bundle that smells faintly of rot',
-    'Parchment covered in a circle of names, all the same name','A coded letter referencing "the third convergence"',
-    'A medallion with a symbol no scholar recognises','Dried fungi ground into powder in a paper envelope',
-    'A small doll wrapped in black thread','A ring of iron with nothing special about it except the weight',
-    'A map of the moon\'s phases for the next decade','A brass compass that doesn\'t point north',
-    'A journal with the last ten pages torn out','A small clay tablet inscribed with something backwards'
-  ],
-  traveler: [
-    'A road-worn boot-polishing kit, nearly empty','A folded map of a place no one recognises',
-    'Three copper coins from three different countries','A small stone from a riverbed, smoothed by years of handling',
-    'A wooden comb with two teeth missing','A travel journal written in terrible poetry',
-    'A half-eaten stick of dried meat (still edible, probably)','A foreign coin, lucky side up by habit',
-    'A needle and thread kit, practical and much-used','A small collection of pressed leaves',
-    'A letter of introduction to someone already dead','A handwritten recipe for a stew in an unknown language',
-    'A canteen with something not water at the bottom','A small whittled figurine of a horse, unfinished',
-    'A prayer bead string with one bead chipped','A road toll receipt dated three months ago'
-  ],
-  dungeon: [
-    'A crumbled brick with a face scratched into it','A piece of rope, frayed at both ends',
-    'A torch stub, burnt down to almost nothing','An iron spike, slightly bent',
-    'A pottery shard painted in a style no one can place','A dried rat, carefully preserved',
-    'A piece of chalk worn to a nub','A ball of string, more knots than string',
-    'A corroded coin of uncertain denomination','A rusty iron hook with no clear purpose',
-    'A moth-eaten sack containing only dust','A broken lantern with the lens intact',
-    'A stone tile from a floor, carefully removed','A collection of small bones arranged deliberately',
-    'A damp scroll with only partial text remaining','A pickaxe head with no handle'
-  ],
-  nature: [
-    'A bird skull, bleached and small','A nest woven with unusual care, no longer occupied',
-    'Fur caught on a sharp twig, soft and unusual','A honeycomb section, dried, no honey remains',
-    'Three smooth pebbles painted with dots','A fragment of antler, shed naturally',
-    'A seed pod that rattles when shaken','A coil of shed snakeskin',
-    'A large feather from a bird of no known species','A dried mushroom cluster strung on a vine',
-    'A chunk of amber containing a tiny fly','A piece of bark with claw marks tallied into it',
-    'A tiny turtle shell, empty','River clay hardened into a rough shape',
-    'A piece of obsidian, chipped into an imperfect circle','A wasp nest, empty, still intact'
-  ],
-  any: []
-};
-// Populate 'any' from all categories
-(function(){
-  Object.keys(TRINKETS).forEach(function(k){
-    if(k!=='any') TRINKETS.any=TRINKETS.any.concat(TRINKETS[k]);
-  });
-})();
-
-function rollTrinkets() {
-  var count  = parseInt(document.getElementById('t-count').value)||5;
-  var source = document.getElementById('t-source').value;
-  var pool   = TRINKETS[source]||TRINKETS.any;
-  // Shuffle and pick
-  var shuffled = pool.slice().sort(function(){return Math.random()-.5;});
-  var picks = [];
-  for(var i=0;i<count;i++) picks.push(shuffled[i%shuffled.length]);
-  
-  var out = document.getElementById('trinket-output');
-  out.innerHTML = picks.map(function(t,i){
-    return '<div class="trinket-card"><div class="t-num">#'+(i+1)+'</div>'+esc(t)+'</div>';
+  document.getElementById('trinket-out').innerHTML=picked.map(function(t,i){
+    return '<div class="card"><div class="cn">#'+(i+1)+'</div>'+esc(t)+'</div>';
   }).join('');
 }
 
-/* ═══════════════════════ NPC & QUESTS ══════════════════════════════════════ */
-async function generateNPC() {
-  var role    = document.getElementById('npc-role').value;
-  var tone    = document.getElementById('npc-tone').value;
-  var setting = document.getElementById('npc-setting').value;
-
-  var result = document.getElementById('npc-result');
-  var body   = document.getElementById('npc-body');
-  result.classList.add('show');
-
-  var sys = 'You are a D&D 5e Dungeon Master creating vivid, usable NPCs. Respond with clean HTML using <h3> for the name, <span class="lbl"> for section labels, and <p> for content. No markdown, no preamble, just the HTML content.';
-  
-  var roleStr    = role==='any'?'a random occupation':(role);
-  var toneStr    = tone==='any'?'a distinctive personality':(tone);
-  var settingStr = setting==='any'?'a generic fantasy setting':(setting);
-
-  var prompt = 'Generate a D&D NPC with this profile:\n'
-    +'- Role: '+roleStr+'\n- Personality: '+toneStr+'\n- Setting: '+settingStr+'\n\n'
-    +'Output HTML with these sections:\n'
-    +'1. <h3>Name</h3> (give a full fantasy name with cultural flavor)\n'
-    +'2. <span class="lbl">Appearance</span><p>One vivid sentence.</p>\n'
-    +'3. <span class="lbl">Background</span><p>Two sentences of history.</p>\n'
-    +'4. <span class="lbl">Personality</span><p>One sentence of how they speak and act.</p>\n'
-    +'5. <span class="lbl">Secret</span><p>Something they are hiding.</p>\n'
-    +'6. <span class="lbl">Quest Hook</span><p>A concrete task or problem they need help with.</p>\n'
-    +'7. <span class="lbl">Motivation</span><p>What they truly want, beyond the quest.</p>\n'
-    +'8. <span class="lbl">Rumor They Carry</span><p>Something they have heard and believe to be true (it may not be).</p>\n'
-    +'Keep everything concise and immediately usable at the table.';
-
-  await askClaude(sys, prompt, body, result);
+/* ══ NPC ═════════════════════════════════════════════════════════════════════ */
+function genNPC(){
+  var role=document.getElementById('npc-role').value;
+  var tone=document.getElementById('npc-tone').value;
+  var isMale=Math.random()>0.5;
+  var name=(isMale?pick(NPC_DATA.first_m):pick(NPC_DATA.first_f))+' '+pick(NPC_DATA.last);
+  var roleStr=role==='any'?pick(['Innkeeper','Merchant','Town guard','Hedge wizard','Priest','Travelling merchant','Retired soldier','Local farmer','Dockworker','Minor noble','Fence','Herbalist']):role;
+  var personality=pick(NPC_DATA.personality);
+  var r=document.getElementById('npc-res');
+  var b=document.getElementById('npc-body');
+  r.classList.add('show');
+  b.innerHTML='<h3>'+esc(name)+'</h3>'
+    +'<p style="font-size:.82rem;color:var(--il);margin-bottom:.3rem;">'+esc(roleStr)+'</p>'
+    +'<span class="lbl">Appearance</span><p>'+esc(pick(NPC_DATA.appearance))+'</p>'
+    +'<span class="lbl">Background</span><p>'+esc(pick(NPC_DATA.background))+'</p>'
+    +'<span class="lbl">Personality</span><p>'+esc(personality)+'</p>'
+    +'<span class="lbl">Secret</span><p>'+esc(pick(NPC_DATA.secret))+'</p>';
 }
 
-/* ═══════════════════════ BOOKS & LORE ══════════════════════════════════════ */
-async function generateBook() {
-  var subject   = document.getElementById('book-subject').value;
-  var bookType  = document.getElementById('book-type').value;
-  var condition = document.getElementById('book-condition').value;
-
-  var result = document.getElementById('book-result');
-  var body   = document.getElementById('book-body');
-  result.classList.add('show');
-
-  var sys = 'You are a D&D 5e world-builder writing flavourful found texts. Respond with clean HTML using <h3> for the title, <span class="lbl"> for labels, and <p> for content. No markdown, no preamble.';
-
-  var subjectStr   = subject==='any'?'a random D&D topic (cosmology, history, monsters, magic, or politics)':subject;
-  var typeStr      = bookType==='any'?'an appropriate format':bookType;
-  var conditionStr = condition==='any'?'some interesting physical condition':condition;
-
-  var prompt = 'Create a found book/document for a D&D game:\n'
-    +'- Subject: '+subjectStr+'\n'
-    +'- Type: '+typeStr+'\n'
-    +'- Physical condition: '+conditionStr+'\n\n'
-    +'Output HTML with:\n'
-    +'1. <h3>Title</h3> (evocative, period-appropriate)\n'
-    +'2. <span class="lbl">Author &amp; Date</span><p>Name and approximate era.</p>\n'
-    +'3. <span class="lbl">Physical Description</span><p>What it looks and feels like.</p>\n'
-    +'4. <span class="lbl">Summary</span><p>Two-three sentences: what this text is about and its central argument or story.</p>\n'
-    +'5. <span class="lbl">Notable Passage</span><p>One short quote (2-4 sentences) in period voice, italic style.</p>\n'
-    +'6. <span class="lbl">Useful Information</span><p>One concrete fact or clue a player could actually use.</p>\n'
-    +'7. <span class="lbl">Hook</span><p>One sentence: why might someone not want this book found?</p>\n'
-    +'Ground everything in real D&D lore (Forgotten Realms, Greyhawk, or generic D&D cosmology).';
-
-  await askClaude(sys, prompt, body, result);
+/* ══ QUESTS ══════════════════════════════════════════════════════════════════ */
+function genQuest(){
+  var type=document.getElementById('q-type').value;
+  var setting=document.getElementById('q-set').value;
+  var hooks=QUEST_DATA.hooks;
+  var typeKey=type==='any'?pick(Object.keys(hooks)):type;
+  if(!hooks[typeKey]) typeKey=pick(Object.keys(hooks));
+  var hook=pick(hooks[typeKey]);
+  var settingStr=setting==='any'?pick(['the city slums','a frontier town','the road between two settlements','a port district','a noble quarter','ancient ruins nearby']):setting;
+  var b=document.getElementById('q-body');
+  document.getElementById('q-res').classList.add('show');
+  b.innerHTML='<h3>'+esc(typeKey)+'</h3>'
+    +'<span class="lbl">The Situation</span><p>'+esc(hook)+'</p>'
+    +'<span class="lbl">Who Approaches Them</span><p>'+esc(pick(QUEST_DATA.givers))+'</p>'
+    +'<span class="lbl">Setting</span><p class="aside">'+esc(settingStr)+'</p>'
+    +'<span class="lbl">Complication</span><p>'+esc(pick(QUEST_DATA.obstacles))+'</p>'
+    +'<span class="lbl">Twist (reveal mid-quest)</span><p>'+esc(pick(QUEST_DATA.twists))+'</p>'
+    +'<span class="lbl">Reward on Success</span><p>'+esc(pick(QUEST_DATA.rewards))+'</p>';
 }
 
-/* ═══════════════════════ TOWN & TAVERN ════════════════════════════════════ */
-async function generateTown() {
-  var locType = document.getElementById('town-type').value;
-  var atm     = document.getElementById('town-atm').value;
-
-  var result = document.getElementById('town-result');
-  var body   = document.getElementById('town-body');
-  result.classList.add('show');
-
-  var sys = 'You are a D&D 5e Dungeon Master generating vivid, immediately usable location snapshots. Respond with clean HTML. Use <h3> for names, <span class="lbl"> for section labels, <p> for content, and <ul><li> for lists. No markdown.';
-
-  var atmStr = atm==='any'?'an atmosphere you find fitting':atm;
-
-  var prompt = 'Generate a fully detailed D&D location snapshot:\n'
-    +'- Location type: '+locType+'\n'
-    +'- Atmosphere: '+atmStr+'\n\n'
-    +'Output HTML with these sections:\n'
-    +'1. <h3>Name</h3> (the location\'s name)\n'
-    +'2. <span class="lbl">First Impression</span><p>Two sentences. What do the players see, hear, and smell when they arrive?</p>\n'
-    +'3. <span class="lbl">Who Is Here</span><ul>3-4 named NPCs with one-line descriptions and current activity.</ul>\n'
-    +'4. <span class="lbl">What\'s For Sale</span><ul>4-5 specific items or services with prices.</ul>\n'
-    +'5. <span class="lbl">What\'s Happening Right Now</span><p>One active scene or conflict unfolding that the players walk into.</p>\n'
-    +'6. <span class="lbl">Rumors &amp; Gossip</span><ul>3 rumors: one true, one false, one partially true (do not label which is which).</ul>\n'
-    +'7. <span class="lbl">Hidden Detail</span><p>Something only a perceptive or investigative player would notice.</p>\n'
-    +'Keep names and details specific and evocative. Make it feel lived-in.';
-
-  await askClaude(sys, prompt, body, result);
+/* ══ BOOKS ═══════════════════════════════════════════════════════════════════ */
+function genBook(){
+  var sub=document.getElementById('bk-sub').value;
+  var fmt=document.getElementById('bk-fmt').value;
+  var subjects=BOOK_DATA.subjects;
+  var subKey=sub==='any'?pick(Object.keys(subjects)):sub;
+  if(!subjects[subKey]) subKey=pick(Object.keys(subjects));
+  var summary=pick(subjects[subKey]);
+  var condition=pick(BOOK_DATA.conditions);
+  var prefix=pick(['A Study of','Notes Toward','An Account of','Observations on','The Complete','Confessions of','Against','In Defence of','Meditations on','The Hidden']);
+  var title=prefix+' '+subKey;
+  var fmtStr=fmt==='any'?pick(BOOK_DATA.formats):fmt;
+  var b=document.getElementById('bk-body');
+  document.getElementById('bk-res').classList.add('show');
+  b.innerHTML='<h3>'+esc(title)+'</h3>'
+    +'<p style="font-size:.8rem;color:var(--il);margin-bottom:.3rem;">'+esc(fmtStr)+'</p>'
+    +'<span class="lbl">Physical Condition</span><p>'+esc(condition)+'</p>'
+    +'<span class="lbl">Contents</span><p>'+esc(summary)+'</p>'
+    +'<span class="lbl">How to Use</span><p class="aside">DC 15 Arcana, History, or Religion check — success gives one concrete piece of information relevant to current events (DM decides).</p>';
 }
 
-/* ═══════════════════════ TAVERN GAMES ════════════════════════════════════ */
-var GAMES = {
-  dragon: {
-    name: "Dragon's Teeth",
-    rules: '<strong>Players:</strong> 2–4 &nbsp;|&nbsp; <strong>Skill:</strong> Luck (no check) or Deception (DC 12 CHA to cheat)\n\nEach player rolls 5d6 and keeps them secret. Players take turns claiming a poker-style hand (pairs, straights, etc.). You must claim higher than the previous player OR call them a liar. If called: reveal all dice. Liar loses a coin. True claim: caller loses a coin. First to 0 coins loses the pot. Start each player with <strong>5 coins</strong>.',
-    setup: function() { return {coins:[5,5], pot:0, round:0, dice:[], lastClaim:''}; },
-    ui: 'dragon-ui'
-  },
-  cups: {
-    name: 'Three Cups',
-    rules: '<strong>Players:</strong> 1 vs House &nbsp;|&nbsp; <strong>Skill:</strong> Perception DC 15 (WIS) or Sleight of Hand DC 13 (DEX) to cheat\n\nA coin is hidden under one of three cups and shuffled. The player guesses where the coin is. Win: double your bet. Lose: lose your bet. The house cheats — each round the player must beat <strong>DC 15 Perception</strong> (passive or active) to notice the dealer palming the coin. Success: the real location is revealed.',
-    setup: function() { return {coins:10, round:0, coin_pos:0, guess:-1}; },
-    ui: 'cups-ui'
-  },
-  fingers: {
-    name: 'Finger Fives',
-    rules: '<strong>Players:</strong> 2 &nbsp;|&nbsp; <strong>Skill:</strong> Initiative modifier (DEX) + Perception DC 12\n\nBoth players hold up 0–5 fingers simultaneously. Both guess the total. Correct guess: 1 point. First to 5 points wins. A <strong>DC 12 Perception</strong> check lets a player read subtle muscle tension for +2 on their guess (once per game).',
-    setup: function() { return {score:[0,0], round:0}; },
-    ui: 'fingers-ui'
-  },
-  tower: {
-    name: 'Tower of Coins',
-    rules: '<strong>Players:</strong> Any &nbsp;|&nbsp; <strong>Skill:</strong> Dexterity DC 10/13/16/19 (increasing each round)\n\nEach player must stack coins one by one on the back of their hand. Each coin added requires a DEX check — DC starts at 10 and increases by 3 each round. Fail: tower falls, you are out. Last player standing wins the pot. Add a coin to your bet each round you survive.',
-    setup: function() { return {coins:0, dc:10, alive:true}; },
-    ui: 'tower-ui'
-  },
-  riddle: {
-    name: "The Riddler's Wager",
-    rules: '<strong>Players:</strong> 1 vs Riddler &nbsp;|&nbsp; <strong>Skill:</strong> Investigation/History DC varies\n\nThe tavern riddler poses a riddle. The player has one guess — no rolls unless stuck. If stuck, a <strong>DC 12 Intelligence</strong> check gives a hint. Answer correctly: win double the wager. Wrong: lose the wager. The riddler accepts payment in drinks.',
-    setup: function() { return {wager:5, solved:0, failed:0}; },
-    ui: 'riddle-ui'
-  },
-  arm: {
-    name: 'Arm of the Bear',
-    rules: '<strong>Players:</strong> 2 &nbsp;|&nbsp; <strong>Skill:</strong> Opposed STR check (Athletics)\n\nClassic arm wrestling. Both players make a <strong>Strength (Athletics)</strong> check. Highest wins the round. Best of 3 rounds wins the match. If both roll the same: deadlock — roll again. Spectators may spend an action to distract an opponent (DC 13 CHA Deception for -2 on their next roll).',
-    setup: function() { return {p1:0, p2:0, round:0}; },
-    ui: 'arm-ui'
-  }
-};
-
-var gameState = {};
-var currentGame = 'dragon';
-
-function loadGame() {
-  currentGame = document.getElementById('game-sel').value;
-  var g = GAMES[currentGame];
-  gameState = g.setup();
-  renderGame();
+/* ══ TOWN ════════════════════════════════════════════════════════════════════ */
+function genTown(){
+  var loc=document.getElementById('tw-loc').value;
+  var atm=document.getElementById('tw-atm').value;
+  var names=TOWN_DATA.names;
+  var locKey=loc==='any'?pick(Object.keys(names)):loc;
+  if(!names[locKey]) locKey=pick(Object.keys(names));
+  var name=pick(names[locKey]);
+  var impressions=TOWN_DATA.impressions;
+  var impKey=atm==='any'?pick(Object.keys(impressions)):Object.keys(impressions).find(function(k){return k.toLowerCase().replace(/[^a-z]/g,'').indexOf(atm.toLowerCase().replace(/[^a-z]/g,''))!==-1;});
+  if(!impKey) impKey=pick(Object.keys(impressions));
+  var impression=pick(impressions[impKey]);
+  var npcs=picks(TOWN_DATA.npcs,3);
+  var forsale=picks(TOWN_DATA.forsale,4);
+  var event=pick(TOWN_DATA.events);
+  var rumors=picks(TOWN_DATA.rumors,3);
+  var b=document.getElementById('tw-body');
+  document.getElementById('tw-res').classList.add('show');
+  b.innerHTML='<h3>'+esc(name)+'</h3>'
+    +'<p style="font-size:.8rem;color:var(--il);margin-bottom:.3rem;">'+esc(locKey)+'</p>'
+    +'<span class="lbl">First Impression</span><p>'+esc(impression)+'</p>'
+    +'<span class="lbl">Who Is Here</span><ul>'+npcs.map(function(n){return '<li>'+esc(n)+'</li>';}).join('')+'</ul>'
+    +'<span class="lbl">What\'s For Sale</span><ul>'+forsale.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>'
+    +'<span class="lbl">What\'s Happening Right Now</span><p>'+esc(event)+'</p>'
+    +'<span class="lbl">Rumors (mix of true, false, partial)</span><ul>'+rumors.map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+'</ul>';
 }
 
-function renderGame() {
-  var g = GAMES[currentGame];
-  var area = document.getElementById('game-area');
-  area.innerHTML = '<div style="margin-bottom:.7rem;">'
-    +'<strong style="font-family:\'Cinzel\',serif;font-size:.9rem;color:var(--cr);">'+g.name+'</strong>'
-    +'</div>'
-    +'<div style="font-size:.82rem;color:var(--il);line-height:1.6;white-space:pre-wrap;margin-bottom:.9rem;">'+g.rules+'</div>'
-    +'<div id="game-interactive"></div>'
-    +'<div class="game-log" id="game-log"><p>Game ready. Good luck.</p></div>';
-  buildGameUI();
+/* ══ GAMES ═══════════════════════════════════════════════════════════════════ */
+function showGame(){
+  var key=document.getElementById('gm-sel').value;
+  var g=GAMES_DATA.find(function(x){return x.id===key;});
+  if(!g){document.getElementById('game-display').innerHTML='';return;}
+  var html='<div class="game-card">'
+    +'<h3>'+g.icon+' '+esc(g.name)+'</h3>'
+    +'<p class="rules">'+esc(g.desc)+'</p>'
+    +'<div class="rolls"><b>Skill Checks at the Table:</b>'
+    +g.rolls.map(function(r){
+      return '<div style="margin-top:.4rem;padding-top:.4rem;border-top:1px solid rgba(139,26,26,.08);">'
+        +'<b>'+esc(r.action)+'</b><br><span style="color:var(--il);">'+esc(r.check)+'</span></div>';
+    }).join('')
+    +'</div></div>';
+  document.getElementById('game-display').innerHTML=html;
 }
 
-function gLog(msg) {
-  var log = document.getElementById('game-log');
-  if (!log) return;
-  var p = document.createElement('p');
-  p.textContent = msg;
-  log.appendChild(p);
-  log.scrollTop = log.scrollHeight;
-}
-
-function buildGameUI() {
-  var el = document.getElementById('game-interactive');
-  if (!el) return;
-  
-  if (currentGame === 'dragon') {
-    el.innerHTML = '<div class="score-board">'
-      +'<div class="score-box"><div class="score-label">Your Coins</div><div class="score-val" id="d-p1">'+gameState.coins[0]+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Opponent</div><div class="score-val" id="d-p2">'+gameState.coins[1]+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Round</div><div class="score-val" id="d-round">'+gameState.round+'</div></div>'
-      +'</div>'
-      +'<div class="dice-row" id="d-dice"></div>'
-      +'<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">'
-      +'<button class="btn btn-primary" onclick="dragonRoll()">\uD83C\uDFB2 Roll My Dice</button>'
-      +'<button class="btn btn-secondary" onclick="dragonCallLiar()">Call Bluff!</button>'
-      +'<button class="btn btn-secondary" onclick="loadGame()">New Game</button>'
-      +'</div>';
-
-  } else if (currentGame === 'cups') {
-    el.innerHTML = '<div class="score-board">'
-      +'<div class="score-box"><div class="score-label">Your Coins</div><div class="score-val" id="c-coins">'+gameState.coins+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Round</div><div class="score-val" id="c-round">'+gameState.round+'</div></div>'
-      +'</div>'
-      +'<div style="display:flex;gap:.5rem;margin:.7rem 0;">'
-      +'<button class="btn btn-secondary" onclick="cupsGuess(0)">\uD83C\uDFC6 Cup 1</button>'
-      +'<button class="btn btn-secondary" onclick="cupsGuess(1)">\uD83C\uDFC6 Cup 2</button>'
-      +'<button class="btn btn-secondary" onclick="cupsGuess(2)">\uD83C\uDFC6 Cup 3</button>'
-      +'</div>'
-      +'<button class="btn btn-secondary" onclick="loadGame()">New Game</button>';
-
-  } else if (currentGame === 'fingers') {
-    el.innerHTML = '<div class="score-board">'
-      +'<div class="score-box"><div class="score-label">You</div><div class="score-val" id="f-p1">'+gameState.score[0]+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Opponent</div><div class="score-val" id="f-p2">'+gameState.score[1]+'</div></div>'
-      +'</div>'
-      +'<div style="margin:.6rem 0;">'
-      +'<label style="margin-bottom:.3rem;">You hold up how many fingers? (0–5)</label>'
-      +'<div style="display:flex;gap:.4rem;flex-wrap:wrap;">'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(0)">0</button>'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(1)">1</button>'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(2)">2</button>'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(3)">3</button>'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(4)">4</button>'
-      +'<button class="btn btn-secondary" onclick="fingersPlay(5)">5</button>'
-      +'</div>'
-      +'</div><button class="btn btn-secondary" onclick="loadGame()">New Game</button>';
-
-  } else if (currentGame === 'tower') {
-    el.innerHTML = '<div class="score-board">'
-      +'<div class="score-box"><div class="score-label">Coins Stacked</div><div class="score-val" id="t-coins">0</div></div>'
-      +'<div class="score-box"><div class="score-label">DC</div><div class="score-val" id="t-dc">'+gameState.dc+'</div></div>'
-      +'</div>'
-      +'<div style="margin:.6rem 0;font-size:.88rem;color:var(--il);">Roll your DEX (Dexterity) die and add your DEX modifier. Enter the total:</div>'
-      +'<div style="display:flex;gap:.5rem;align-items:flex-end;">'
-      +'<input type="number" id="t-roll" placeholder="Your roll total" style="max-width:160px;">'
-      +'<button class="btn btn-primary" onclick="towerAdd()">\uD83E\uDE99 Add Coin</button>'
-      +'</div>'
-      +'<button class="btn btn-secondary" style="margin-top:.5rem;" onclick="loadGame()">New Game</button>';
-
-  } else if (currentGame === 'riddle') {
-    var riddles = [
-      {q:"I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", a:"echo"},
-      {q:"The more you take, the more you leave behind. What am I?", a:"footsteps"},
-      {q:"I have cities, but no houses live there. I have mountains, but no trees grow. I have water, but no fish swim in it. What am I?", a:"map"},
-      {q:"What has a head, a tail, is brown, and has no legs?", a:"coin"},
-      {q:"I can be cracked, made, told, and played. What am I?", a:"joke"},
-      {q:"What gets wetter the more it dries?", a:"towel"},
-      {q:"Forward I am heavy, backward I am not. What am I?", a:"ton"},
-      {q:"The more of it there is, the less you see. What am I?", a:"darkness"},
-    ];
-    var r = riddles[Math.floor(Math.random()*riddles.length)];
-    gameState.riddle = r;
-    el.innerHTML = '<div style="background:rgba(139,26,26,.05);border:1px solid rgba(139,26,26,.15);border-radius:4px;padding:.8rem 1rem;margin-bottom:.7rem;font-size:.95rem;font-style:italic;">'+esc(r.q)+'</div>'
-      +'<div style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem;">'
-      +'<input type="text" id="r-ans" placeholder="Your answer\u2026" style="flex:1;" onkeydown="if(event.keyCode===13)riddleAnswer()">'
-      +'<button class="btn btn-primary" onclick="riddleAnswer()">Answer</button>'
-      +'</div>'
-      +'<div style="display:flex;gap:.5rem;flex-wrap:wrap;">'
-      +'<button class="btn btn-secondary" onclick="riddleHint()">Hint (DC 12 INT)</button>'
-      +'<button class="btn btn-secondary" onclick="loadGame()">New Riddle</button>'
-      +'</div>';
-
-  } else if (currentGame === 'arm') {
-    el.innerHTML = '<div class="score-board">'
-      +'<div class="score-box"><div class="score-label">You</div><div class="score-val" id="a-p1">'+gameState.p1+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Opponent</div><div class="score-val" id="a-p2">'+gameState.p2+'</div></div>'
-      +'<div class="score-box"><div class="score-label">Round</div><div class="score-val" id="a-rnd">'+(gameState.round+1)+'/3</div></div>'
-      +'</div>'
-      +'<div style="font-size:.88rem;color:var(--il);margin:.5rem 0;">Enter your STR (Athletics) roll total. The opponent rolls 1d20+3.</div>'
-      +'<div style="display:flex;gap:.5rem;align-items:flex-end;">'
-      +'<input type="number" id="a-roll" placeholder="Your roll total" style="max-width:160px;">'
-      +'<button class="btn btn-primary" onclick="armWrestle()">Wrestle!</button>'
-      +'</div>'
-      +'<button class="btn btn-secondary" style="margin-top:.5rem;" onclick="loadGame()">New Match</button>';
-  }
-}
-
-/* Game logic */
-function d20g(){ return Math.floor(Math.random()*20)+1; }
-function d6g(){  return Math.floor(Math.random()*6)+1; }
-
-function dragonRoll() {
-  var dice = [d6g(),d6g(),d6g(),d6g(),d6g()];
-  gameState.dice = dice;
-  gameState.round++;
-  var el = document.getElementById('d-dice');
-  if(el) el.innerHTML = dice.map(function(d){ return '<div class="die">'+d+'</div>'; }).join('');
-  var rnd = document.getElementById('d-round');
-  if(rnd) rnd.textContent = gameState.round;
-  // Opponent also rolls (hidden)
-  var oppDice = [d6g(),d6g(),d6g(),d6g(),d6g()];
-  gameState.oppDice = oppDice;
-  gLog('Round '+gameState.round+': You rolled ['+dice.join(', ')+'] (opponent\'s dice are hidden).');
-  gLog('Now declare a hand (verbally) or call the opponent\'s bluff!');
-}
-
-function dragonCallLiar() {
-  if (!gameState.oppDice) { gLog('Roll first!'); return; }
-  var opp = gameState.oppDice;
-  gLog('Opponent reveals: ['+opp.join(', ')+']');
-  // Simple: check if opponent has any pairs (claim was pairs) - rough simulation
-  var hasGoodHand = opp.filter(function(x,i,a){return a.indexOf(x)!==i;}).length > 0;
-  if (hasGoodHand) {
-    gameState.coins[0]--;
-    gLog('The opponent HAD a valid hand. You lose 1 coin. Your coins: '+gameState.coins[0]);
-  } else {
-    gameState.coins[1]--;
-    gLog('The opponent was bluffing! They lose 1 coin. Opponent coins: '+gameState.coins[1]);
-  }
-  var p1El = document.getElementById('d-p1'), p2El = document.getElementById('d-p2');
-  if(p1El) p1El.textContent = gameState.coins[0];
-  if(p2El) p2El.textContent = gameState.coins[1];
-  if(gameState.coins[0]<=0) gLog('You are out of coins. The opponent wins!');
-  if(gameState.coins[1]<=0) gLog('Opponent is out of coins. You win the pot!');
-}
-
-function cupsGuess(cup) {
-  gameState.round++;
-  gameState.coin_pos = Math.floor(Math.random()*3);
-  // House cheats: 60% of the time it moves after player commits
-  var cheat = Math.random() < 0.60;
-  var actual = cheat ? (cup===gameState.coin_pos ? (gameState.coin_pos+1)%3 : gameState.coin_pos) : gameState.coin_pos;
-  gameState.round++;
-  var cEl = document.getElementById('c-round');
-  if(cEl) cEl.textContent = gameState.round;
-  if(cup === actual) {
-    gameState.coins+=5;
-    gLog('Round '+gameState.round+': Coin was under Cup '+(actual+1)+'! You guessed right. +5 coins. Total: '+gameState.coins);
-  } else {
-    gameState.coins=Math.max(0,gameState.coins-5);
-    gLog('Round '+gameState.round+': Coin was under Cup '+(actual+1)+'. You guessed Cup '+(cup+1)+'. -5 coins. Total: '+gameState.coins+(cheat?' (dealer cheated!)':''));
-  }
-  var cCoinEl = document.getElementById('c-coins');
-  if(cCoinEl) cCoinEl.textContent = gameState.coins;
-  if(gameState.coins<=0) gLog('You\'re broke! The dealer smiles.');
-}
-
-function fingersPlay(myFingers) {
-  var oppFingers = Math.floor(Math.random()*6);
-  var total = myFingers + oppFingers;
-  var myGuess = myFingers + Math.floor(Math.random()*3); // simple AI
-  var oppGuess = oppFingers + Math.floor(Math.random()*(myFingers+2));
-  gameState.round++;
-  var myHit = myGuess === total;
-  var oppHit = oppGuess === total;
-  if(myHit && !oppHit) { gameState.score[0]++; gLog('Round '+gameState.round+': Total was '+total+'. You guessed '+myGuess+' — correct! You score a point.'); }
-  else if(oppHit && !myHit) { gameState.score[1]++; gLog('Round '+gameState.round+': Total was '+total+'. Opponent guessed '+oppGuess+' — they score.'); }
-  else { gLog('Round '+gameState.round+': Total was '+total+'. Neither guess correct (you: '+myGuess+', opp: '+oppGuess+').'); }
-  var s1=document.getElementById('f-p1'),s2=document.getElementById('f-p2');
-  if(s1) s1.textContent=gameState.score[0];
-  if(s2) s2.textContent=gameState.score[1];
-  if(gameState.score[0]>=5) gLog('You reach 5 points — you WIN!');
-  if(gameState.score[1]>=5) gLog('Opponent reaches 5 points — you lose!');
-}
-
-function towerAdd() {
-  var inp = document.getElementById('t-roll');
-  var rollVal = parseInt(inp.value)||0;
-  inp.value='';
-  gameState.coins++;
-  var tEl = document.getElementById('t-coins');
-  var dcEl = document.getElementById('t-dc');
-  if(rollVal >= gameState.dc) {
-    gLog('Coin '+gameState.coins+' stacked! (Roll '+rollVal+' vs DC '+gameState.dc+') Next DC: '+(gameState.dc+3));
-    gameState.dc += 3;
-    if(dcEl) dcEl.textContent = gameState.dc;
-    if(tEl) tEl.textContent = gameState.coins;
-  } else {
-    gLog('The tower falls! (Roll '+rollVal+' vs DC '+gameState.dc+') You stacked '+gameState.coins+' coins before it collapsed.');
-    gameState.alive = false;
-  }
-}
-
-function riddleAnswer() {
-  var ans = (document.getElementById('r-ans').value||'').trim().toLowerCase();
-  var correct = gameState.riddle.a.toLowerCase();
-  if(ans === correct || ans.includes(correct)) {
-    gLog('CORRECT! "'+gameState.riddle.a+'" is right. The riddler nods and pays out.');
-  } else {
-    gLog('Wrong. The answer was "'+gameState.riddle.a+'". The riddler takes your coin with a grin.');
-  }
-}
-
-function riddleHint() {
-  var roll = d20g();
-  gLog('INT check: you rolled '+roll+(roll>=12?' — success':' — fail')+'. '+(roll>=12?'Hint: the answer is one word that describes something common and everyday.':'Your mind draws a blank.'));
-}
-
-function armWrestle() {
-  var inp = document.getElementById('a-roll');
-  var myRoll = parseInt(inp.value)||1;
-  inp.value='';
-  var oppRoll = d20g() + 3;
-  gameState.round++;
-  var rndEl=document.getElementById('a-rnd');
-  if(rndEl) rndEl.textContent = (gameState.round+1)+'/3';
-  if(myRoll > oppRoll) {
-    gameState.p1++;
-    gLog('Round '+gameState.round+': You rolled '+myRoll+', opponent rolled '+oppRoll+'. You win this round!');
-  } else if(oppRoll > myRoll) {
-    gameState.p2++;
-    gLog('Round '+gameState.round+': You rolled '+myRoll+', opponent rolled '+oppRoll+'. Opponent wins this round!');
-  } else {
-    gLog('Round '+gameState.round+': Both rolled '+myRoll+'! Deadlock — roll again!');
-    gameState.round--;
-  }
-  var a1=document.getElementById('a-p1'), a2=document.getElementById('a-p2');
-  if(a1) a1.textContent=gameState.p1;
-  if(a2) a2.textContent=gameState.p2;
-  if(gameState.p1>=2) gLog('You win the arm wrestling match! The crowd cheers.');
-  else if(gameState.p2>=2) gLog('The opponent wins! They flex and call for another ale.');
-}
-
-/* ─── UTILS ─────────────────────────────────────────────────────────────── */
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Init
+/* ── INIT ─────────────────────────────────────────────────────────────────── */
 rollTrinkets();
-loadGame();
+showGame();
+
 </script>
 </body>
 </html>
