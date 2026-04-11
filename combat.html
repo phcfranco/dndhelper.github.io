@@ -240,14 +240,19 @@ label{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.1em;text-transf
             </select>
           </div>
           <div class="field">
-            <label>Type</label>
+            <label>Environment</label>
             <select id="enc-type">
-              <option value="any">Any Type</option>
-              <option>aberration</option><option>beast</option><option>celestial</option>
-              <option>construct</option><option>dragon</option><option>elemental</option>
-              <option>fey</option><option>fiend</option><option>giant</option>
-              <option>humanoid</option><option>monstrosity</option><option>ooze</option>
-              <option>plant</option><option>undead</option>
+              <option value="any">Any Environment</option>
+              <option value="forest">Forest</option>
+              <option value="dungeon">Dungeon</option>
+              <option value="mountain">Mountain</option>
+              <option value="plains">Plains</option>
+              <option value="arctic">Arctic</option>
+              <option value="underdark">Underdark</option>
+              <option value="coastal">Coastal</option>
+              <option value="desert">Desert</option>
+              <option value="swamp">Swamp</option>
+              <option value="urban">Urban</option>
             </select>
           </div>
           <div class="field" style="max-width:70px">
@@ -678,15 +683,23 @@ function generateEncounter() {
 
   lastEncParams = {partySize,level,diffSel,env};
 
-  // Filter by environment using direct habitat tags
+  // Filter by environment using direct habitat tags on each monster
   var pool = MONSTERS.slice().filter(function(m){return m.ac&&m.hp&&m.cr>0;});
   if(env!=='any'){
-    var envPool=pool.filter(function(m){
-      var envs=m.envs||['any'];
-      return envs.indexOf(env)!==-1||envs.indexOf('any')!==-1;
+    // Only monsters specifically tagged for this environment
+    var strictPool=pool.filter(function(m){
+      return (m.envs||[]).indexOf(env)!==-1;
     });
-    // Prefer env-specific, but fall back to all if too few
-    if(envPool.length>=5) pool=envPool;
+    // If we have enough, use strict; otherwise pad with untagged generalists
+    if(strictPool.length>=5){
+      pool=strictPool;
+    } else {
+      var anyPool=pool.filter(function(m){
+        var envs=m.envs||['any'];
+        return envs[0]==='any'; // only truly untagged monsters
+      });
+      pool=strictPool.concat(anyPool);
+    }
   }
 
   // Try to build an encounter within budget
@@ -749,24 +762,38 @@ function buildEncounterFromBudget(pool, budget, partySize) {
 
 function generateManual() {
   var crSel  = document.getElementById('enc-cr').value;
-  var typSel = document.getElementById('enc-type').value;
+  var envSel = document.getElementById('enc-type').value;   // now environment
   var num    = parseInt(document.getElementById('enc-num').value)||1;
   var partySize = parseInt(document.getElementById('enc-party').value)||4;
   var level     = parseInt(document.getElementById('enc-level').value)||5;
 
   var pool = MONSTERS.filter(function(m){return m.ac&&m.hp;});
+
+  // Filter by CR
   if(crSel!=='any'){
     var crF=parseFloat(crSel);
     pool=pool.filter(function(m){return Math.abs(m.cr-crF)<0.01;});
   }
-  if(typSel!=='any'){
-    pool=pool.filter(function(m){return (m.ty||'').toLowerCase().indexOf(typSel)!==-1;});
+
+  // Filter by environment using .envs tags (same logic as random encounter)
+  if(envSel!=='any'){
+    var strictPool=pool.filter(function(m){
+      return (m.envs||[]).indexOf(envSel)!==-1;
+    });
+    if(strictPool.length>=1){
+      pool=strictPool;
+    } else {
+      // No tagged monsters for this env at this CR — keep unfiltered pool, warn
+      var anyPool=pool.filter(function(m){var e=m.envs||['any'];return e[0]==='any';});
+      pool=anyPool.length?anyPool:pool;
+    }
   }
-  if(!pool.length){alert('No monsters match those filters.');return;}
+
+  if(!pool.length){alert('No monsters match those filters. Try Any CR or Any Environment.');return;}
 
   var m = pool[Math.floor(Math.random()*pool.length)];
   lastEncounter=[{monster:m,count:num}];
-  lastEncParams={partySize,level};
+  lastEncParams={partySize:partySize,level:level};
   var totalXP = (CR_XP[m.cr]||10)*num*getMultiplier(num);
   var diff=difficultyLabel(totalXP,partySize,level);
   showEncResult(lastEncounter, partySize, level, diff.d);
