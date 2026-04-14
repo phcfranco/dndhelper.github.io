@@ -65,6 +65,7 @@ select:focus,input:focus{border-color:var(--cr);}
   <button class="tb" onclick="showTab('books')"><span class="ti">&#128218;</span>Books</button>
   <button class="tb" onclick="showTab('town')"><span class="ti">&#127960;</span>Town</button>
   <button class="tb" onclick="showTab('games')"><span class="ti">&#127922;</span>Games</button>
+  <button class="tb" onclick="showTab('traps')"><span class="ti">&#128293;</span>Traps</button>
 </div>
 
 <div class="panel on" id="panel-trinkets">
@@ -184,6 +185,26 @@ select:focus,input:focus{border-color:var(--cr);}
   </div>
   <div id="game-display"></div>
 </div>
+<div class="panel" id="panel-traps">
+  <div class="sec">Trap Generator</div>
+  <p class="hint">Generate a fully described dungeon, wilderness, or urban trap with trigger, effect, detection DC, and disarm notes.</p>
+  <div class="row">
+    <div class="field"><label>Setting</label>
+      <select id="tr-set"><option value="any">Any</option>
+        <option>Dungeon</option><option>Wilderness</option><option>Urban</option>
+        <option>Ancient ruin</option><option>Cave</option><option>Manor / castle</option></select></div>
+    <div class="field"><label>Severity</label>
+      <select id="tr-sev"><option value="any">Any</option>
+        <option>Setback (CR 1-4)</option><option>Dangerous (CR 5-10)</option>
+        <option>Deadly (CR 11+)</option></select></div>
+    <div class="field"><label>Type</label>
+      <select id="tr-type"><option value="any">Any</option>
+        <option>Mechanical</option><option>Magic</option><option>Natural hazard</option>
+        <option>Poison / gas</option><option>Pit</option><option>Alarm</option></select></div>
+    <button class="btn btn-p" onclick="genTrap()">&#127922; Generate Trap</button>
+  </div>
+  <div class="res" id="tr-res"><div class="res-t">&#128293; Trap</div><div class="res-body" id="tr-body"></div></div>
+</div>
 </div>
 
 <script>
@@ -198,7 +219,7 @@ function showTab(id){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
   document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('on');});
   document.getElementById('panel-'+id).classList.add('on');
-  var ids=['trinkets','npc','quests','books','town','games'];
+  var ids=['trinkets','npc','quests','books','town','games','traps'];
   var btns=document.querySelectorAll('.tb');
   var i=ids.indexOf(id);
   if(btns[i]) btns[i].classList.add('on');
@@ -326,6 +347,179 @@ function showGame(){
     }).join('')
     +'</div></div>';
   document.getElementById('game-display').innerHTML=html;
+}
+
+
+/* ══ TRAPS ══════════════════════════════════════════════════════════════════ */
+var TRAP_DATA = {
+  triggers: {
+    Mechanical: [
+      "a pressure plate hidden under a thin layer of dust and grit",
+      "a tripwire of dark thread stretched ankle-height across a corridor",
+      "a loose flagstone that depresses when more than 50 lb steps on it",
+      "a door handle that rotates a hidden mechanism when turned",
+      "a slightly too-obvious gemstone on a pedestal, spring-loaded when lifted",
+      "a counterweight in the ceiling triggered by removing any object from a shelf",
+      "a wire connected to the doorframe that snaps when the door opens fully",
+      "a false floorboard that pivots downward under sustained weight",
+    ],
+    Magic: [
+      "a glyph of warding carved into the floor, invisible until triggered",
+      "a scrying sensor that alerts the caster when any creature passes",
+      "an alarm spell tuned to non-humanoid creatures, silent to the caster",
+      "a symbol of pain inscribed inside a book's cover",
+      "a magical ward on a chest that activates if opened without the correct word",
+      "an illusory floor concealing a real pit below",
+      "a permanent Suggestion placed on a door that compels intruders to leave",
+      "a bound elemental spirit that wakes when its sigil is disturbed",
+    ],
+    'Natural hazard': [
+      "an unstable ceiling section, balanced by a single rotted support beam",
+      "a patch of yellow mould that releases spores when disturbed",
+      "a deadfall of heavy logs suspended above a narrow trail",
+      "a thin crust of ice concealing a 10ft drop into freezing water",
+      "a nest of stirges lodged in a hollow just above head height",
+      "a patch of quicksand disguised by leafy debris",
+      "a boulder balanced at the top of a slope, held by a thin wooden chock",
+      "a crevasse bridged by a single rotten plank over a 40ft drop",
+    ],
+    'Poison / gas': [
+      "a sealed vial of contact poison balanced to spill when a door opens",
+      "a pressure plate that releases poisoned gas from vents in the walls",
+      "a poisoned needle concealed in a lock mechanism",
+      "a tipped urn of sleep-inducing incense triggered by a tripwire",
+      "a bladder of green spores sewn into a chest's false bottom",
+      "a cylinder of compressed gas that releases when a lever is pulled",
+      "a scent-masked fog cloud pre-cast in a sealed room",
+      "poisoned thorns woven into a handle or rope",
+    ],
+    Pit: [
+      "a trapdoor disguised as regular flooring, hinged at one end",
+      "a false bridge of painted canvas stretched over a 20ft drop",
+      "a trapdoor balanced to stay up until enough weight is centred on it",
+      "a section of floor that swings away when a wall sconce is pulled",
+      "a collapsing section of tunnel ceiling that drops into a pit below",
+      "a rolling stone floor that tilts and slides creatures into a chute",
+      "an illusory floor over a 30ft pit filled with sharpened stakes",
+    ],
+    Alarm: [
+      "a thin thread attached to a brass bell on the other side of a door",
+      "a Message spell encoded to wake a sleeping guard at a specific word",
+      "a mirror enchanted to reflect magical darkness when disturbed",
+      "a pile of tin cups and loose coins arranged to fall loudly when stepped on",
+      "a hidden whistle that produces a piercing note when air pressure changes",
+      "a Sending Stone tuned to alert its pair when the room is entered",
+      "a canary in a covered cage that sings when it hears unfamiliar footsteps",
+    ],
+  },
+  effects: {
+    Setback: [
+      "each creature in the area makes a DC 11 DEX saving throw or takes 2d6 piercing damage",
+      "a net drops from the ceiling — DC 12 STR or restrained until escaped (DC 12 STR, 1 action)",
+      "the creature falls into a 10ft pit and takes 1d6 bludgeoning damage",
+      "all creatures within 10ft make a DC 10 CON save or be poisoned for 1 hour",
+      "a loud alarm sounds alerting all creatures within 300ft",
+      "the triggering creature is coated in a slow-drying resin: DEX checks at disadvantage for 1 hour",
+      "a cloud of itching powder fills a 10ft cube: DC 10 CON or distracted — disadvantage on Concentration checks for 10 min",
+      "the floor shifts: all creatures in the room must DC 12 DEX or be knocked prone",
+    ],
+    Dangerous: [
+      "each creature in a 15ft cone makes a DC 14 DEX save or takes 4d6 fire damage (half on success)",
+      "poisoned darts fire from the walls: +8 to hit, 2d6 piercing + DC 13 CON or poisoned (disadvantage on attacks and checks) for 1 hour",
+      "a 20ft pit opens: DC 14 DEX or fall, taking 2d6 bludgeoning damage and landing prone",
+      "yellow mould spores fill a 10ft cube: DC 13 CON or 3d6 poison damage and poisoned 1 minute",
+      "a blade pendulum swings: DEX DC 15 or 3d10 slashing damage",
+      "a collapsing ceiling drops 4 tons of rock on a 15ft square: DC 15 DEX or 4d10 bludgeoning damage, DC 15 STR to dig out (1 hour)",
+      "the room fills with water over 10 rounds: creatures must swim or drown",
+      "a glyph triggers a Lightning Bolt (8d6, DC 14 DEX, 100ft line)",
+    ],
+    Deadly: [
+      "spears fire from walls in a 30ft corridor: +10 to hit, 3d10 piercing, auto-reset each round for 3 rounds",
+      "the floor retracts over a 40ft spike pit: DC 16 DEX or 20d6 piercing damage on impact",
+      "a Symbol of Death triggers: each creature within 60ft makes DC 17 CON save or drops to 0 HP",
+      "a Prismatic Spray fires from a gem in the ceiling: roll 1d8 per creature to determine the colour effect",
+      "a Chain Lightning fires from a rod: 10d8 to primary target (DC 18 DEX halves), then arcs to 3 more",
+      "the room seals and fills with a dense, odourless poison gas: DC 16 CON or 6d6 poison per round",
+      "a Power Word Stun gem shatters: any creature with 150 HP or fewer is stunned until end of next turn",
+      "the floor magnetises: metal armour and weapons are wrenched downward — creatures in metal armour are restrained (DC 18 STR to move)",
+    ],
+  },
+  locations: {
+    Dungeon: ["a stone corridor","the entrance to a burial chamber","a vault doorway","a treasure room","a collapsed passage","a prison cell block","the approach to a boss chamber"],
+    Wilderness: ["a game trail","a river crossing","a cave entrance","a hidden forest path","a cliff face with handholds","a ravine bridge","an abandoned campsite"],
+    Urban: ["a shop's back room","a noble's private study","an alleyway","a sewage tunnel","a warehouse","a money-changer's strongroom","a government records office"],
+    'Ancient ruin': ["a crumbling staircase","a flooded lower level","a sealed antechamber","a mosaic floor","a collapsed archway","a grand ceremonial hall","a hidden sub-level entrance"],
+    Cave: ["a narrow crawl-space","a bat-colony chamber","a stalactite-heavy ceiling","an underground stream crossing","a slippery descent","a flooded side passage"],
+    'Manor / castle': ["a servant's corridor","a trophy room","the lord's private quarters","a wine cellar","the armoury","a guard post","a hidden passage behind a bookshelf"],
+  },
+  detection: {
+    Mechanical: ["DC 15 WIS (Perception) to notice","DC 13 INT (Investigation) to find","DC 17 WIS (Perception) — the wire is very thin","DC 11 WIS (Perception) — fairly obvious to a careful looker","DC 14 INT (Investigation) while searching the floor"],
+    Magic: ["DC 15 INT (Arcana) or Detect Magic spell","DC 17 WIS (Perception) — the glyph is expertly hidden","DC 13 INT (Investigation) reveals faint magical residue","only Detect Magic or True Seeing reveals it","DC 14 INT (Arcana) after 1 minute of study"],
+    'Natural hazard': ["DC 12 WIS (Perception) to notice the instability","DC 14 WIS (Survival) — a wilderness expert recognises the signs","DC 10 WIS (Perception) on close inspection","DC 16 WIS (Perception) — it looks safe until it isn't","DC 13 INT (Nature) to identify the hazard"],
+    'Poison / gas': ["DC 14 WIS (Perception) — faint smell detectable upwind","DC 12 INT (Investigation) to find the needle","DC 16 WIS (Perception) — odourless and invisible","DC 11 WIS (Perception) detects a faint chemical smell","DC 15 INT (Investigation) to spot the gas vent"],
+    Pit: ["DC 14 INT (Investigation) of the floor","DC 12 WIS (Perception) — the seam is barely visible","DC 16 WIS (Perception) — it matches the surrounding floor perfectly","DC 10 WIS (Perception) on careful inspection of the path","Detect Magic or True Seeing reveals the illusion"],
+    Alarm: ["DC 13 WIS (Perception) to spot","DC 10 INT (Investigation) on a thorough search","DC 15 WIS (Perception) — it's quite well hidden","DC 12 WIS (Perception) to hear the tension in the wire","only magical detection reveals the Sending Stone link"],
+  },
+  disarm: {
+    Mechanical: ["DC 15 DEX (Thieves' Tools) to disable the mechanism","DC 13 DEX (Thieves' Tools) to cut the wire without triggering it","DC 14 STR to safely block the pressure plate with a wedge","jamming the mechanism with a spike: automatic but loud","DC 12 DEX (Thieves' Tools) — simple but fiddly"],
+    Magic: ["DC 15 INT (Arcana) to suppress it for 1 minute using a counterspell or Dispel Magic","Dispel Magic (DC 15) removes it permanently","no mundane disarm possible — requires Dispel Magic","DC 14 INT (Arcana) to identify the correct counter-ritual (1 hour)","Remove Curse or Dispel Magic (CL 5+)"],
+    'Natural hazard': ["DC 14 STR (Athletics) to safely prop the beam","DC 12 INT (Nature) to identify a safe path around it","no disarm possible — must be bypassed","DC 15 STR to clear enough debris to pass safely","cannot be disarmed; must be avoided or triggered from a safe distance"],
+    'Poison / gas': ["DC 13 DEX (Thieves' Tools) to extract the needle safely","DC 14 CON to hold breath and cap the vent","neutralised by a purify food and drink spell","DC 12 DEX to block the vent with wax or cloth","Antitoxin negates the poison effect if consumed beforehand"],
+    Pit: ["DC 13 DEX (Thieves' Tools) to lock the trapdoor in place","no disarm — mark it and go around","a Spike driven into the hinge: automatic but permanent","DC 15 STR to hold the door closed while others cross","Dispel Magic removes the illusion, revealing the real floor"],
+    Alarm: ["DC 12 DEX (Thieves' Tools) to silence the bell first","DC 10 DEX (Stealth) to step over the thread","counterspell or silence spell when triggered","DC 11 DEX to catch the cups before they fall (reaction)","DC 14 WIS (Perception) to find and disable all sensors"],
+  },
+  resets: ["manual reset by the trap-setter","automatic reset after 1 hour","one-use only — depleted after triggering","resets after 1 minute if not triggered by a second creature","never resets — the mechanism is destroyed on use"],
+};
+
+function genTrap(){
+  var setting = document.getElementById('tr-set').value;
+  var severity = document.getElementById('tr-sev').value;
+  var type = document.getElementById('tr-type').value;
+
+  // Pick type
+  var typeKeys = Object.keys(TRAP_DATA.triggers);
+  var trapType = type === 'any' ? pick(typeKeys) : type;
+  if (!TRAP_DATA.triggers[trapType]) trapType = pick(typeKeys);
+
+  // Pick severity
+  var sevKeys = ['Setback','Dangerous','Deadly'];
+  var sev;
+  if (severity === 'any') {
+    sev = pick(sevKeys);
+  } else if (severity.indexOf('Setback') !== -1) {
+    sev = 'Setback';
+  } else if (severity.indexOf('Dangerous') !== -1) {
+    sev = 'Dangerous';
+  } else {
+    sev = 'Deadly';
+  }
+
+  // Pick setting
+  var settingKeys = Object.keys(TRAP_DATA.locations);
+  var settingKey = setting === 'any' ? pick(settingKeys) : setting;
+  if (!TRAP_DATA.locations[settingKey]) settingKey = pick(settingKeys);
+
+  var trigger    = pick(TRAP_DATA.triggers[trapType]);
+  var effect     = pick(TRAP_DATA.effects[sev]);
+  var location   = pick(TRAP_DATA.locations[settingKey]);
+  var detection  = pick(TRAP_DATA.detection[trapType]);
+  var disarm     = pick(TRAP_DATA.disarm[trapType]);
+  var reset      = pick(TRAP_DATA.resets);
+
+  // CR hint
+  var crHint = sev === 'Setback' ? 'Suitable for CR 1\u20134' : sev === 'Dangerous' ? 'Suitable for CR 5\u201310' : 'Suitable for CR 11+';
+
+  var b = document.getElementById('tr-body');
+  document.getElementById('tr-res').classList.add('show');
+  b.innerHTML = '<h3>' + esc(trapType) + ' Trap</h3>'
+    + '<p style="font-size:.8rem;color:var(--il);margin-bottom:.4rem;">'
+    + esc(sev) + ' \u00b7 ' + esc(settingKey) + ' \u00b7 ' + esc(crHint) + '</p>'
+    + '<span class="lbl">Location</span><p>Found in ' + esc(location) + '.</p>'
+    + '<span class="lbl">Trigger</span><p>Activated by ' + esc(trigger) + '.</p>'
+    + '<span class="lbl">Effect</span><p>When triggered: ' + esc(effect) + '.</p>'
+    + '<span class="lbl">Detection</span><p>' + esc(detection) + '.</p>'
+    + '<span class="lbl">Disarm</span><p>' + esc(disarm) + '.</p>'
+    + '<span class="lbl">Reset</span><p>' + esc(reset) + '.</p>';
 }
 
 /* ── INIT ─────────────────────────────────────────────────────────────────── */

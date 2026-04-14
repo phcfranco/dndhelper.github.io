@@ -510,6 +510,174 @@ var SHOPS = [
     ]},
 ];
 
+// ── NEW MERCHANT SHOPS ────────────────────────────────────────────────────────
+
+var EXTRA_SHOPS = [
+  // ── MUSIC & ENTERTAINMENT ─────────────────────────────────────────────────
+  { category:'Music & Entertainment', tier:'common', name:"Cadenza's Instruments", icon:'\uD83C\uDFB9',
+    desc:'A cramped, noisy shop run by a retired bard who never shuts up. Instruments, sheet music, and performance supplies. Everything tested personally, and loudly.',
+    stock:[
+      {name:'Lute',price:'35 gp',notes:'Light stringed instrument. Bards use as arcane focus.'},
+      {name:'Flute',price:'2 gp',notes:'Simple wind instrument. Easy to carry.'},
+      {name:'Drum',price:'6 gp',notes:'Percussive. Louder than expected.'},
+      {name:'Viol',price:'30 gp',notes:'Bowed string instrument. Melancholy sound.'},
+      {name:'Horn',price:'3 gp',notes:'Brass wind. Very loud. Carries half a mile.'},
+      {name:'Lyre',price:'35 gp',notes:'Classical. Preferred by scholarly bards.'},
+      {name:'Bagpipes',price:'30 gp',notes:'Beloved in the north. Loathed elsewhere.'},
+      {name:'Pan Flute',price:'12 gp',notes:'Multiple pipes. Pastoral sound.'},
+      {name:'Shawm',price:'2 gp',notes:'Reed instrument, loud and piercing.'},
+      {name:'Dulcimer',price:'25 gp',notes:'Hammered string board. Requires a surface.'},
+      {name:'Sheet Music (popular song)',price:'1 gp',notes:'Transcription of a well-known melody'},
+      {name:'Sheet Music (rare piece)',price:'10 gp',notes:'Obscure or complex composition'},
+      {name:'Instrument Repair Kit',price:'5 gp',notes:'Strings, rosin, small tools. Fix minor damage.'},
+      {name:'Performance Costume',price:'5 gp',notes:'Colourful, eye-catching. +1 to Performance checks (DM discretion).'},
+    ]},
+
+  // ── WRITING & SCHOLARSHIP ─────────────────────────────────────────────────
+  { category:'Writing & Scholarship', tier:'common', name:"The Open Tome", icon:'\uD83D\uDCDD',
+    desc:'Ink, paper, and knowledge for sale. Run by two elderly scholars who disagree about everything. Both are usually right.',
+    stock:[
+      {name:'Parchment (10 sheets)',price:'1 sp ea',notes:'Standard writing surface'},
+      {name:'Vellum (5 sheets)',price:'5 sp ea',notes:'Finer quality. Better for permanent records.'},
+      {name:'Ink (common, 1 oz)',price:'5 sp',notes:'Black writing ink'},
+      {name:'Ink (coloured, 1 oz)',price:'2 gp',notes:'Red, blue, green, or gold — choose one'},
+      {name:'Ink Pen',price:'2 cp',notes:'Standard quill-style pen'},
+      {name:'Wax Seal Kit',price:'5 sp',notes:'Wax sticks + a plain stamp. Add a custom stamp for 2 gp.'},
+      {name:'Calligraphy Supplies',price:'10 gp',notes:'Full kit. Proficiency required for full benefit.'},
+      {name:'Blank Ledger',price:'1 gp',notes:'100-page accounting book. Gridded pages.'},
+      {name:'Language Primer',price:'10 gp',notes:'Study one language. 250 days + teacher to learn it.'},
+      {name:'Encyclopedia (one volume)',price:'25 gp',notes:'History, Geography, or Natural Philosophy — choose. Adv. on relevant INT checks.'},
+      {name:'Copying Service',price:'2 gp/page',notes:'A scribe copies a document accurately (1 day per 10 pages)'},
+      {name:'Translation Service',price:'5 gp/page',notes:'Common, Elvish, Dwarvish. Other languages: 10 gp/page.'},
+    ]},
+
+  // ── CLOTHING & FASHION ────────────────────────────────────────────────────
+  { category:'Clothing & Fashion', tier:'common', name:"The Needle & Thread", icon:'\uD83E\uDDF5',
+    desc:'Practical clothes for working people and travellers. No judgement about what you have been doing in those bloodstained trousers.',
+    stock:[
+      {name:'Common Clothes',price:'5 sp',notes:'Shirt, trousers, and boots. Plain.'},
+      {name:"Traveler's Clothes",price:'2 gp',notes:'Sturdy, weatherproofed, many pockets.'},
+      {name:'Fine Clothes',price:'15 gp',notes:'Suitable for courts. Uncomfortably nice.'},
+      {name:'Cold-Weather Gear',price:'10 gp',notes:'Cloak, gloves, scarf. Adv. on CON vs cold environments (DM).'},
+      {name:'Belt & Pouches',price:'5 sp',notes:'Three belt pouches. Holds a good amount.'},
+      {name:'Boots (common)',price:'2 sp',notes:'Leather, ankle height. Serviceable.'},
+      {name:'Boots (good)',price:'2 gp',notes:'Well-made, knee-high. Better grip.'},
+      {name:'Cloak (wool)',price:'1 gp',notes:'Heavy and waterproof. Dark grey.'},
+      {name:'Cloak (fine)',price:'5 gp',notes:'Lined with silk. Fastens with a clasp.'},
+      {name:'Hood (deep)',price:'3 sp',notes:'Conceals the face in dim light. Very suspicious.'},
+      {name:'Alterations & Repairs',price:'1 sp+',notes:'Mending, resizing, adding pockets. Price by complexity.'},
+    ]},
+
+  // ── HERBALIST & WILDERNESS ────────────────────────────────────────────────
+  { category:'Herbalist & Wilderness', tier:'common', name:"The Green Cauldron", icon:'\uD83C\uDF3F',
+    desc:'Dried herbs, natural remedies, and wilderness supplies. The proprietor is a druid who retired from adventuring after the incident in the Thornwood. She does not discuss it.',
+    stock:[
+      {name:'Herbalism Kit',price:'5 gp',notes:'Craft antitoxin and healing potions. Requires proficiency.'},
+      {name:'Healer\'s Kit',price:'5 gp',notes:'10 uses. Stabilise at 0 HP without a Medicine check.'},
+      {name:'Antitoxin',price:'50 gp',notes:'Adv. on CON saves vs poison for 1 hour.'},
+      {name:'Soothing Balm',price:'5 sp',notes:'Non-magical. Relieves minor pain and inflammation. No game effect, but NPCs appreciate it.'},
+      {name:'Fever Root (bundle)',price:'2 gp',notes:'Treats mundane fever and infection. 5 doses.'},
+      {name:'Nightshade (dose)',price:'5 gp',notes:'Highly toxic raw herb. Legal. Handle with care.'},
+      {name:'Dried Mistletoe (druidic focus)',price:'1 gp',notes:'Druid arcane focus. Replenished each season.'},
+      {name:'Totem Carving (druidic focus)',price:'1 gp',notes:'Animal shape carved from wood. Druid focus.'},
+      {name:'Trail Rations (herb-packed)',price:'7 sp',notes:'Better than standard rations. Resists spoilage longer.'},
+      {name:'Insect Repellent (pouch)',price:'3 sp',notes:'Burns as incense. Keeps insects away for 4 hours.'},
+      {name:'Rope, Woven Vine (50ft)',price:'8 sp',notes:'Natural fibre. Not as strong as hemp, but floats.'},
+      {name:'Field Identification Guide',price:'5 gp',notes:'Identify common plants and fungi. Adv. on Nature checks to identify plants.'},
+    ]},
+
+  // ── RELIGIOUS & HOLY SUPPLIES ─────────────────────────────────────────────
+  { category:'Religious & Holy Supplies', tier:'common', name:"The Vigil Lamp", icon:'\uD83D\uDD6F',
+    desc:'Candles, incense, holy water, and religious paraphernalia for every faith. The proprietor serves all gods equally and finds this diplomatically exhausting.',
+    stock:[
+      {name:'Holy Symbol (any deity)',price:'5 gp',notes:'Amulet form. Specify the deity.'},
+      {name:'Holy Symbol (embossed shield)',price:'10 gp',notes:'Shield-face divine symbol. Can be used as shield and focus.'},
+      {name:'Holy Water (flask)',price:'25 gp',notes:'2d6 radiant damage vs undead/fiends as improvised weapon.'},
+      {name:'Candles (10)',price:'1 cp ea',notes:'White wax, 1-hour burn.'},
+      {name:'Ritual Candles (black or red, 3)',price:'5 sp',notes:'Used in specific religious ceremonies.'},
+      {name:'Incense (10 sticks)',price:'2 sp',notes:'Ceremony use. Neutral scent.'},
+      {name:'Incense (rare, 3 sticks)',price:'1 gp',notes:'Frankincense, myrrh, or saffron — choose one.'},
+      {name:'Prayer Beads (wooden)',price:'5 sp',notes:'30 beads on a cord. Tool for meditation.'},
+      {name:'Prayer Beads (fine)',price:'5 gp',notes:'Semiprecious stones. Counts as a holy symbol.'},
+      {name:'Religious Text (common faith)',price:'5 gp',notes:'Prayers and scripture. Doubles as holy symbol.'},
+      {name:'Religious Text (rare faith)',price:'25 gp',notes:'Obscure or minority religion. Hard to find.'},
+      {name:'Blessed Salt (pouch)',price:'1 gp',notes:'Used in warding rituals. Non-magical; tradition varies.'},
+      {name:'Funeral Shroud',price:'2 gp',notes:'White linen. Proper burial. Matters to the dead.'},
+    ]},
+
+  // ── SIEGE & CONSTRUCTION ──────────────────────────────────────────────────
+  { category:'Construction & Siege', tier:'major', name:"Durrin's Heavy Goods", icon:'\uD83D\uDD28',
+    desc:'Large quantities of iron, stone, lumber, and siege equipment. Durrin delivers. Durrin also builds. Durrin has opinions about your plans and will share them.',
+    stock:[
+      {name:'Iron Spikes (10)',price:'1 gp',notes:'Pitons, anchors, door spikes. 1 lb each.'},
+      {name:'Iron Chain (10ft)',price:'5 gp',notes:'Heavy. Holds 2,000 lb.'},
+      {name:'Iron Lock (good)',price:'10 gp',notes:'DC 15 Thieves\' Tools to pick.'},
+      {name:'Iron Lock (exceptional)',price:'50 gp',notes:'DC 20 Thieves\' Tools to pick.'},
+      {name:'Lumber (10ft plank)',price:'1 sp',notes:'Build things. Smash things. Both.'},
+      {name:'Stone Block',price:'5 sp',notes:'Standard building stone, rough-hewn.'},
+      {name:'Ladder (10ft)',price:'1 sp',notes:'25 lb. Awkward but essential.'},
+      {name:'Pulley System',price:'3 gp',notes:'Reduces lift weight by half. Requires anchoring.'},
+      {name:'Ballista (kit)',price:'500 gp',notes:'4d10 piercing, 120/480ft. Assembly: 1 hour, 4 people.'},
+      {name:'Ballista Bolt (5)',price:'5 gp',notes:'Ammunition for ballista.'},
+      {name:'Cauldron (iron, large)',price:'2 gp',notes:'Holds 8 gallons. Cooking or pouring boiling things.'},
+      {name:'Ram (battering)',price:'4 gp',notes:'Improvised: STR +4 vs doors. Purpose-built: STR +8.'},
+      {name:'Manacles',price:'2 gp',notes:'DC 20 STR or DC 15 Escape Artist to break free.'},
+    ]},
+
+  // ── GAMBLING & GAMES ──────────────────────────────────────────────────────
+  { category:'Games & Gambling', tier:'common', name:"The Lucky Die", icon:'\uD83C\uDFB0',
+    desc:'Dice, card decks, game sets, and the finest in recreational chance. The proprietor is suspiciously wealthy for someone who only sells things.',
+    stock:[
+      {name:'Dice Set (standard, 5d6)',price:'1 sp',notes:'Bone dice. For Dragon\'s Teeth and most tavern games.'},
+      {name:'Dice Set (loaded, 5d6)',price:'2 gp',notes:'Weighted to favour high numbers. DC 14 Perception to spot.'},
+      {name:'Playing Card Deck',price:'5 sp',notes:'52 cards plus 2 blanks. Standard suits.'},
+      {name:'Playing Card Deck (marked)',price:'5 gp',notes:'Invisible marks on the backs. DC 16 Perception to notice.'},
+      {name:'Chess Set (bone)',price:'1 gp',notes:'Functional. Two players.'},
+      {name:'Chess Set (ivory & ebony)',price:'25 gp',notes:'Fine quality. Makes an impression.'},
+      {name:'Dragonchess Set',price:'1 gp',notes:'3-board version. Requires the rules (included).'},
+      {name:'Three-Dragon Ante Deck',price:'1 gp',notes:'Card game popular in taverns and on campaign.'},
+      {name:'Coin (weighted, 100 pcs)',price:'5 gp',notes:'Consistently lands on one side. For cheating, divination, or arguments.'},
+      {name:'Game of Three Cups (kit)',price:'2 gp',notes:'Cups, ball, and collapsible table. The house always wins.'},
+    ]},
+
+  // ── MARITIME & TRAVEL ─────────────────────────────────────────────────────
+  { category:'Maritime & Travel', tier:'major', name:"The Harbour Chandler", icon:'\u2693',
+    desc:'Everything needed for sea travel. The proprietor smells of salt and tar and has a detailed opinion on every waterway within 500 miles.',
+    stock:[
+      {name:'Navigator\'s Tools',price:'25 gp',notes:'Charts, compass, astrolabe. Chart a sea course.'},
+      {name:'Spyglass',price:'1,000 gp',notes:'Targets appear 2x closer.'},
+      {name:'Compass',price:'10 gp',notes:'Points north. Reliable.'},
+      {name:'Anchor (small)',price:'5 gp',notes:'Holds a small boat. 25 lb.'},
+      {name:'Fishing Tackle',price:'1 gp',notes:'Rod, line, hooks, bait. WIS check to catch fish.'},
+      {name:'Net (weighted)',price:'1 gp',notes:'Can be thrown as improvised weapon: restrained on hit, DC 10 STR to escape.'},
+      {name:'Life Ring (rope)',price:'5 sp',notes:'30ft of rope with a sealed buoyant ring. Throw to drowning creature.'},
+      {name:'Waterproof Satchel',price:'2 gp',notes:'Oilskin bag. Keeps contents dry underwater.'},
+      {name:'Lantern (signal)',price:'8 gp',notes:'Bright light visible at 2 miles. Coloured lens inserts sold separately.'},
+      {name:'Oars (pair)',price:'5 sp',notes:'For rowboats and small vessels.'},
+      {name:'Pitch (barrel)',price:'2 gp',notes:'Waterproofing and fire-starting. Very flammable.'},
+      {name:'Passage (coastal, per day)',price:'1 sp/day',notes:'Berth on a merchant vessel. No questions.'},
+    ]},
+
+  // ── THIEVES & UNDERGROUND ─────────────────────────────────────────────────
+  { category:'Grey Market', tier:'major', name:"No Name — Ask at the Bar", icon:'\uD83D\uDD13',
+    desc:'A back-room arrangement. You were told to ask for "someone who can help." The proprietor has never been arrested, which is either evidence of innocence or competence.',
+    stock:[
+      {name:'Thieves\' Tools',price:'25 gp',notes:'Pick locks, disarm traps. DEX proficiency required.'},
+      {name:'Thieves\' Tools (masterwork)',price:'100 gp',notes:'+2 to Thieves\' Tools checks. Very illegal to own in most cities.'},
+      {name:'Forgery Kit',price:'15 gp',notes:'Duplicate written documents. INT (Forgery Kit) to use.'},
+      {name:'Disguise Kit',price:'25 gp',notes:'Cosmetics, wigs, false features.'},
+      {name:'Crowbar',price:'2 gp',notes:'Advantage on STR to force open.'},
+      {name:'Grappling Hook (silent)',price:'15 gp',notes:'Padded hooks. No noise on throw. DC 16 Perception to hear.'},
+      {name:'Rope, Knotted (50ft)',price:'2 gp',notes:'Pre-tied at 1ft intervals for climbing. Easier to grip.'},
+      {name:'Caltrops (bag of 20)',price:'1 gp',notes:'Scatter in 5ft square: creatures must DC 15 DEX or stop and take 1 damage, speed halved until healed.'},
+      {name:'Smoke Powder (vial)',price:'20 gp',notes:'When broken: fills 10ft cube with opaque smoke for 1 minute.'},
+      {name:'Pouch (hidden, sewn-in)',price:'3 gp',notes:'Concealed compartment sewn into a cloak or vest. DC 14 to find.'},
+      {name:'Message Cipher (pair)',price:'10 gp',notes:'Two matching cipher wheels. Encrypt short messages.'},
+      {name:'Acid (vial)',price:'25 gp',notes:'Dissolves most metals given 1 hour. Immediate: 2d6 acid damage.'},
+    ]},
+];
+
+SHOPS = SHOPS.concat(EXTRA_SHOPS);
 var FARM_SHOPS = [
   { category:'Farm Goods', tier:'farm', name:'Homestead Pantry', icon:'\uD83C\uDF3D',
     desc:'The family sells surplus. Everything is cheaper than in town.',
@@ -534,42 +702,119 @@ var currentSettlement = 'capital';
 
 function dRoll(n) { return Math.floor(Math.random() * n) + 1; }
 
+function shuffleArr(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
+function dRoll(n) { return Math.floor(Math.random() * n) + 1; }
+
+// Settlement rules:
+//   capital   = all shops, 100% stock
+//   city      = all shops, 75% stock
+//   town      = all shops (no capital-only), 50% stock
+//   hamlet    = all shops (no capital-only), 30% stock, slimmed names
+//   farmstead = food/gear/alchemist/transport only, 25% stock
+//   itinerant = ONE randomly picked shop per category group, 1d4 items each
+
+var FARMSTEAD_CATS = ['Food & Lodging','Adventuring Gear','Transport & Mounts','Alchemist & Apothecary'];
+
 function buildMerchant() {
   var size = document.getElementById('settlement-size').value;
   currentSettlement = size;
-  var config = SETTLEMENT_CONFIG[size];
-  var allowedTiers = TIER_VISIBILITY[size] || ['common'];
 
-  // Gather applicable shops
-  var allShops = SHOPS.concat(size === 'farmstead' ? FARM_SHOPS : []);
-  var activeShops = allShops.filter(function(s) {
-    return allowedTiers.indexOf(s.tier) !== -1;
+  // ── What each settlement size means ──────────────────────────────────────
+  // capital:   ALL shops, FULL stock
+  // city:      all shops, 75% stock
+  // town:      ONE random shop per category, 50% stock
+  // hamlet:    ONE random shop per category (prefer common tier), ~4 items each
+  // farmstead: ONE random shop per category, 2-3 items each
+  // itinerant: roll 1d6 for how many categories appear, ONE random shop each, 1d4 items
+
+  var allShops = SHOPS.concat(FARM_SHOPS);
+
+  // Group shops by category
+  var byCategory = {};
+  allShops.forEach(function(s) {
+    if (!byCategory[s.category]) byCategory[s.category] = [];
+    byCategory[s.category].push(s);
   });
 
-  // For hamlet/farmstead/itinerant: pick a random subset of shops
-  if (size === 'hamlet') {
-    activeShops = shuffleArr(activeShops).slice(0, 3);
+  var activeShops = [];
+  var stockFraction = 1.0;
+
+  if (size === 'capital') {
+    // Show all shops, full stock
+    activeShops = allShops.slice();
+    stockFraction = 1.0;
+
+  } else if (size === 'city') {
+    // All shops (excluding capital-only from unique categories), 75% stock
+    activeShops = allShops.filter(function(s) { return s.tier !== 'capital'; });
+    stockFraction = 0.75;
+
+  } else if (size === 'town') {
+    // One random shop per category (prefer common/major), 50% stock
+    Object.keys(byCategory).forEach(function(cat) {
+      var group = byCategory[cat].filter(function(s) { return s.tier !== 'capital'; });
+      if (!group.length) group = byCategory[cat];
+      activeShops.push(shuffleArr(group.slice())[0]);
+    });
+    stockFraction = 0.5;
+
+  } else if (size === 'hamlet') {
+    // One shop per category (prefer common tier), ~4 items
+    Object.keys(byCategory).forEach(function(cat) {
+      var common = byCategory[cat].filter(function(s) { return s.tier === 'common' || s.tier === 'minimal' || s.tier === 'farm'; });
+      var group  = common.length ? common : byCategory[cat];
+      activeShops.push(shuffleArr(group.slice())[0]);
+    });
+    stockFraction = 0.25;  // will be capped to min 3 items below
+
+  } else if (size === 'farmstead') {
+    // One shop per category, very limited
+    Object.keys(byCategory).forEach(function(cat) {
+      var common = byCategory[cat].filter(function(s) { return s.tier === 'common' || s.tier === 'farm'; });
+      var group  = common.length ? common : byCategory[cat];
+      activeShops.push(shuffleArr(group.slice())[0]);
+    });
+    stockFraction = 0.15;  // min 2 items below
+
   } else if (size === 'itinerant') {
-    activeShops = shuffleArr(activeShops).slice(0, 2);
+    // Roll 1d6 for number of categories present
+    var allCats = Object.keys(byCategory);
+    var numCats = dRoll(6);
+    var chosenCats = shuffleArr(allCats.slice()).slice(0, numCats);
+    chosenCats.forEach(function(cat) {
+      var group = byCategory[cat].filter(function(s) { return s.tier !== 'capital'; });
+      if (!group.length) group = byCategory[cat];
+      activeShops.push(shuffleArr(group.slice())[0]);
+    });
+    stockFraction = 'd4';
   }
 
-  // Apply stock trimming per settlement
-  var stockFraction = config.stock;
+  // ── Apply stock trimming ─────────────────────────────────────────────────
   currentShopList = activeShops.map(function(s) {
     var stock;
     if (stockFraction === 'd4') {
       var n = dRoll(4);
       stock = shuffleArr(s.stock.slice()).slice(0, n);
     } else if (stockFraction < 1) {
-      var keep = Math.max(1, Math.round(s.stock.length * stockFraction));
+      // Calculate keep amount, with per-size minimums
+      var minItems = size === 'farmstead' ? 2 : size === 'hamlet' ? 3 : 4;
+      var keep = Math.max(minItems, Math.round(s.stock.length * stockFraction));
+      keep = Math.min(keep, s.stock.length);
       stock = shuffleArr(s.stock.slice()).slice(0, keep);
     } else {
-      stock = s.stock;
+      stock = s.stock.slice();
     }
     return { name: s.name, icon: s.icon, desc: s.desc, category: s.category, stock: stock };
   });
 
-  // Build sidebar
+  // ── Build sidebar ─────────────────────────────────────────────────────────
   var list = document.getElementById('shop-list');
   var html = '';
   var lastCat = '';
@@ -583,24 +828,24 @@ function buildMerchant() {
   });
 
   if (!currentShopList.length) {
-    html = '<div style="padding:.5rem;font-size:.82rem;color:var(--ink-light);font-style:italic;">No merchants available here.</div>';
+    html = '<div style="padding:.5rem;font-size:.82rem;color:var(--ink-light);font-style:italic;">No merchants at this location.</div>';
   }
-
   list.innerHTML = html;
-  if (currentShopList.length) openShop(0);
-  else document.getElementById('shop-stock').innerHTML = '<div style="padding:1rem;font-style:italic;color:var(--ink-light);">Nothing for sale at this location. Move on.</div>';
 
-  // Show settlement note
-  var note = {
-    capital:   'Full marketplace. All major shops represented with complete stock.',
-    city:      'Good selection. Major shops only; some rare items may need to be ordered.',
-    town:      'Common goods available. Expect about half the usual stock.',
-    hamlet:    'A few traders with limited wares. Roll again for different random selection.',
-    farmstead: 'Subsistence goods only. No armour, no magic.',
-    itinerant: 'Travelling merchant with a cart. 1d4 random items per type. Roll again for a different load.',
+  // ── Hint text ──────────────────────────────────────────────────────────────
+  var notes = {
+    capital:   'Full marketplace \u2014 every shop type, complete stock.',
+    city:      'All shop types, approximately \u00be stock.',
+    town:      'One randomly selected merchant per category at half stock.',
+    hamlet:    'One merchant per category with limited wares (3\u20134 items each). Click Reroll for different traders.',
+    farmstead: 'One merchant per category, bare minimum stock (2\u20133 items). Click Reroll for different stock.',
+    itinerant: '1d6 random merchant categories today. Each has 1d4 items. Click Reroll for a different trader.',
   };
   var hint = document.querySelector('#panel-merchant .hint');
-  if (hint) hint.textContent = note[size] || '';
+  if (hint) hint.textContent = notes[size] || '';
+
+  if (currentShopList.length) openShop(0);
+  else document.getElementById('shop-stock').innerHTML = '<div style="padding:1rem;font-style:italic;color:var(--ink-light);">Nothing for sale here.</div>';
 }
 
 function openShop(idx) {
@@ -610,17 +855,19 @@ function openShop(idx) {
   document.querySelectorAll('.shop-item').forEach(function(el, i) {
     el.classList.toggle('active', i === idx);
   });
-  var stock = document.getElementById('shop-stock');
+
+  var stockNote = '';
+  if (currentSettlement === 'itinerant') {
+    stockNote = '<p style="font-size:.78rem;color:var(--ink-light);font-style:italic;margin-bottom:.5rem;">Itinerant stock \u2014 rolled 1d4 items. Reroll Stock to see different wares.</p>';
+  }
+
   var rows = shop.stock.map(function(item) {
     return '<tr><td><strong>' + item.name + '</strong></td><td>' + item.price + '</td>'
       + '<td style="color:var(--ink-light);font-size:.82rem;">' + item.notes + '</td></tr>';
   }).join('');
 
-  var stockNote = currentSettlement === 'itinerant'
-    ? '<p style="font-size:.78rem;color:var(--ink-light);font-style:italic;margin-bottom:.5rem;">Itinerant stock — rolled 1d4 items. Reroll to see different wares.</p>'
-    : '';
-
-  stock.innerHTML = '<div style="margin-bottom:.8rem;">'
+  document.getElementById('shop-stock').innerHTML =
+    '<div style="margin-bottom:.8rem;">'
     + '<span style="font-family:\'Cinzel\',serif;font-size:1rem;color:var(--crimson);">' + shop.icon + ' ' + shop.name + '</span>'
     + '<p style="font-size:.85rem;color:var(--ink-light);font-style:italic;margin-top:.25rem;">' + shop.desc + '</p>'
     + '</div>'
@@ -628,13 +875,6 @@ function openShop(idx) {
     + '<table><thead><tr><th>Item</th><th>Price</th><th>Notes</th></tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
-function shuffleArr(arr) {
-  for (var i = arr.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
-  }
-  return arr;
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOOT GENERATOR (DMG 2024 treasure tables)
