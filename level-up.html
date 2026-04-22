@@ -307,6 +307,9 @@ label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.12em
             <option value="">— choose —</option>
             <option>1</option><option>2</option><option>3</option><option>4</option>
             <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+            <option>10</option><option>11</option><option>12</option><option>13</option>
+            <option>14</option><option>15</option><option>16</option><option>17</option>
+            <option>18</option><option>19</option>
           </select>
         </div>
       </div>
@@ -372,7 +375,7 @@ if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 // ── Level progression data (from PHB 2024) ────────────────────────────────
-const PROF_BONUS = {1:2,2:2,3:2,4:2,5:3,6:3,7:3,8:3,9:4,10:4};
+const PROF_BONUS = {1:2,2:2,3:2,4:2,5:3,6:3,7:3,8:3,9:4,10:4,11:4,12:4,13:5,14:5,15:5,16:5,17:6,18:6,19:6,20:6};
 
 // PHB 2024 fixed HP per level (not die average — the new fixed values)
 const HP_PER_LEVEL = {
@@ -382,47 +385,87 @@ const HP_PER_LEVEL = {
   sorcerer: 4, wizard: 4
 };
 
-// Full spell slot tables per class, levels 1–10
-// Format: [L1, L2, L3, L4, L5] slots
+// Full spell slot tables per class, levels 1–20
+// Format: [L1, L2, L3, L4, L5, L6, L7, L8, L9] slots
 const SPELL_SLOTS = {
-  wizard:   {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
-  sorcerer: {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
-  bard:     {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
-  cleric:   {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
-  druid:    {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[4,2,0,0,0],4:[4,3,0,0,0],5:[4,3,2,0,0],6:[4,3,3,0,0],7:[4,3,3,1,0],8:[4,3,3,2,0],9:[4,3,3,3,1],10:[4,3,3,3,2]},
-  paladin:  {1:[2,0,0,0,0],2:[2,0,0,0,0],3:[3,0,0,0,0],4:[3,0,0,0,0],5:[4,2,0,0,0],6:[4,2,0,0,0],7:[4,3,0,0,0],8:[4,3,0,0,0],9:[4,3,2,0,0],10:[4,3,2,0,0]},
-  ranger:   {1:[0,0,0,0,0],2:[2,0,0,0,0],3:[3,0,0,0,0],4:[3,0,0,0,0],5:[4,2,0,0,0],6:[4,2,0,0,0],7:[4,3,0,0,0],8:[4,3,0,0,0],9:[4,3,2,0,0],10:[4,3,2,0,0]},
-  warlock:  {1:[1,0,0,0,0],2:[2,0,0,0,0],3:[0,2,0,0,0],4:[0,2,0,0,0],5:[0,0,2,0,0],6:[0,0,2,0,0],7:[0,0,0,2,0],8:[0,0,0,2,0],9:[0,0,0,0,2],10:[0,0,0,0,2]},
+  wizard:   {
+    1:[2,0,0,0,0,0,0,0,0],2:[3,0,0,0,0,0,0,0,0],3:[4,2,0,0,0,0,0,0,0],4:[4,3,0,0,0,0,0,0,0],
+    5:[4,3,2,0,0,0,0,0,0],6:[4,3,3,0,0,0,0,0,0],7:[4,3,3,1,0,0,0,0,0],8:[4,3,3,2,0,0,0,0,0],
+    9:[4,3,3,3,1,0,0,0,0],10:[4,3,3,3,2,0,0,0,0],11:[4,3,3,3,2,1,0,0,0],12:[4,3,3,3,2,1,0,0,0],
+    13:[4,3,3,3,2,1,1,0,0],14:[4,3,3,3,2,1,1,0,0],15:[4,3,3,3,2,1,1,1,0],16:[4,3,3,3,2,1,1,1,0],
+    17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  sorcerer: {
+    1:[2,0,0,0,0,0,0,0,0],2:[3,0,0,0,0,0,0,0,0],3:[4,2,0,0,0,0,0,0,0],4:[4,3,0,0,0,0,0,0,0],
+    5:[4,3,2,0,0,0,0,0,0],6:[4,3,3,0,0,0,0,0,0],7:[4,3,3,1,0,0,0,0,0],8:[4,3,3,2,0,0,0,0,0],
+    9:[4,3,3,3,1,0,0,0,0],10:[4,3,3,3,2,0,0,0,0],11:[4,3,3,3,2,1,0,0,0],12:[4,3,3,3,2,1,0,0,0],
+    13:[4,3,3,3,2,1,1,0,0],14:[4,3,3,3,2,1,1,0,0],15:[4,3,3,3,2,1,1,1,0],16:[4,3,3,3,2,1,1,1,0],
+    17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  bard:     {
+    1:[2,0,0,0,0,0,0,0,0],2:[3,0,0,0,0,0,0,0,0],3:[4,2,0,0,0,0,0,0,0],4:[4,3,0,0,0,0,0,0,0],
+    5:[4,3,2,0,0,0,0,0,0],6:[4,3,3,0,0,0,0,0,0],7:[4,3,3,1,0,0,0,0,0],8:[4,3,3,2,0,0,0,0,0],
+    9:[4,3,3,3,1,0,0,0,0],10:[4,3,3,3,2,0,0,0,0],11:[4,3,3,3,2,1,0,0,0],12:[4,3,3,3,2,1,0,0,0],
+    13:[4,3,3,3,2,1,1,0,0],14:[4,3,3,3,2,1,1,0,0],15:[4,3,3,3,2,1,1,1,0],16:[4,3,3,3,2,1,1,1,0],
+    17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  cleric:   {
+    1:[2,0,0,0,0,0,0,0,0],2:[3,0,0,0,0,0,0,0,0],3:[4,2,0,0,0,0,0,0,0],4:[4,3,0,0,0,0,0,0,0],
+    5:[4,3,2,0,0,0,0,0,0],6:[4,3,3,0,0,0,0,0,0],7:[4,3,3,1,0,0,0,0,0],8:[4,3,3,2,0,0,0,0,0],
+    9:[4,3,3,3,1,0,0,0,0],10:[4,3,3,3,2,0,0,0,0],11:[4,3,3,3,2,1,0,0,0],12:[4,3,3,3,2,1,0,0,0],
+    13:[4,3,3,3,2,1,1,0,0],14:[4,3,3,3,2,1,1,0,0],15:[4,3,3,3,2,1,1,1,0],16:[4,3,3,3,2,1,1,1,0],
+    17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  druid:    {
+    1:[2,0,0,0,0,0,0,0,0],2:[3,0,0,0,0,0,0,0,0],3:[4,2,0,0,0,0,0,0,0],4:[4,3,0,0,0,0,0,0,0],
+    5:[4,3,2,0,0,0,0,0,0],6:[4,3,3,0,0,0,0,0,0],7:[4,3,3,1,0,0,0,0,0],8:[4,3,3,2,0,0,0,0,0],
+    9:[4,3,3,3,1,0,0,0,0],10:[4,3,3,3,2,0,0,0,0],11:[4,3,3,3,2,1,0,0,0],12:[4,3,3,3,2,1,0,0,0],
+    13:[4,3,3,3,2,1,1,0,0],14:[4,3,3,3,2,1,1,0,0],15:[4,3,3,3,2,1,1,1,0],16:[4,3,3,3,2,1,1,1,0],
+    17:[4,3,3,3,2,1,1,1,1],18:[4,3,3,3,3,1,1,1,1],19:[4,3,3,3,3,2,1,1,1],20:[4,3,3,3,3,2,2,1,1]},
+  paladin:  {
+    1:[2,0,0,0,0,0,0,0,0],2:[2,0,0,0,0,0,0,0,0],3:[3,0,0,0,0,0,0,0,0],4:[3,0,0,0,0,0,0,0,0],
+    5:[4,2,0,0,0,0,0,0,0],6:[4,2,0,0,0,0,0,0,0],7:[4,3,0,0,0,0,0,0,0],8:[4,3,0,0,0,0,0,0,0],
+    9:[4,3,2,0,0,0,0,0,0],10:[4,3,2,0,0,0,0,0,0],11:[4,3,3,0,0,0,0,0,0],12:[4,3,3,0,0,0,0,0,0],
+    13:[4,3,3,1,0,0,0,0,0],14:[4,3,3,1,0,0,0,0,0],15:[4,3,3,2,0,0,0,0,0],16:[4,3,3,2,0,0,0,0,0],
+    17:[4,3,3,3,1,0,0,0,0],18:[4,3,3,3,1,0,0,0,0],19:[4,3,3,3,2,0,0,0,0],20:[4,3,3,3,2,0,0,0,0]},
+  ranger:   {
+    1:[0,0,0,0,0,0,0,0,0],2:[2,0,0,0,0,0,0,0,0],3:[3,0,0,0,0,0,0,0,0],4:[3,0,0,0,0,0,0,0,0],
+    5:[4,2,0,0,0,0,0,0,0],6:[4,2,0,0,0,0,0,0,0],7:[4,3,0,0,0,0,0,0,0],8:[4,3,0,0,0,0,0,0,0],
+    9:[4,3,2,0,0,0,0,0,0],10:[4,3,2,0,0,0,0,0,0],11:[4,3,3,0,0,0,0,0,0],12:[4,3,3,0,0,0,0,0,0],
+    13:[4,3,3,1,0,0,0,0,0],14:[4,3,3,1,0,0,0,0,0],15:[4,3,3,2,0,0,0,0,0],16:[4,3,3,2,0,0,0,0,0],
+    17:[4,3,3,3,1,0,0,0,0],18:[4,3,3,3,1,0,0,0,0],19:[4,3,3,3,2,0,0,0,0],20:[4,3,3,3,2,0,0,0,0]},
+  warlock:  {
+    1:[1,0,0,0,0,0,0,0,0],2:[2,0,0,0,0,0,0,0,0],3:[0,2,0,0,0,0,0,0,0],4:[0,2,0,0,0,0,0,0,0],
+    5:[0,0,2,0,0,0,0,0,0],6:[0,0,2,0,0,0,0,0,0],7:[0,0,0,2,0,0,0,0,0],8:[0,0,0,2,0,0,0,0,0],
+    9:[0,0,0,0,2,0,0,0,0],10:[0,0,0,0,2,0,0,0,0],11:[0,0,0,0,3,0,0,0,0],12:[0,0,0,0,3,0,0,0,0],
+    13:[0,0,0,0,3,0,0,0,0],14:[0,0,0,0,3,0,0,0,0],15:[0,0,0,0,3,0,0,0,0],16:[0,0,0,0,3,0,0,0,0],
+    17:[0,0,0,0,4,0,0,0,0],18:[0,0,0,0,4,0,0,0,0],19:[0,0,0,0,4,0,0,0,0],20:[0,0,0,0,4,0,0,0,0]},
 };
 
-// Cantrips known per level per class (0 = no change from previous)
+// Cantrips known per level per class (only levels where count increases)
 const CANTRIPS_KNOWN = {
-  wizard:   {1:3,2:0,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
-  sorcerer: {1:4,2:0,3:0,4:5,5:0,6:0,7:0,8:0,9:0,10:6},
-  bard:     {1:2,2:0,3:0,4:3,5:0,6:0,7:0,8:0,9:0,10:4},
-  cleric:   {1:3,2:0,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
-  druid:    {1:2,2:0,3:0,4:3,5:0,6:0,7:0,8:0,9:0,10:4},
-  warlock:  {1:2,2:3,3:0,4:4,5:0,6:0,7:0,8:0,9:0,10:5},
+  wizard:   {1:3,4:4,10:5},
+  sorcerer: {1:4,4:5,10:6},
+  bard:     {1:2,4:3,10:4},
+  cleric:   {1:3,4:4,10:5},
+  druid:    {1:2,4:3,10:4},
+  warlock:  {1:2,2:3,4:4,10:5},
 };
 
 // Spells known (for non-preparer classes) — new spells gained each level
 const SPELLS_KNOWN_GAINED = {
-  bard:     {1:4,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:2},
-  sorcerer: {1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1},
-  warlock:  {1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1},
-  ranger:   {1:2,2:0,3:1,4:0,5:1,6:0,7:1,8:0,9:1,10:0},
+  bard:    {1:4,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:2,11:1,12:0,13:1,14:1,15:1,16:0,17:1,18:2,19:0,20:1},
+  sorcerer:{1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:0,13:1,14:1,15:1,16:0,17:1,18:1,19:0,20:1},
+  warlock: {1:2,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:0,13:1,14:0,15:1,16:0,17:1,18:0,19:1,20:0},
+  ranger:  {1:2,2:0,3:1,4:0,5:1,6:0,7:1,8:0,9:1,10:0,11:1,12:0,13:1,14:0,15:1,16:0,17:1,18:0,19:1,20:0},
 };
 
 // Highest spell level accessible at each level per class
 const SPELL_LEVEL_ACCESS = {
-  wizard:   {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
-  sorcerer: {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
-  bard:     {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
-  cleric:   {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
-  druid:    {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
-  paladin:  {1:1,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3},
-  ranger:   {1:0,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3},
-  warlock:  {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5},
+  wizard:  {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:6,12:6,13:7,14:7,15:8,16:8,17:9,18:9,19:9,20:9},
+  sorcerer:{1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:6,12:6,13:7,14:7,15:8,16:8,17:9,18:9,19:9,20:9},
+  bard:    {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:6,12:6,13:7,14:7,15:8,16:8,17:9,18:9,19:9,20:9},
+  cleric:  {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:6,12:6,13:7,14:7,15:8,16:8,17:9,18:9,19:9,20:9},
+  druid:   {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:6,12:6,13:7,14:7,15:8,16:8,17:9,18:9,19:9,20:9},
+  paladin: {1:1,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3,11:3,12:3,13:4,14:4,15:4,16:4,17:5,18:5,19:5,20:5},
+  ranger:  {1:0,2:1,3:1,4:1,5:2,6:2,7:2,8:2,9:3,10:3,11:3,12:3,13:4,14:4,15:4,16:4,17:5,18:5,19:5,20:5},
+  warlock: {1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4,9:5,10:5,11:5,12:5,13:5,14:5,15:5,16:5,17:5,18:5,19:5,20:5},
 };
 
 // ── Full class level data ────────────────────────────────────────────────────
@@ -888,6 +931,164 @@ wizard: {
 
 }; // end CLASSES
 
+// ── L11–20 class features (appended to CLASSES after initial declaration) ──
+var CLASSES_HIGH = {
+barbarian: { levels: {
+  11: { auto: [["Relentless Rage","When you are reduced to 0 HP while raging and don't die, you can make a DC 10 CON save (+5 per use since last Long Rest). On success, drop to 1 HP instead. This is your death-cheater."]] },
+  12: { asi: true },
+  13: { auto: [["Brutal Strike upgrade","When you use a Brutal Strike, the extra damage increases to 2d10."]] },
+  14: { auto: [["Subclass Feature","Your Primal Path grants another feature."]] },
+  15: { auto: [["Persistent Rage","Your Rage now lasts indefinitely and doesn't end early due to not attacking or taking damage. You can Rage continuously."]] },
+  16: { asi: true },
+  17: { auto: [["Brutal Strike upgrade","Two Brutal Strike effects can now be applied per hit."]] },
+  18: { auto: [["Indomitable Might","If your STR check total is less than your STR score, use your STR score for the check. Never roll below your raw STR."]] },
+  19: { asi: true },
+  20: { auto: [["Primal Champion","Your STR increases by 4 and your CON increases by 4 (to a maximum of 25). Update all related values on your sheet — attack bonus, damage, CON saves, HP."]] },
+}},
+bard: { levels: {
+  11: { auto: [["Bardic Inspiration die upgrade","Your Bardic Inspiration die increases to d10. Update sheet."],["Magical Secrets (extra)","You can choose 1 additional spell from any class list as a Bard spell."]] },
+  12: { asi: true },
+  13: { spellNote: "6th-level Bard spells are now accessible. Learn 1 new spell." },
+  14: { auto: [["Subclass Feature","Your Bard College grants a feature."],["Magical Secrets","Choose 2 more spells from any class list as Bard spells."]] },
+  15: { auto: [["Bardic Inspiration die upgrade","Your Bardic Inspiration die increases to d12. Update sheet."]] },
+  16: { asi: true },
+  17: { spellNote: "9th-level spells unlocked. Wish, True Resurrection, and Foresight are now accessible." },
+  18: { auto: [["Superior Bardic Inspiration","When you roll initiative with no Inspiration remaining, you regain one use."]] },
+  19: { asi: true },
+  20: { auto: [["Words of Creation","You always have Power Word Heal and Power Word Kill prepared. Each can be cast once per Long Rest without a slot."]] },
+}},
+cleric: { levels: {
+  11: { auto: [["Destroy Undead CR 4","Channel Divinity now destroys Undead of CR 4 or lower."]] },
+  12: { asi: true },
+  13: { spellNote: "7th-level spells available: Conjure Celestial, Divine Word. Prepare one on next Long Rest." },
+  14: { auto: [["Subclass Feature","Your Divine Domain grants a capstone-tier feature."]] },
+  15: { auto: [["Destroy Undead CR 5","Channel Divinity destroys Undead of CR 5 or lower. Nearly every undead in the MM."]] },
+  16: { asi: true },
+  17: { spellNote: "9th-level spells available: True Resurrection and Gate. Only 1 slot each per day." },
+  18: { auto: [["Channel Divinity (3/rest)","You now have 3 Channel Divinity uses per Short/Long Rest."]] },
+  19: { asi: true },
+  20: { auto: [["Divine Intervention upgrade","Your deity always answers when you use Divine Intervention — no roll needed. This can replicate any spell of 9th level or lower."]] },
+}},
+druid: { levels: {
+  11: { auto: [["Subclass Feature","Your Circle grants a high-level feature."]] },
+  12: { asi: true },
+  13: { spellNote: "7th-level spells accessible. Regenerate and Plane Shift become available." },
+  14: { auto: [["Subclass Feature","Another feature from your Circle."]] },
+  15: { auto: [["Wild Shape improvement","Your Wild Shape can now use Beasts of CR 5 or lower (circle permitting). Check subclass for overrides."]] },
+  16: { asi: true },
+  17: { spellNote: "9th-level spells available: Shapechange and Foresight are excellent Druid picks." },
+  18: { auto: [["Beast Spells","You can cast Druid spells while in Wild Shape, maintaining concentration normally. Transformative — you can now Wild Shape AND spellcast."]] },
+  19: { asi: true },
+  20: { auto: [["Archdruid","You can cast Shapechange without expending a spell slot, once per Long Rest. Your Wild Shape uses per rest become unlimited."]] },
+}},
+fighter: { levels: {
+  11: { auto: [["Three Attacks","You can attack THREE times whenever you use the Attack action. Update your sheet — this is the main damage jump at L11."]] },
+  12: { asi: true },
+  13: { auto: [["Indomitable (2/Long Rest)","You can use Indomitable twice per Long Rest."]] },
+  14: { auto: [["Subclass Feature","Your Martial Archetype grants a new feature."]] },
+  15: { auto: [["Tactical Master","On a hit, you can use your Weapon Mastery property even if you don't have proficiency in the weapon."]] },
+  16: { asi: true },
+  17: { auto: [["Action Surge (2/Short Rest)","You can use Action Surge twice per Short Rest (still only once per turn)."],["Indomitable (3/Long Rest)","Indomitable is now usable 3 times per Long Rest."]] },
+  18: { auto: [["Subclass Feature","Another high-level feature from your Martial Archetype."]] },
+  19: { asi: true },
+  20: { auto: [["Four Attacks","You can attack FOUR times whenever you use the Attack action. Update your sheet immediately."]] },
+}},
+monk: { levels: {
+  11: { auto: [["Body and Mind","Your Focus Point maximum increases by 2."]] },
+  12: { asi: true },
+  13: { auto: [["Deflect Energy","Deflect Attacks now works against all damage types, not just weapon damage."]] },
+  14: { auto: [["Subclass Feature","Your Monastic Tradition grants a feature."]] },
+  15: { auto: [["Purity of Body (upgrade)","You are immune to disease and poison damage, and cannot be Poisoned."]] },
+  16: { asi: true },
+  17: { auto: [["Tongue of Sun and Moon","You understand all spoken languages and all creatures understand your speech."]] },
+  18: { auto: [["Empty Body","Bonus Action: become invisible until start of your next turn. Focus cost: 4. Or cast Astral Projection (cost: 8) once per Long Rest without a spell slot."]] },
+  19: { asi: true },
+  20: { auto: [["Perfect Self","When you roll Initiative with no Focus Points remaining, you regain 4 Focus Points."]] },
+}},
+paladin: { levels: {
+  11: { auto: [["Radiant Strikes","Your weapon attacks deal an additional 1d8 radiant damage. Write this on your sheet."]] },
+  12: { asi: true },
+  13: { spellNote: "4th-level Paladin spells unlocked. Banishment and Death Ward are excellent picks." },
+  14: { auto: [["Subclass Feature","Your Sacred Oath grants a feature."]] },
+  15: { auto: [["Aura of Courage (15ft)","Your Aura of Courage expands to 15 ft radius."]] },
+  16: { asi: true },
+  17: { spellNote: "5th-level Paladin spells unlocked. Holy Weapon and Raise Dead are now accessible." },
+  18: { auto: [["Aura of Protection (15ft)","Your Aura of Protection expands to 15 ft. Update your sheet — every friendly creature in your aura gains your CHA bonus to all saves."]] },
+  19: { asi: true },
+  20: { auto: [["Subclass Feature","Your Sacred Oath grants its capstone ability. This is your class-defining high-level power."]] },
+}},
+ranger: { levels: {
+  11: { auto: [["Deft Explorer upgrade","Your Roving speed bonus increases by 5 more (total +15 ft)."]] },
+  12: { asi: true },
+  13: { spellNote: "4th-level Ranger spells available. Freedom of Movement and Conjure Woodland Beings are picks." },
+  14: { auto: [["Subclass Feature","Your Ranger conclave grants a feature."]] },
+  15: { auto: [["Feral Senses","You do not suffer Disadvantage on attack rolls against invisible creatures, as long as they are within 30 ft."]] },
+  16: { asi: true },
+  17: { spellNote: "5th-level Ranger spells available. Conjure Volley and Steel Wind Strike are stand-outs." },
+  18: { auto: [["Vanish","You can use Hide as a Bonus Action. You also can't be tracked by nonmagical means unless you choose to leave a trail."]] },
+  19: { asi: true },
+  20: { auto: [["Foe Slayer","Once per turn, add your WIS modifier to attack or damage rolls against a Favored Enemy. Write your WIS mod (+X) as a bonus available once per turn."]] },
+}},
+rogue: { levels: {
+  11: { auto: [["Sneak Attack increases","Sneak Attack is now 6d6. Update your sheet."],["Subtle Strikes","When you attack with Advantage, the second dice counts for Sneak Attack even if not an ally nearby."]] },
+  12: { asi: true },
+  13: { auto: [["Sneak Attack increases","Sneak Attack is now 7d6."],["Subclass Feature","Your Roguish Archetype grants a feature."]] },
+  14: { auto: [["Devious Strikes","Your Sneak Attack gains three new options (Daze, Knock Out, Obscure) — choose how to use it each hit."]] },
+  15: { auto: [["Sneak Attack increases","Sneak Attack is now 8d6."],["Slippery Mind","You gain proficiency in WIS saves. If already proficient, gain Expertise instead."]] },
+  16: { asi: true },
+  17: { auto: [["Sneak Attack increases","Sneak Attack is now 9d6."],["Subclass Feature","Another feature from your Roguish Archetype."]] },
+  18: { auto: [["Elusive","No attack roll ever has Advantage against you as long as you aren't Incapacitated. You can't be sneak-attacked."]] },
+  19: { asi: true, auto: [["Sneak Attack increases","Sneak Attack is now 10d6."]] },
+  20: { auto: [["Stroke of Luck","If your attack misses, it hits instead. Or if you fail an ability check, treat it as a 20. Each power usable once per Short/Long Rest."]] },
+}},
+sorcerer: { levels: {
+  11: { spellNote: "6th-level spells unlocked. Globe of Invulnerability and True Seeing are powerful picks." },
+  12: { asi: true },
+  13: { spellNote: "7th-level spells unlocked. Reverse Gravity and Finger of Death available." },
+  14: { auto: [["Subclass Feature","Your Sorcerous Origin grants a feature."]] },
+  15: { spellNote: "8th-level spells unlocked. Power Word Stun and Sunburst become available." },
+  16: { asi: true, auto: [["Metamagic (4th option)","You learn a 4th Metamagic option. Add to sheet."]] },
+  17: { spellNote: "9th-level spells unlocked. Wish is now accessible — the most powerful spell in the game. Plan your use carefully." },
+  18: { auto: [["Subclass Feature","Your Sorcerous Origin grants its capstone feature."]] },
+  19: { asi: true },
+  20: { auto: [["Sorcerous Restoration","You regain 4 expended Sorcery Points whenever you finish a Short Rest."]] },
+}},
+warlock: { levels: {
+  11: { auto: [["Mystic Arcanum (6th level)","Choose one 6th-level spell from the Warlock list. You can cast it once per Long Rest without a slot. Write it on your sheet — this slot cannot be converted to Sorcery Points."]] },
+  12: { asi: true, auto: [["Eldritch Invocation","You learn a new Eldritch Invocation."]] },
+  13: { auto: [["Mystic Arcanum (7th level)","Choose one 7th-level spell. Cast once per Long Rest without a slot."]] },
+  14: { auto: [["Subclass Feature","Your Patron grants a feature."]] },
+  15: { auto: [["Mystic Arcanum (8th level)","Choose one 8th-level spell. Cast once per Long Rest without a slot."]] },
+  16: { asi: true },
+  17: { auto: [["Mystic Arcanum (9th level)","Choose one 9th-level spell. Cast once per Long Rest without a slot. Common choice: True Resurrection or Wish (check with your DM)."]] },
+  18: { auto: [["Eldritch Master","You can spend 1 minute communing with your patron to regain all expended Pact Magic slots. Once per Long Rest."]] },
+  19: { asi: true, auto: [["Eldritch Invocation","You learn a new Eldritch Invocation."]] },
+  20: { auto: [["Eldritch Master upgrade","Your Eldritch Master recharge now costs only a Bonus Action."]] },
+}},
+wizard: { levels: {
+  11: { spellNote: "6th-level spells unlocked. Disintegrate, Globe of Invulnerability, and True Seeing are excellent picks. Add 2 spells to spellbook." },
+  12: { asi: true },
+  13: { spellNote: "7th-level spells unlocked. Forcecage, Simulacrum, and Teleport are top-tier. Add 2 spells to spellbook." },
+  14: { auto: [["Subclass Feature","Your Arcane Tradition grants a feature."]] },
+  15: { spellNote: "8th-level spells unlocked. Power Word Stun, Dominate Monster, and Mind Blank become available." },
+  16: { asi: true },
+  17: { spellNote: "9th-level spells unlocked. Wish, True Resurrection, and Time Stop. Add 2 spells. Budget one Wish per adventure." },
+  18: { auto: [["Spell Mastery","Choose a 1st-level and a 2nd-level spell. You can cast them at their lowest level without a spell slot, as long as you have them prepared. Choose carefully — this is permanent."]] },
+  19: { asi: true },
+  20: { auto: [["Signature Spells","Choose two 3rd-level spells. They are always prepared and you can cast each once per Short Rest without a slot. Best choices: Fireball, Counterspell, Fly, or Hypnotic Pattern depending on build."]] },
+}},
+};
+
+// Merge L11–20 data into CLASSES
+Object.keys(CLASSES_HIGH).forEach(function(cls) {
+  if (CLASSES[cls]) {
+    var high = CLASSES_HIGH[cls].levels || {};
+    Object.keys(high).forEach(function(lvl) {
+      CLASSES[cls].levels[lvl] = high[lvl];
+    });
+  }
+});
+
 
 // ── App Logic ────────────────────────────────────────────────────────────
 // ── State ──────────────────────────────────────────────────────────────────
@@ -1027,7 +1228,7 @@ function renderLevelPicker() {
   targetLevel = null;
   document.getElementById('btn-advance').disabled = true;
 
-  for (var lvl = 1; lvl <= 10; lvl++) {
+  for (var lvl = 1; lvl <= 20; lvl++) {
     var btn = document.createElement('button');
     btn.className = 'level-btn' + (lvl === char.level ? ' current' : lvl < char.level ? ' disabled' : '');
     btn.textContent = lvl;
@@ -1104,11 +1305,13 @@ function buildLevelBlock(lvl) {
     var newSlots = slots[lvl];
     var oldSlots = (lvl > 1 && slots[lvl-1]) ? slots[lvl-1] : [0,0,0,0,0];
     var slotChanges = [];
-    for (var s = 0; s < 5; s++) {
-      if (newSlots[s] > oldSlots[s]) slotChanges.push('L'+(s+1)+': '+oldSlots[s]+'→'+newSlots[s]);
+    for (var s = 0; s < newSlots.length; s++) {
+      var oldVal = oldSlots[s] !== undefined ? oldSlots[s] : 0;
+      if (newSlots[s] > oldVal) slotChanges.push('L'+(s+1)+': '+oldVal+'\u2192'+newSlots[s]);
     }
     if (slotChanges.length) {
-      body += '<div class="auto-gain"><span class="auto-gain-label">Spell Slots</span><span class="auto-gain-val">' + slotChanges.join(', ') + '</span></div>';
+      var slotLabel = cls === 'warlock' ? 'Pact Magic Slots' : 'Spell Slots';
+      body += '<div class="auto-gain"><span class="auto-gain-label">'+slotLabel+'</span><span class="auto-gain-val">' + slotChanges.join(', ') + '</span></div>';
     }
   }
 
@@ -1141,7 +1344,20 @@ function buildLevelBlock(lvl) {
   }
 
   // Level 4 / 8 / 12: ASI or Feat
-  var asiLevels = { barbarian:[4,8], fighter:[4,6,8], monk:[4,8], paladin:[4,8], ranger:[4,8], rogue:[4,8], wizard:[4,8], sorcerer:[4,8], bard:[4,8], cleric:[4,8], druid:[4,8], warlock:[4,8] };
+  var asiLevels = {
+    barbarian:[4,8,12,16,19],
+    fighter:  [4,6,8,12,16,19],
+    monk:     [4,8,12,16,19],
+    paladin:  [4,8,12,16,19],
+    ranger:   [4,8,12,16,19],
+    rogue:    [4,8,12,16,19],
+    wizard:   [4,8,12,16,19],
+    sorcerer: [4,8,12,16,19],
+    bard:     [4,8,12,16,19],
+    cleric:   [4,8,12,16,19],
+    druid:    [4,8,12,16,19],
+    warlock:  [4,8,12,16,19],
+  };
   var clsAsiLevels = asiLevels[cls] || [4,8];
   if (clsAsiLevels.indexOf(lvl) !== -1) {
     body += buildASIDecision(lvl);

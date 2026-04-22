@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Character Forge | Dungeon Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--p:#f4e8c1;--pd:#e8d5a0;--ink:#1a1209;--il:#3d2b1a;--cr:#8b1a1a;--crl:#b52a2a;--go:#c9973a;--gl:#e8b84b;--bg:#1a1209;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);min-height:100vh;font-family:"Crimson Pro",serif;color:var(--ink);padding:1.5rem 1rem 3rem;}
+.hdr{text-align:center;margin-bottom:1.5rem;}
+.hdr h1{font-family:"Cinzel",serif;font-weight:900;font-size:clamp(1.6rem,3.5vw,2.2rem);color:var(--gl);letter-spacing:.08em;}
+.dv{width:220px;height:2px;margin:.6rem auto .8rem;background:linear-gradient(90deg,transparent,var(--go),transparent);}
+.back{display:inline-block;margin-bottom:1rem;font-family:"Cinzel",serif;font-size:.68rem;letter-spacing:.1em;color:var(--go);text-decoration:none;opacity:.7;}
+.back:hover{opacity:1;}
+/* Layout */
+.layout{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:260px 1fr;gap:1.2rem;align-items:start;}
+/* Controls panel */
+.ctrl-panel{background:var(--p);border-radius:4px;box-shadow:0 0 0 2px var(--go),0 0 0 4px var(--cr),0 4px 24px rgba(0,0,0,.6);padding:1rem 1.1rem;}
+.sec{font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cr);margin-bottom:.5rem;padding-bottom:.25rem;border-bottom:1px solid rgba(139,26,26,.18);}
+.sec:not(:first-child){margin-top:.9rem;}
+label{font-family:"Cinzel",serif;font-size:.58rem;letter-spacing:.09em;text-transform:uppercase;color:var(--cr);display:block;margin-bottom:.2rem;}
+select,input[type=number]{width:100%;padding:.38rem .55rem;border:1px solid rgba(139,26,26,.28);border-radius:3px;background:rgba(248,237,205,.7);font-family:"Crimson Pro",serif;font-size:.88rem;color:var(--ink);outline:none;margin-bottom:.55rem;}
+select:focus,input:focus{border-color:var(--cr);}
+.btn{display:block;width:100%;padding:.55rem;font-family:"Cinzel",serif;font-size:.68rem;letter-spacing:.1em;border-radius:3px;cursor:pointer;border:1px solid;margin-bottom:.4rem;text-align:center;transition:all .18s;}
+.btn-p{background:var(--cr);color:var(--p);border-color:var(--go);}
+.btn-p:hover{background:var(--crl);}
+.btn-s{background:transparent;color:var(--cr);border-color:rgba(139,26,26,.35);}
+.btn-s:hover{background:rgba(139,26,26,.07);}
+/* Legend */
+.legend{margin-top:.8rem;}
+.leg-item{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--il);margin:.18rem 0;}
+.leg-swatch{width:14px;height:14px;border-radius:2px;flex-shrink:0;}
+/* Map area */
+.map-panel{background:var(--p);border-radius:4px;box-shadow:0 0 0 2px var(--go),0 0 0 4px var(--cr),0 4px 24px rgba(0,0,0,.6);overflow:hidden;}
+.map-hdr{background:rgba(26,18,9,.95);padding:.6rem 1rem;font-family:"Cinzel",serif;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gl);display:flex;align-items:center;justify-content:space-between;}
+#dungeon-canvas{display:block;width:100%;cursor:crosshair;}
+/* Room notes */
+.notes-area{padding:.8rem 1rem;border-top:1px solid rgba(139,26,26,.15);max-height:280px;overflow-y:auto;}
+.notes-title{font-family:"Cinzel",serif;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go);margin-bottom:.5rem;}
+.room-note{padding:.4rem 0;border-bottom:1px solid rgba(139,26,26,.07);font-size:.85rem;line-height:1.5;}
+.room-note .rn-head{font-family:"Cinzel",serif;font-size:.75rem;color:var(--cr);}
+.room-note .rn-body{color:var(--il);}
+.hover-tip{position:fixed;background:rgba(26,18,9,.95);color:var(--pd);font-family:"Crimson Pro",serif;font-size:.8rem;padding:.4rem .65rem;border-radius:3px;border:1px solid var(--go);pointer-events:none;display:none;max-width:260px;line-height:1.45;z-index:100;}
+@media(max-width:800px){.layout{grid-template-columns:1fr;}}
+
+/* ── Print styles ── */
+@media print{
+  body{background:#fff;padding:.5rem;}
+  .ctrl-panel,.hover-tip,#room-detail button{display:none!important;}
+  .layout{grid-template-columns:1fr;max-width:100%;}
+  .map-panel{box-shadow:none;border:1px solid #ccc;break-inside:avoid;}
+  #dungeon-canvas{width:100%!important;height:auto!important;max-width:100%;}
+  .notes-area{max-height:none;border-top:1px solid #ccc;}
+  .room-note{break-inside:avoid;page-break-inside:avoid;}
+  .map-hdr{background:#333;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+<div style="max-width:1400px;margin:0 auto"><a href="index.html" class="back">&#8592; Back to Home</a></div>
+<div class="hdr"><h1>Character Forge</h1><div class="dv"></div></div>
+
+<div class="layout">
+
+<!-- Controls -->
+<div class="ctrl-panel">
+  <div class="sec">Dungeon Settings</div>
+  <label>Dungeon Type</label>
+  <select id="dg-type">
+    <option value="dungeon">Classic Dungeon</option>
+    <option value="cave">Natural Cave</option>
+    <option value="ruins">Ancient Ruins</option>
+    <option value="sewers">City Sewers</option>
+    <option value="fortress">Underground Fortress</option>
+    <option value="tomb">Tomb / Crypt</option>
+  </select>
+  <label>Size</label>
+  <select id="dg-size">
+    <option value="small">Small (4–6 rooms)</option>
+    <option value="medium" selected>Medium (8–12 rooms)</option>
+    <option value="large">Large (14–20 rooms)</option>
+  </select>
+  <label>Party Level</label>
+  <select id="dg-level">
+    <option value="1">Level 1–2</option>
+    <option value="3">Level 3–4</option>
+    <option value="5" selected>Level 5–6</option>
+    <option value="7">Level 7–8</option>
+    <option value="9">Level 9–10</option>
+    <option value="11">Level 11+</option>
+  </select>
+  <label>Corridor Style</label>
+  <select id="dg-corridors">
+    <option value="winding">Winding</option>
+    <option value="straight" selected>Straight</option>
+    <option value="sparse">Sparse (large rooms)</option>
+  </select>
+  <label>Seed (blank = random)</label>
+  <input type="number" id="dg-seed" placeholder="e.g. 42">
+
+  <button class="btn btn-p" onclick="generateDungeon()">&#127922; Generate Dungeon</button>
+  <button class="btn btn-s" onclick="exportNotes()">&#128196; Copy Room Notes</button>
+  <button class="btn btn-s" onclick="window.print()">&#128424; Print / Save PDF</button>
+
+  <div class="legend">
+    <div class="sec">Legend</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#1a1209;border:1px solid #444;"></div> Wall</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#bfac7a;"></div> Room floor</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#8a7a52;"></div> Main chain corridor (1→2→…→N)</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#6a5a3a;"></div> Shortcut corridor</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#2a4a2a;border:1px solid #a0ffaa;"></div> R1 Entrance</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#8b0000;border:1px solid #ff9090;"></div> Rn-1 Boss</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#14306e;border:1px solid #90b8ff;"></div> Rn Treasure (last room)</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#4a0d7a;border:1px solid #cc88ff;"></div> Magic / Ritual</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#7a3e00;border:1px solid #ffb830;"></div> Trap Room</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#4a1a0a;border:1px solid #ff8a50;"></div> Monster Lair</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#1e2e3e;border:1px solid #88aacc;"></div> Corridor Hub</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#252525;border:1px solid #888;"></div> Empty Room</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#c9973a;border:1px solid #e8b84b;"></div> Door</div>
+  </div>
+</div>
+
+<!-- Map -->
+<div class="map-panel">
+  <div class="map-hdr">
+    <span id="dg-title">&#9919; Dungeon Map</span>
+    <span id="dg-stats" style="font-size:.6rem;opacity:.6;"></span>
+  </div>
+  <canvas id="dungeon-canvas"></canvas>
+  <!-- ── Room detail panel (click a room to expand) ── -->
+  <div id="room-detail" style="display:none;padding:.8rem 1rem;border-top:2px solid rgba(201,151,58,.35);background:rgba(26,18,9,.97);">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem;">
+      <span id="rd-title" style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--gl);font-weight:600;"></span>
+      <button onclick="document.getElementById('room-detail').style.display='none';"
+        style="background:transparent;border:none;color:rgba(244,232,193,.45);font-size:1.2rem;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div id="rd-feature" style="font-size:.88rem;color:var(--pd);font-style:italic;line-height:1.5;margin-bottom:.5rem;"></div>
+    <div id="rd-encounter" style="display:none;font-size:.85rem;margin-bottom:.3rem;color:#ff9090;"></div>
+    <div id="rd-trap"      style="display:none;font-size:.85rem;margin-bottom:.3rem;color:#ffb830;"></div>
+    <div id="rd-treasure"  style="display:none;font-size:.85rem;margin-bottom:.3rem;color:#90b8ff;"></div>
+  </div>
+  <div class="notes-area" id="notes-area">
+    <div class="notes-title">Room Notes</div>
+    <div id="room-notes" style="color:var(--il);font-style:italic;font-size:.85rem;">Generate a dungeon to see room descriptions.</div>
+  </div>
+</div>
+
+</div>
+<div class="hover-tip" id="hover-tip"></div>
+
+<script>/* ─── SEEDED RNG (xorshift32, zero-safe) ─────────────────────────────────── */
+var rngState = 1;
+function seedRng(s){
+  rngState = (s|0) || 0x6f3a21b4;  // never seed with 0
+  if(!rngState) rngState = 0x6f3a21b4;
+  // warm up
+  for(var i=0;i<16;i++) rng();
+}
+function rng(){
+  rngState ^= rngState<<13;
+  rngState ^= rngState>>17;
+  rngState ^= rngState<<5;
+  if(!rngState) rngState = 0x6f3a21b4;  // escape zero-state
+  return (rngState>>>0)/4294967296;
+}
+function rngInt(n){ return n<=0?0:Math.floor(rng()*n); }
+function rngRange(a,b){ return b<a?a:a+rngInt(b-a+1); }
+function rngPick(arr){ return arr.length?arr[rngInt(arr.length)]:null; }
+function rngShuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=rngInt(i+1); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+
+/* ─── ENCOUNTER TABLES (12–15 entries per tier) ──────────────────────────── */
+var ENC = {
+  1:[
+    '3 Goblins (CR 1/4) + 1 Goblin Boss (CR 1)',
+    '4 Skeletons (CR 1/4)',
+    '3 Kobolds (CR 1/8) + 1 Kobold Scale Sorcerer (CR 1)',
+    '1 Ghoul (CR 2)',
+    '2 Giant Spiders (CR 1)',
+    '1 Shadow (CR 1/2) + 3 Zombies (CR 1/4)',
+    '4 Bandits (CR 1/8) + 1 Bandit Captain (CR 2)',
+    '2 Stirges (CR 1/8) + 1 Swarm of Bats (CR 1/4)',
+    '1 Mimic (CR 2) — posing as a chest',
+    '3 Giant Rats (CR 1/8) + 1 Wererat (CR 2)',
+    '2 Zombies (CR 1/4) + 1 Warhorse Skeleton (CR 1/2)',
+    '1 Ochre Jelly (CR 2)',
+  ],
+  3:[
+    '1 Bugbear Chief (CR 3) + 3 Bugbears (CR 1)',
+    '2 Wights (CR 3)',
+    '1 Green Hag (CR 3) + 2 Doppelgangers (CR 3)',
+    '1 Banshee (CR 4)',
+    '4 Hobgoblins (CR 1/2) + 1 Hobgoblin Captain (CR 3)',
+    '2 Ogres (CR 2)',
+    '1 Werewolf (CR 3) + 2 Wolves (CR 1/4)',
+    '1 Black Pudding (CR 4)',
+    '2 Ghasts (CR 2) + 4 Ghouls (CR 1)',
+    '1 Mummy (CR 3) + 4 Skeletons (CR 1/4)',
+    '2 Manticores (CR 3)',
+    '1 Phase Spider (CR 3) + 2 Giant Spiders (CR 1)',
+    '3 Gnolls (CR 1/2) + 1 Gnoll Fang of Yeenoghu (CR 4)',
+    '1 Orc Eye of Gruumsh (CR 2) + 4 Orcs (CR 1/2)',
+  ],
+  5:[
+    '1 Troll (CR 5)',
+    '1 Flesh Golem (CR 5)',
+    '2 Wights (CR 3) + 4 Zombies (CR 1/4)',
+    '1 Vampire Spawn (CR 5) + 4 Shadows (CR 1/2)',
+    '1 Bandit Captain (CR 2) + 6 Bandits + 2 Veterans (CR 3)',
+    '2 Phase Spiders (CR 3) + 4 Giant Spiders (CR 1)',
+    '1 Shield Guardian (CR 7) — key required to control',
+    '3 Werewolves (CR 3)',
+    '1 Mezzoloth (CR 5) + 2 Nycaloths (CR 9) — one random',
+    '1 Otyugh (CR 5)',
+    '2 Ettin (CR 4)',
+    '1 Roper (CR 5) — disguised as a stalagmite',
+    '4 Cambions (CR 5) — guarding a portal',
+    '1 Gorgon (CR 5) — territory marked with frozen statues',
+  ],
+  7:[
+    '1 Hydra (CR 8)',
+    '1 Mind Flayer (CR 7) + 4 Grimlocks (CR 1/4)',
+    '2 Oni (CR 7)',
+    '1 Bone Devil (CR 9) + 2 Barbed Devils (CR 5)',
+    '1 Young Dragon (CR 7–9) — hatchling claiming territory',
+    '1 Horned Devil (CR 11) — bound by a weakening ward',
+    '3 Stone Giants (CR 7)',
+    '1 Vrock (CR 9) + 2 Hezrous (CR 8)',
+    '1 Spirit Naga (CR 8)',
+    '2 Cyclopes (CR 6)',
+    '1 Dao (CR 11) — enslaved, looking for a loophole',
+    '2 Erinyes (CR 12) — at half strength, recovering',
+    '1 Glabrezu (CR 9)',
+    '1 Chain Devil (CR 8) + 4 Imps (CR 1)',
+  ],
+  9:[
+    '1 Adult Red Dragon (CR 17) — young, arrogant',
+    '1 Lich (CR 21) — phylactery hidden elsewhere',
+    '1 Archmage (CR 12) + 4 Mages (CR 6)',
+    '2 Death Knights (CR 17)',
+    '1 Vampire (CR 13) + 4 Vampire Spawn (CR 5)',
+    '1 Rakshasa (CR 13) + 4 Gladiators (CR 5)',
+    '1 Beholder (CR 13)',
+    '1 Elder Oblex (CR 10) — has copied three party members',
+    '2 Mariliths (CR 16)',
+    '1 Storm Giant (CR 13)',
+    '3 Cloud Giants (CR 9)',
+    '1 Death Slaad (CR 10) + 3 Gray Slaadi (CR 9)',
+    '2 Planetars (CR 16) — corrupted',
+    '1 Mummy Lord (CR 15) + 4 Mummies (CR 3)',
+  ],
+  11:[
+    '1 Ancient Dragon (CR 20–24) — awoken by the party\'s intrusion',
+    '1 Lich (CR 21) + 4 Death Knights (CR 17)',
+    '1 Kraken (CR 23)',
+    '1 Elder Brain (CR 14) + 4 Mind Flayers (CR 7)',
+    '1 Tarrasque (CR 30) — bound, barely',
+    '2 Pit Fiends (CR 20)',
+    '1 Solar (CR 21) — fallen, hostile',
+    '1 Death Tyrant (CR 14) + 2 Beholders (CR 13)',
+    '3 Mariliths (CR 16)',
+    '1 Balor (CR 19) + 4 Glabrezus (CR 9)',
+    '2 Ancient Vampires (CR 17 equivalent)',
+    '1 Empyrean (CR 23)',
+    '3 Storm Giants (CR 13)',
+    '1 Aboleth (CR 10) with full lair actions — in its domain',
+  ],
+};
+
+/* ─── TRAP TABLES (12 entries per tier) ──────────────────────────────────── */
+var TRAPS = {
+  1:[
+    'Dart trap: +4 to hit, 1d4+2 piercing, DC 12 Perception to spot',
+    'Pit trap: DC 12 DEX save or fall 10ft (1d6 bludg., prone)',
+    'Tripwire bell: DC 11 Perception; failure alerts nearest patrol in 1 round',
+    'Rolling log trap: DC 11 DEX save or 2d6 bludg. and knocked prone',
+    'Poison needle in lock: DC 12 Investigation; on failure, 1d6 piercing + DC 10 CON or poisoned 1hr',
+    'Swinging blade: +5 to hit, 2d6 slashing; DC 13 Perception to disarm (Thieves\' Tools)',
+    'Net drop: DC 12 DEX or restrained (DC 12 STR to break free, takes 1 action)',
+    'Pressure plate + alarm bell: wakes every enemy within 100ft',
+    'False step: DC 11 Perception; failure triggers caltrops (1d4 pierce, speed halved)',
+    'Collapsing shelf: DC 12 DEX or 2d8 bludg. from falling masonry',
+    'Slippery slope: DC 11 DEX (Acrobatics) or slide 20ft and fall prone',
+    'Tripwire + bucket of burning oil: DC 11 DEX save or 1d8 fire',
+  ],
+  3:[
+    'Blade pendulum: DC 14 DEX save or 3d8 slashing',
+    'Spike floor: DC 13 Perception; failure 3d10 piercing (DC 14 DEX half)',
+    'Thunderstone pressure plate: 10ft burst, DC 13 CON or stunned 1 round + 2d6 thunder',
+    'Poison gas vent: DC 13 CON save or 3d6 poison + poisoned for 10 min',
+    'Glyph of Warding — Thunderwave: DC 14 DEX, 3d8 thunder + pushed 10ft',
+    'Falling portcullis: DC 13 DEX save or grappled; requires DC 17 STR (Athletics) to lift',
+    'Symbol of Fear: DC 13 WIS save or frightened for 1 minute',
+    'Dart volley (wall slits): Dex DC 14 or 2d6 piercing + poisoned (DC 12 CON)',
+    'Fire gout from brazier: DC 13 DEX or 3d6 fire in 15ft cone',
+    'Reverse gravity tile (1 round): DC 13 DEX or fall 20ft to ceiling (2d6)',
+    'Sliding wall: party member DC 14 STR or separated from group for 1 minute',
+    'Cursed pedestal: picking up any item, DC 14 WIS or under Bane for 1 hour',
+  ],
+  5:[
+    'Lightning arc: 60ft line, DC 15 DEX save or 4d8 lightning (half on save)',
+    'Glyph of Warding — Fireball: 20ft radius, DC 15 DEX, 6d6 fire (half on save)',
+    'Collapsing ceiling: DC 14 DEX or 4d10 bludg. + restrained under rubble',
+    'Paralysis gas: fills 20ft cube, DC 14 CON or paralyzed for 1 minute',
+    'Teleport trap: DC 15 Investigation; failure teleports one creature 1d6 rooms away',
+    'Animated statue: treats all non-password-speakers as hostile (Guard stats + +7 attack)',
+    'Symbol of Stunning: DC 15 CON save or stunned until end of next turn',
+    'Sphere of force: DC 14 DEX or trapped in a 10ft sphere for 10 minutes',
+    'Wall of ice: seals the exit, 3 panels HP 30 each (cold immune, vulnerable fire)',
+    'Hidden pit + grey ooze at the bottom: 20ft fall (2d6) + ooze attacks immediately',
+    'Poison dart field: 4 darts, each +6 hit, 1d6+3 pierce + DC 14 CON or poisoned 1hr',
+    'Magical darkness + alarm: room goes dark, cultists alerted (arrive in 3 rounds)',
+  ],
+  7:[
+    'Symbol of Stunning: DC 16 CON save or stunned for 1 minute',
+    'Disintegration beam: +9 to hit (line 60ft), 10d6+40 force, on hit creature reduced to dust at 0 HP',
+    'Gravity inversion plate: room\'s gravity reverses for 1d4 rounds (all creatures DC 15 DEX or fall to ceiling)',
+    'Sphere of Annihilation (1 use): DC 17 DEX save or disintegrated; sphere then destabilises',
+    'Anti-magic zone: 30ft radius for 10 minutes triggered by sound above whisper',
+    'Bone cage: DC 15 DEX or entrapped (20 HP cage, break DC 17 STR, magical silence inside)',
+    'Flesh ward glyph: DC 16 CON or reduced to 1 HP and incapacitated until end of next turn',
+    'Mass suggestion trap: DC 16 WIS or compelled to return the way you came (8hr duration)',
+    'Necrotic field: 30ft radius, DC 16 CON, 8d8 necrotic and max HP halved until long rest',
+    'Symbol of Insanity: DC 16 INT or random action each turn for 1 minute',
+    'Chain trap: DC 15 DEX or restrained; chains deal 2d8 on each failed STR check',
+    'Soul anchor: one creature DC 16 WIS or cannot be teleported / plane shifted for 24hr',
+  ],
+  9:[
+    'Symbol of Death: DC 17 CON save or drop to 0 HP; creatures under 100 max HP die outright',
+    'Prismatic ray: one creature, roll 1d8 for colour effect (as Prismatic Spray)',
+    'Power Word Stun: any creature with 150 HP or fewer is stunned (no save)',
+    'Maze trap: DC 17 INT or banished to a maze plane; DC 18 INT to escape each turn',
+    'Imprisonment sphere: DC 17 WIS or trapped in gemstone; frees only by Wish or Dispel Magic (L9)',
+    'Disjunction field: all magic items in 30ft radius must make DC 17 check or be suppressed 24hr',
+    'Vorpal wire: thin wire at neck height; DC 18 Perception; failure — DC 16 CON or severed (1 HP)',
+    'Time lock: 30ft bubble; 1 creature DC 17 WIS or frozen in time for 1d4 rounds',
+    'Energy drain: DC 17 CON or lose one level of exhaustion + one spell slot / ability use',
+    'True name curse: a glyph records the first creature\'s true name — binds it to this plane',
+    'Anti-resurrection field: any creature killed here cannot be resurrected for 30 days',
+    'Wail of the damned: DC 17 WIS or frightened AND deafened for 1 hour',
+  ],
+  11:[
+    'Wish-trap: triggers a twisted version of Wish with unintended consequences',
+    'Time Stop bubble: creatures inside are frozen for 1d4+1 rounds; the builder acts freely inside',
+    'Gate to the Abyss: one-way portal opens; pulls in all creatures (DC 18 STR to resist)',
+    'True Death glyph: any creature killed by this trap cannot be resurrected by any means',
+    'Eldritch seal: triggers a Sphere of Annihilation that expands 5ft per round for 1 minute',
+    'Reality fracture: 40ft radius Antimagic Field + Wild Magic surge zone simultaneously',
+    'Soul imprisonment: DC 19 WIS or soul extracted, stored in an onyx gem in this room',
+    'Godslayer ward: deals damage equal to the creature\'s maximum HP (half on DC 20 CON)',
+    'Cascading dispel: removes ALL magical effects (beneficial and harmful) on every creature in range',
+    'Paradox loop: one creature re-lives the last 10 minutes on repeat until DC 19 INT save',
+    'Null zone: removes all class features, spells, and racial traits for 1 hour (no save)',
+    'The Last Word: a spoken phrase that, when read aloud, triggers a Power Word Kill',
+  ],
+};
+
+/* ─── TREASURE TABLES (12 entries per tier) ──────────────────────────────── */
+var TREASURE = {
+  1:[
+    '3d6 × 10 cp + 1d4 × 10 sp',
+    '50 gp + 1 Potion of Healing',
+    '1d4 × 100 sp + 1d4 gems (10 gp each)',
+    '75 gp + 1 Spell Scroll (L1)',
+    '2 art objects (25 gp each) + 2d6 × 10 gp',
+    '1d4 gems (50 gp each)',
+    '1 common magic item + 30 gp',
+    '1 Potion of Healing + 1 Antitoxin + 40 gp',
+    '1d6 × 50 sp + a locked strongbox (DC 14, contains 2d6 × 10 gp)',
+    '1 Spell Scroll (L1) + 1 Spell Scroll (L2) + 15 gp',
+    '3 art objects (10 gp each) + 1d4 × 10 gp',
+    '1 +1 weapon of the DM\'s choice (mundane in appearance)',
+  ],
+  3:[
+    '2d4 × 100 sp + 2d6 × 10 gp + 1 Potion of Greater Healing',
+    '1d4 × 100 gp + 1 uncommon magic item',
+    '2d6 gems (50 gp each) + 1 Spell Scroll (L3)',
+    '1d6 × 100 gp + 2 art objects (250 gp each)',
+    '1 uncommon magic item + 3d6 × 50 gp',
+    '1 Bag of Holding + 50 gp',
+    '2d4 × 100 gp + 1 Potion of Heroism',
+    '3 art objects (100 gp each) + 1 uncommon weapon',
+    '1 Spell Scroll (L4) + 1d4 × 100 gp',
+    '1 Elixir of Health + 2d6 gems (50 gp each)',
+    '1 Cloak of Protection + 2d6 × 10 gp',
+    '1d4 uncommon potions + 1d6 × 100 sp',
+  ],
+  5:[
+    '2d6 × 100 gp + 1 rare magic item',
+    '1d6 art objects (250 gp each) + 2d6 × 100 gp',
+    '1 rare magic item + 1d4 × 100 pp',
+    '3d6 gems (100 gp each) + 1 Spell Scroll (L5–L6)',
+    '2 uncommon items + 1 rare item + 1d6 × 100 gp',
+    '1 Necklace of Fireballs + 2d4 × 100 gp',
+    '1 Staff of the Python + 3d6 gems (100 gp each)',
+    '1 Sword +2 (type: DM\'s choice) + 1d4 × 100 gp',
+    '1 Belt of Giant Strength (Hill) + 100 gp',
+    '1 Potion of Flying + 1 rare weapon + 50 gp',
+    '2d6 × 100 gp + 1 Ring of Feather Falling',
+    '1 rare armor + 2d4 art objects (250 gp each)',
+  ],
+  7:[
+    '1 very rare magic item + 2d6 × 100 gp',
+    '2d4 art objects (750 gp each) + 1d6 × 100 pp',
+    '2 rare items + 1 very rare item',
+    '1d6 gems (500 gp each) + 1d4 × 100 pp',
+    '1 rare weapon + 1d6 Spell Scrolls (L5–L7)',
+    '1 Scimitar of Speed + 3d6 gems (500 gp each)',
+    '1 Manual of Gainful Exercise + 200 gp',
+    '1 Cloak of Arachnida + 2d4 art objects (750 gp each)',
+    '1 Flame Tongue weapon + 1d4 × 100 pp',
+    '2 very rare potions + 1d4 × 100 gp',
+    '1 Helm of Brilliance + 1d6 gems (500 gp each)',
+    '1 Ring of Spell Storing (fully charged) + 1d4 × 100 pp',
+  ],
+  9:[
+    '1 legendary item + 2d6 × 100 pp',
+    '1d6 very rare items + 1d6 art objects (2,500 gp)',
+    '3d6 gems (1,000 gp each) + 1 legendary item',
+    '2 very rare + 1 legendary magic item',
+    '1 legendary weapon + 2d6 × 100 pp',
+    '1 Tome of Clear Thought + 3d6 gems (1,000 gp)',
+    '1 Staff of the Magi + 1d4 × 100 pp',
+    '1 Cloak of Invisibility + 2 very rare items',
+    '1 Ring of Three Wishes (1 charge) + 1d6 × 100 pp',
+    '1 Luck Blade (+3, 1 wish) + 1d6 art objects (2,500 gp)',
+    '1 legendary armor + 3d6 gems (1,000 gp each)',
+    '2 legendary items (weapon + armor) + 100 pp',
+  ],
+  11:[
+    '2 legendary items + 1d6 × 1,000 gp',
+    '1d4 legendary items + 3d6 gems (5,000 gp each)',
+    '1 artifact + 1d6 × 1,000 gp',
+    '1 legendary item + access to a planar vault (DM)',
+    '1 legendary item pair (weapon + shield) + 1d4 × 100 pp per room',
+    '1 Holy Avenger + 1 Staff of the Magi + 500 pp',
+    '1 Vorpal Sword + 1d4 legendary armor',
+    '1 Ring of Three Wishes (3 charges) — fully charged',
+    '3 artifacts (minor) + 1d6 × 1,000 pp',
+    '1 Deck of Many Things (DM\'s discretion)',
+    '1 legendary item + eternal binding to the dungeon\'s patron deity',
+    '2 legendary weapons + a map to the next dungeon',
+  ],
+};
+
+/* ─── ROOM FEATURES (unchanged — kept from original, good content) ───────── */
+var ROOM_FEATURES = {
+  dungeon:{
+    entrance:['Heavy iron door, rusted open, with scratch marks on both sides','Carved archway with a warning inscription worn nearly smooth','Collapsed staircase leading down — rope required to descend safely','A guardroom, long abandoned, with two empty weapon racks','An antechamber with dried blood on the flagstones and a broken lantern'],
+    monster:['A barracks room, cots overturned, creature nesting in the corner','Bones of previous adventurers arranged in a deliberate pattern','A feeding area — scraps and offal suggest regular habitation','A patrol route crossing point — creatures arrive every 1d4 hours','A lair with a crude nest and territorial markings on the walls','The remains of a campfire and bedrolls — something has been living here for weeks'],
+    trap:['Pressure plates visible to DC 14 Perception — dart launchers in the walls','A false floor over a 20ft pit, canvas painted to match stone (DC 15 Investigation)','A tripwire at ankle height attached to a large bell (DC 12 Perception to spot)','A glyph of warding carved into a door frame — DC 16 Arcana to identify','A poison needle in the lock mechanism — DC 13 Investigation to find before touching'],
+    treasure:['A locked iron chest (DC 15 Thieves\' Tools) containing the hoard','Treasure scattered carelessly — either looted or there is more hidden','A false wall (DC 17 Investigation) concealing a small vault','Coins and valuables inside the carcass of a large creature','A locked strongbox spiked to the floor — requires both a key and a password'],
+    magic:['A summoning circle still faintly glowing — something was called here recently','An arcane laboratory with partially consumed spell components','A ritual chamber with astronomical symbols and iron rings in the floor','An altar with offerings — the god it honours is unclear and worrying','A mirror that shows the viewer somewhere else — or something watching back'],
+    boss:['A throne room, crude but deliberate — the occupant considers this a kingdom','A final chamber at the lowest point — something old and patient has waited here','An audience chamber with the bones of previous challengers decorating the walls','A natural cavern enlarged by violence — the walls bear marks of enormous claws','A forge-room — the boss creates something here; still operational'],
+    empty:['Collapsed ceiling filling half the room with rubble','A storage room emptied long ago, shelves rotted','A flooded corner where water seeps through the walls — green and still','A crossroads with an old signpost, text worn away','A room with four doors and a pile of adventurer equipment — all bad signs'],
+    corridor_hub:['A junction with a crude map scratched into the wall by a previous adventurer','A guard post controlling three corridors — murder holes in the ceiling','A reinforced intersection with iron gates, all open or broken','A small antechamber where patrols rest — a cold brazier and empty cups'],
+  },
+  cave:{
+    entrance:['A narrow fissure barely wide enough for armour — widens beyond','A cave mouth partially blocked by a recent rockfall','An underground lake shore — the dungeon continues via a boat or by swimming','A sinkhole descent — 30ft drop, rope suggested'],
+    monster:['A stalactite-hung cavern with a nest of creatures above head height','A bioluminescent fungus garden — creatures graze here and guard it','An underground stream where creatures drink — exposed and dangerous here','A cavern echoing with sounds of movement from an unseen upper level'],
+    trap:['Unstable ceiling: DC 14 Perception, 4d10 bludgeoning to all below if triggered','Yellow mould cluster (DC 12 Nature): triggers on 5+ damage to it, DC 13 CON or 3d6 poison','A thin ice bridge over a 30ft frozen chasm — 200 lb weight limit','Rockslide trigger — tripwire hidden under gravel (DC 15 Perception)'],
+    treasure:['Crystals — mundane, but beautiful; a few may be worth 10–50 gp each','Treasure sealed inside a rock formation — chisel required, 1 hour of noise','The accumulated hoard of a territorial beast, piled in its sleeping hollow','A cache left by previous explorers who clearly did not return'],
+    magic:['A crystalline structure that resonates with magical energy — Detect Magic activates at 60ft','An underground hot spring with faintly magical properties — water heals 1 HP on contact','Cave paintings depicting events that have not happened yet','A stalactite that drips water into a perfect circle — never fills, never empties'],
+    boss:['A cathedral cavern, 60ft ceiling, where the apex predator rules by violence','An underground arena of smooth stone — something has been fighting here for sport','A geothermal vent heating a chamber to near-unbearable levels — the creature is comfortable','A cavern of ice and bone — the occupant has been here since the glacier retreated'],
+    empty:['A side cavern containing nothing but the sound of distant water','A dead end with fossils in the walls — footprints in the mud, no exit','A chamber that smells strongly of sulphur — no visible source','A collapsed tunnel — blocked, but sounds from the other side'],
+    corridor_hub:['A natural tunnel junction worn smooth by centuries of use','A cavern crossroads with stalactites from multiple angles — limited visibility','A chimney shaft — climb check required to proceed upward (DC 14)'],
+  },
+  ruins:{
+    entrance:['A grand colonnade, half the columns toppled, leading to a sealed door','The ruins of a gatehouse — the portcullis is up, rusted open forever','A ceremonial entrance flanked by defaced statues','Excavated entry — someone dug here recently; the dig site is 1d4 days old'],
+    monster:['A creature has nested in what was once a scriptorium — texts destroyed','Territorial markings on ancient stonework — the creature has been here generations','A ballroom where something enormous now sleeps between the pillars','Creatures roost in a collapsed tower — the floor above is unstable'],
+    trap:['An ancient mechanical trap — still functional after centuries (DC 16 Investigation)','A magical ward placed by the original builders: Alarm spell triggers on entry','A false floor over a dry moat filled with sharpened stakes (DC 14 Perception)','A cursed threshold: any creature crossing triggers a Bestow Curse (DC 16 WIS negates)'],
+    treasure:['A vault intact behind a wall that was never breached — requires a specific key or DC 18 Thieves\' Tools','An offering room where valuables were left for a deity — still here, uncollected','A treasury half-looted centuries ago — what remains is intentionally left behind','A collapsed section with items visible beneath rubble — 1 hour to safely excavate'],
+    magic:['An intact arcane library — books in an unknown script, faintly magical','A planar anchor — something from another plane is bound here','An observatory with a still-functional orrery tracking an unknown system','A ritual site where a spell was cast and never ended — it continues, weakening'],
+    boss:['A throne room where the last ruler still holds court — in some fashion','A final sanctum, intact, as if the original occupants left yesterday','A guardian placed here when the civilization fell — still operating on original orders','The tomb of the civilization\'s greatest figure — who has not stayed dead'],
+    empty:['A library of ash — books burned in a fire that clearly mattered to someone','Dwelling quarters, furniture rotted but recognizable — personal effects remain','A collapsed great hall where the ceiling came down on whatever happened here','A garden space, underground, where plants grew without light — now dead'],
+    corridor_hub:['A grand intersection with a dry fountain — the drain still functions as a passage','A colonnade walk where statues observe travelers from both sides','A checkpoint room with ancient customs records still legible on a stone tablet'],
+  },
+  sewers:{
+    entrance:['A maintenance access shaft from the street above — iron rungs, 20ft descent','A drainage outflow tunnel on the river bank — waist-deep water at high tide','A collapsed storm drain, recently forced open from the inside','A secret access panel in a merchant\'s cellar — someone knew this was here'],
+    monster:['Creatures adapted to total darkness patrol this section — have for generations','A colony in the junction where two lines meet — food scraps from the city above','Something large inhabits the main channel — smaller things avoid it','A territorial nest in a maintenance alcove, defending a stretch of tunnel'],
+    trap:['A city guard trip-wire alarm — alerts the surface station in 10 minutes','A pressure plate on the maintenance walkway over a deep channel (DC 13 Perception)','The entrance to a criminal safehouse with non-lethal deterrents — nets and sleeping gas','A portcullis controlled from an unknown location — can trap creatures between two gates'],
+    treasure:['A criminal cache submerged in a sealed alcove — waterproof containers','Smuggled goods in transit — hidden in a side channel behind a false wall','A dead drop with coin and a sealed letter','The private stash of a city official — found here because no one checks'],
+    magic:['An experimental filtration system using water elementals — they are restless','A ritual circle drawn in the maintenance access room — recent use','Alchemical runoff from somewhere above has created a magical residue — effects unknown','A divination anchor — someone has been scrying the city through the water system'],
+    boss:['A criminal mastermind who controls this network from a fortified hub','An intelligent creature that has claimed the network as its kingdom','A city official who built a private sanctuary here — well-equipped, well-defended','Something that came in through the river outflow and never left'],
+    empty:['A maintenance alcove with long-expired tools and a dead lantern','A section sealed off — the reason is not clear from this side','A node junction where three lines meet — no current traffic'],
+    corridor_hub:['A four-way junction with flow controls for all channels — controls a large area','A maintenance hub with access ladders, tools, and a dry rest area','A junction guarded by an old iron gate — open, but sounds travel far here'],
+  },
+  fortress:{
+    entrance:['A barracks antechamber — guards would have held here; now occupied by something else','A checkpoint with iron gates, murder holes, and arrow slits — all working','A collapsed drawbridge over an underground channel — a crossing can be improvised','A sally port tunnel — designed for one direction of travel; the occupants adapted it'],
+    monster:['A former barracks, now claimed — the creature understands defensible positions','An armory room where a creature has cached weapons it cannot use but hoards anyway','A patrol junction — something follows the old guard routes out of habit or programming','A command post occupied by the dominant creature — others defer to it here'],
+    trap:['Military-grade crossbow trap: +8 attack, 2d10 piercing (DC 15 Perception to spot)','A portcullis trap — drops when a pressure plate at the far end is triggered','A pit trap with spikes, covered by iron plate (DC 14 Investigation to spot)','A military alarm network — triggering here alerts all sentries within 300ft'],
+    treasure:['The paymaster\'s strongbox — multiple locks, originally required two separate keyholders','An armory cache of high-quality mundane weapons and armor','The commander\'s private collection in a locked quarters room','Emergency supplies sealed in a vault — intended for a siege that never came'],
+    magic:['A command center using a crystal communication array — still broadcasting','An arcane ward system — each door has a glyph; the control panel is somewhere central','A bound elemental doing the work the garrison no longer can','A magical alarm perimeter — calibrated to the original patrol patterns'],
+    boss:['The command room — the leader of whatever now occupies this fortress rules from here','A fortified inner keep within the dungeon — requires bypassing additional defenses','The original commander\'s headquarters — the new occupant understands its symbolic value','A war room where tactics are planned — the occupant is more organized than expected'],
+    empty:['A disciplined empty space — even the current occupants avoid this room','A collapsed section of fortification — structurally unstable','A former chapel to a war deity — the altar is intact, the deity\'s response unknown'],
+    corridor_hub:['A four-way military junction with firing positions covering all approaches','A reinforced chokepoint — one of the fortress\'s original killzones','A communication node where orders would have been relayed — a bell system still works'],
+  },
+  tomb:{
+    entrance:['A sealed stone door with a curse inscription — the curse is real (DC 15 WIS or frightened 1hr)','An antechamber where mourners left offerings — now dried offerings and old bones','Guardian statues flanking the entrance — they watch; whether they act is unclear','A false entrance leading to a dummy tomb; the real tomb is hidden (DC 17 Investigation)'],
+    monster:['Undead servants placed here to guard the tomb — their conditioning is still active','A wight placed here as a guardian and given centuries to develop opinions','Animated constructs triggered by the last person who disturbed this section','A tomb robber who entered recently and did not leave — in a state worse than death'],
+    trap:['Sarcophagus trap: opening it without the correct ritual, DC 14 DEX, 4d10 necrotic','A false floor over a blessed pit — undead cannot follow, living creatures fall','Poison gas sealed in the walls, released by removing specific offerings (DC 15 Perception)','A Symbol of Death inscribed on the inner door — DC 17 Arcana to identify'],
+    treasure:['The grave goods of a powerful individual — may be cursed (Identify recommended)','A library of preserved records from a dead civilization — historically priceless','Offerings from centuries of funerary rites — scattered but significant in total value','The personal weapons of the occupant — beautifully crafted, potentially awakened'],
+    magic:['A binding seal keeping something inside a sarcophagus — showing age','An active Speak with Dead effect — the original occupant anticipated visitors','A planar anchor binding the soul of the occupant here — they are aware of intruders','A preservation ward that has kept this room in perfect condition for centuries'],
+    boss:['The central tomb — the occupant is the reason this place exists and the reason it is dangerous','A burial chamber for someone who refused to stay dead — and succeeded','A lich\'s place of power within the tomb — not the phylactery, but still deadly','The final chamber where the tomb\'s original purpose is revealed — and it is not over'],
+    empty:['A tomb prepared for someone who was never buried here — they knew something','An antechamber stripped of offerings by tomb robbers — bodies left, value taken','A meditation chamber where priests would have kept vigil — candles extinguished recently'],
+    corridor_hub:['A processional hall where funerary rites would have been performed — still echoes','A junction of burial niches — hundreds of recesses, all occupied, none disturbed','A preparation room where bodies were readied — the tools are here, recently used'],
+  },
+};
+
+/* ─── CELL CONSTANTS ──────────────────────────────────────────────────────── */
+var CELL_WALL=0, CELL_FLOOR=1, CELL_CORR=2, CELL_DOOR=3, CELL_SHORTCUT=4;
+
+/* ─── ROOM VISUALS — distinct, high-contrast, color-coded ────────────────── */
+var ROOM_COLORS={
+  entrance:   '#1e5c1e',   // forest green — start/safety
+  boss:       '#8b0000',   // deep blood red — final danger
+  treasure:   '#14306e',   // deep royal blue — wealth
+  magic:      '#4a0d7a',   // deep purple — arcane
+  trap:       '#7a3e00',   // burnt sienna — hazard
+  monster:    '#4a1a0a',   // dark brown-red — combat
+  corridor_hub:'#1e2e3e',  // dark slate blue — navigation
+  empty:      '#252525',   // near-black grey — neutral
+};
+// Lighter accent colors for text contrast testing
+var ROOM_TEXT_COLORS={
+  entrance:'#a0ffaa',boss:'#ff9090',treasure:'#90b8ff',
+  magic:'#cc88ff',trap:'#ffb830',monster:'#ff8a50',
+  corridor_hub:'#88aacc',empty:'#888888',
+};
+var ROOM_LABEL={
+  entrance:'ENT',boss:'BOSS',treasure:'$$$',magic:'RIT',
+  trap:'TRP',monster:'MON',corridor_hub:'HUB',empty:'   ',
+};
+var ROOM_EMOJI={
+  entrance:'⬆',boss:'☠',treasure:'◈',magic:'✦',
+  trap:'⚡',monster:'⚔',corridor_hub:'✦',empty:' ',
+};
+
+/* ─── GENERATION STATE ────────────────────────────────────────────────────── */
+var GRID_W, GRID_H, CELL_SIZE;
+var grid=[], rooms=[], doors=[];
+var dungeonType='dungeon', partyLevel=5;
+var generatedSeed=0;
+var roomCounter=0;
+
+/* ─── MAIN GENERATE ───────────────────────────────────────────────────────── */
+function generateDungeon(){
+  var type      = document.getElementById('dg-type').value;
+  var size      = document.getElementById('dg-size').value;
+  var level     = parseInt(document.getElementById('dg-level').value)||5;
+  var corrStyle = document.getElementById('dg-corridors').value;
+  var seedInput = parseInt(document.getElementById('dg-seed').value);
+  var seed      = isNaN(seedInput)||(document.getElementById('dg-seed').value==='') ? (Date.now()^0xdeadbeef)|0 : seedInput;
+
+  dungeonType   = type;
+  partyLevel    = level;
+  generatedSeed = seed;
+  roomCounter   = 0;
+  seedRng(seed);
+
+  var sizeMap={small:[52,40,4,6],medium:[72,56,8,12],large:[96,72,14,20]};
+  var sd=sizeMap[size]||sizeMap.medium;
+  GRID_W=sd[0]; GRID_H=sd[1];
+  var targetRooms=rngRange(sd[2],sd[3]);
+
+  // Init grid
+  grid=[];
+  for(var y=0;y<GRID_H;y++){ grid[y]=[]; for(var x=0;x<GRID_W;x++) grid[y][x]=CELL_WALL; }
+  rooms=[]; doors=[];
+  var rd=document.getElementById('room-detail');
+  if(rd) rd.style.display='none';
+
+  // ── PHASE 1: Place rooms via BSP (NO corridors yet) ──────────────────────
+  bspPlaceRooms(1,1,GRID_W-2,GRID_H-2,targetRooms,corrStyle,0);
+  if(rooms.length<2){ renderDungeon(); buildRoomNotes(); return; }
+
+  // ── PHASE 2: Sort rooms spatially, re-assign sequential IDs ──────────────
+  // Quantise into broad horizontal bands so left-to-right ordering dominates
+  // within each band. This gives a natural "explore left-to-right, then down"
+  // progression that makes the numbered path legible on screen.
+  var bandH = Math.max(1, Math.floor(GRID_H / 4));
+  rooms.sort(function(a,b){
+    var ba=Math.floor(a.cy/bandH), bb=Math.floor(b.cy/bandH);
+    if(ba!==bb) return ba-bb;
+    return a.cx-b.cx;
+  });
+  rooms.forEach(function(r,i){ r.id=i; r.connected=[]; });
+
+  // ── PHASE 3: Carve MAIN CHAIN — room[i] always connects to room[i+1] ─────
+  for(var i=0;i<rooms.length-1;i++){
+    connectRooms(rooms[i], rooms[i+1], corrStyle, false);
+  }
+
+  // ── PHASE 4: Add SHORTCUTS — non-sequential connections ───────────────────
+  // ~25% of room count, skip 2–5 rooms ahead, no duplicates.
+  var shortcutTarget = Math.max(1, Math.floor(rooms.length*0.25));
+  var attempts = shortcutTarget*4;
+  var made = 0;
+  while(made<shortcutTarget && attempts-->0){
+    var ia = rngInt(rooms.length-3);
+    var skip = rngRange(2, Math.min(5, rooms.length-1-ia));
+    var ib = ia+skip;
+    if(rooms[ia].connected.indexOf(ib)<0){
+      connectRooms(rooms[ia], rooms[ib], corrStyle, true);  // true = shortcut
+      made++;
+    }
+  }
+
+  // ── PHASE 5: Assign types and content ────────────────────────────────────
+  assignRoomTypes(level, type);
+
+  // ── PHASE 6: Expand special rooms (boss/treasure/magic get more space) ───
+  expandSpecialRooms();
+
+  renderDungeon();
+  buildRoomNotes();
+
+  document.getElementById('dg-title').textContent=
+    '\u9919 '+capitalize(type)+' \u2014 Level '+level+' \u2014 Seed '+seed;
+  document.getElementById('dg-stats').textContent=
+    rooms.length+' rooms \u00b7 '+doors.length+' doors \u00b7 '
+    +made+' shortcut'+(made!==1?'s':'')+' \u00b7 '+GRID_W+'\u00d7'+GRID_H+' grid';
+}
+
+/* ─── BSP ROOM PLACEMENT ONLY (no corridors) ─────────────────────────────── */
+function bspPlaceRooms(x,y,w,h,maxRooms,style,depth){
+  var minSplit=11, maxDepth=7;
+  var canSplitH=(w>=minSplit*2), canSplitV=(h>=minSplit*2);
+
+  if(depth>=maxDepth || rooms.length>=maxRooms || (!canSplitH&&!canSplitV)){
+    makeRoom(x,y,w,h,style);
+    return;
+  }
+
+  // Choose split axis — prefer longer dimension, some randomness
+  var splitH;
+  if(canSplitH && !canSplitV) splitH=true;
+  else if(!canSplitH && canSplitV) splitH=false;
+  else splitH=(w>=h);
+  if(rng()<0.30) splitH=!splitH;
+  if(canSplitH && w>h*1.5) splitH=true;
+  if(canSplitV && h>w*1.5) splitH=false;
+
+  if(splitH){
+    var ratio=0.35+rng()*0.30;
+    var splitX=x+Math.max(minSplit,Math.min(w-minSplit,Math.floor(w*ratio)));
+    bspPlaceRooms(x,  y, splitX-x,    h, maxRooms, style, depth+1);
+    bspPlaceRooms(splitX,y,x+w-splitX,h, maxRooms, style, depth+1);
+  } else {
+    var ratio2=0.35+rng()*0.30;
+    var splitY=y+Math.max(minSplit,Math.min(h-minSplit,Math.floor(h*ratio2)));
+    bspPlaceRooms(x,y,  w, splitY-y,    maxRooms, style, depth+1);
+    bspPlaceRooms(x,splitY,w,y+h-splitY,maxRooms, style, depth+1);
+  }
+  // NOTE: no connectRooms here — corridors are carved after sorting in Phase 3
+}
+
+/* ─── ROOM CREATION ───────────────────────────────────────────────────────── */
+function makeRoom(bx,by,bw,bh,style){
+  var minW=4, maxW=Math.min(bw-2,style==='sparse'?14:10);
+  var minH=4, maxH=Math.min(bh-2,style==='sparse'?12:8);
+  if(maxW<minW||maxH<minH) return null;
+
+  var rw=rngRange(minW,maxW);
+  var rh=rngRange(minH,maxH);
+  // Safe placement within bounds
+  var rx=bx+rngRange(1,Math.max(1,bw-rw-1));
+  var ry=by+rngRange(1,Math.max(1,bh-rh-1));
+  // Clamp to grid
+  if(rx+rw>=GRID_W-1){rx=Math.max(bx,GRID_W-2-rw);}
+  if(ry+rh>=GRID_H-1){ry=Math.max(by,GRID_H-2-rh);}
+  if(rx<1||ry<1||rw<minW||rh<minH) return null;
+
+  for(var y=ry;y<ry+rh;y++) for(var x=rx;x<rx+rw;x++) grid[y][x]=CELL_FLOOR;
+
+  var id=roomCounter++;  // FIX: use counter, not rooms.length
+  var room={x:rx,y:ry,w:rw,h:rh,cx:Math.floor(rx+rw/2),cy:Math.floor(ry+rh/2),
+            id:id,type:'empty',connected:[]};
+  rooms.push(room);
+  return room;
+}
+
+/* ─── SPECIAL ROOM EXPANSION ─────────────────────────────────────────────── */
+// Boss, treasure, and magic rooms are expanded outward into adjacent wall
+// space to make them visually distinct and feel appropriately grand.
+function expandSpecialRooms(){
+  var EXPAND_TYPES = {boss:4, treasure:3, magic:2};
+  rooms.forEach(function(r){
+    var expand = EXPAND_TYPES[r.type];
+    if(!expand) return;
+    // Try to grow in each direction up to `expand` cells
+    var dirs = [{dx:0,dy:-1,axis:'y'},{dx:0,dy:1,axis:'y'},{dx:-1,dy:0,axis:'x'},{dx:1,dy:0,axis:'x'}];
+    dirs = dirs.sort(function(){ return rng()-0.5; }); // random priority
+    dirs.forEach(function(d){
+      var grew = 0;
+      while(grew < expand){
+        // Check if the entire edge in this direction is carveable (all wall)
+        var canGrow = true;
+        if(d.axis==='y'){
+          var ey = d.dy < 0 ? r.y-1 : r.y+r.h;
+          if(ey<1||ey>=GRID_H-1){ canGrow=false; break; }
+          for(var ex=r.x;ex<r.x+r.w;ex++){
+            if(grid[ey][ex]!==CELL_WALL){ canGrow=false; break; }
+          }
+          if(canGrow){
+            for(var ex2=r.x;ex2<r.x+r.w;ex2++) grid[ey][ex2]=CELL_FLOOR;
+            if(d.dy<0){ r.y--; r.h++; } else { r.h++; }
+            grew++;
+          } else break;
+        } else {
+          var ex3 = d.dx < 0 ? r.x-1 : r.x+r.w;
+          if(ex3<1||ex3>=GRID_W-1){ canGrow=false; break; }
+          for(var ey2=r.y;ey2<r.y+r.h;ey2++){
+            if(grid[ey2][ex3]!==CELL_WALL){ canGrow=false; break; }
+          }
+          if(canGrow){
+            for(var ey3=r.y;ey3<r.y+r.h;ey3++) grid[ey3][ex3]=CELL_FLOOR;
+            if(d.dx<0){ r.x--; r.w++; } else { r.w++; }
+            grew++;
+          } else break;
+        }
+      }
+    });
+    // Recompute centre after expansion
+    r.cx = Math.floor(r.x + r.w/2);
+    r.cy = Math.floor(r.y + r.h/2);
+  });
+}
+
+/* ─── CORRIDOR CARVING ────────────────────────────────────────────────────── */
+function connectRooms(a,b,style,isShortcut){
+  var x1=a.cx,y1=a.cy,x2=b.cx,y2=b.cy;
+  // Track connection so shortcuts aren't duplicated
+  a.connected.push(b.id); b.connected.push(a.id);
+
+  // Mark cells with a shortcut flag so rendering can distinguish them
+  var cellType = isShortcut ? CELL_SHORTCUT : CELL_CORR;
+
+  if(style==='winding'){
+    var mx=rngRange(Math.min(x1,x2),Math.max(x1,x2));
+    var my=rngRange(Math.min(y1,y2),Math.max(y1,y2));
+    carveCorr(x1,mx,y1,y1,cellType);
+    carveCorr(mx,mx,y1,my,cellType);
+    carveCorr(mx,x2,my,my,cellType);
+    carveCorr(x2,x2,my,y2,cellType);
+    placeDoor(mx,y1); placeDoor(x2,my);
+  } else {
+    if(rng()>0.5){
+      carveCorr(x1,x2,y1,y1,cellType);
+      carveCorr(x2,x2,y1,y2,cellType);
+      placeDoor(x2,y1);
+    } else {
+      carveCorr(x1,x1,y1,y2,cellType);
+      carveCorr(x1,x2,y2,y2,cellType);
+      placeDoor(x1,y2);
+    }
+  }
+}
+
+// Unified corridor carver — handles both H and V in one call
+function carveCorr(x1,x2,y1,y2,cellType){
+  var xs=Math.min(x1,x2), xe=Math.max(x1,x2);
+  var ys=Math.min(y1,y2), ye=Math.max(y1,y2);
+  for(var y=ys;y<=ye;y++){
+    for(var x=xs;x<=xe;x++){
+      if(y>=0&&y<GRID_H&&x>=0&&x<GRID_W){
+        // Main chain (CELL_CORR) overwrites shortcut; never overwrite floor
+        if(grid[y][x]===CELL_WALL||(cellType===CELL_CORR&&grid[y][x]===CELL_SHORTCUT)){
+          grid[y][x]=cellType;
+        }
+      }
+    }
+  }
+}
+
+// Keep old helpers as wrappers (used nowhere else but kept for safety)
+function carveHCorr(x1,x2,y){ carveCorr(x1,x2,y,y,CELL_CORR); }
+function carveVCorr(y1,y2,x){ carveCorr(x,x,y1,y2,CELL_CORR); }
+
+function placeDoor(x,y){
+  if(x>1&&x<GRID_W-2&&y>1&&y<GRID_H-2){
+    var c=grid[y][x];
+    if((c===CELL_CORR||c===CELL_SHORTCUT||c===CELL_FLOOR)&&rng()>0.42){
+      grid[y][x]=CELL_DOOR;
+      doors.push({x:x,y:y});
+    }
+  }
+}
+
+/* ─── ROOM TYPING ─────────────────────────────────────────────────────────── */
+function getLevelKey(l){
+  if(l<=2) return 1; if(l<=4) return 3; if(l<=6) return 5;
+  if(l<=8) return 7; if(l<=10) return 9; return 11;
+}
+
+function assignRoomTypes(level,type){
+  if(!rooms.length) return;
+  var n=rooms.length;
+  var lvl=getLevelKey(level);
+  var feats=(ROOM_FEATURES[type]||ROOM_FEATURES.dungeon);
+
+  // rooms[] is sorted by id (0 = first, n-1 = last/highest number)
+  // RULE: Room 1 (id 0) = entrance, Room N (id n-1) = treasure, Room N-1 (id n-2) = boss
+  rooms[0].type='entrance';
+  rooms[n-1].type='treasure';                    // LAST ROOM = TREASURE
+  if(n>2) rooms[n-2].type='boss';                // PENULTIMATE = BOSS
+  if(n>5){
+    // Magic: place around 60% through the dungeon
+    var magicIdx=Math.round(n*0.60);
+    // Clamp away from entrance/boss/treasure
+    magicIdx=Math.max(1,Math.min(n-3,magicIdx));
+    if(rooms[magicIdx].type==='empty') rooms[magicIdx].type='magic';
+  }
+
+  // Traps: ~18% of rooms, placed in the middle section (avoid first and last two)
+  var trapTarget=Math.max(1,Math.round(n*0.18));
+  var trapCandidates=rooms.slice(1,n-2).filter(function(r){return r.type==='empty';});
+  rngShuffle(trapCandidates).slice(0,trapTarget).forEach(function(r){r.type='trap';});
+
+  // Fill remaining with monster / corridor_hub / empty
+  rooms.forEach(function(r){
+    if(r.type!=='empty') return;
+    var roll=rng();
+    r.type=roll<0.55?'monster':roll<0.75?'corridor_hub':'empty';
+  });
+
+  // Assign content using shuffled pools — guarantees no repeats until pool exhausted
+  var encPool=rngShuffle(ENC[lvl].slice());
+  var trapPool=rngShuffle(TRAPS[lvl].slice());
+  var tresPool=rngShuffle(TREASURE[lvl].slice());
+  var encIdx=0, trapIdx=0, tresIdx=0;
+
+  rooms.forEach(function(r){
+    r.feature=rngPick(feats[r.type]||feats.empty);
+
+    if(r.type==='monster'){
+      r.encounter=encPool[encIdx % encPool.length]; encIdx++;
+    } else if(r.type==='boss'){
+      // Boss picks from the hardest 40% of encounters
+      var hard=ENC[lvl].slice(Math.floor(ENC[lvl].length*0.6));
+      r.encounter=rngPick(hard.length?hard:ENC[lvl]);
+    }
+
+    if(r.type==='trap'){
+      r.trap=trapPool[trapIdx % trapPool.length]; trapIdx++;
+    }
+
+    if(r.type==='treasure'||r.type==='boss'){
+      r.treasure=tresPool[tresIdx % tresPool.length]; tresIdx++;
+    }
+  });
+}
+
+/* ─── RENDERING ───────────────────────────────────────────────────────────── */
+function renderDungeon(){
+  var canvas=document.getElementById('dungeon-canvas');
+  var container=canvas.parentElement;
+  var availW=container.clientWidth||800;
+  CELL_SIZE=Math.max(7,Math.min(16,Math.floor(availW/GRID_W)));
+
+  var cw=GRID_W*CELL_SIZE, ch=GRID_H*CELL_SIZE;
+  canvas.width=cw; canvas.height=ch;
+  canvas.style.width=cw+'px'; canvas.style.height=ch+'px';
+  var ctx=canvas.getContext('2d');
+
+  // ── Background ────────────────────────────────────────────────────────────
+  ctx.fillStyle='#0a0a0a';
+  ctx.fillRect(0,0,cw,ch);
+
+  // ── Draw floor cells ──────────────────────────────────────────────────────
+  for(var y=0;y<GRID_H;y++){
+    for(var x=0;x<GRID_W;x++){
+      var c=grid[y][x];
+      if(c===CELL_WALL) continue;
+      if(c===CELL_FLOOR){
+        ctx.fillStyle='#bfac7a';          // room floor — warm stone
+      } else if(c===CELL_CORR){
+        ctx.fillStyle='#8a7a52';          // main chain corridor — darker stone
+      } else if(c===CELL_SHORTCUT){
+        ctx.fillStyle='#6a5a3a';          // shortcut corridor — even darker, clearly distinct
+      } else if(c===CELL_DOOR){
+        ctx.fillStyle='#c9973a';          // gold doors
+      }
+      ctx.fillRect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    }
+  }
+
+  // ── Wall shading — thin border on floor edges ────────────────────────────
+  ctx.strokeStyle='rgba(0,0,0,0.35)';
+  ctx.lineWidth=0.5;
+  for(var y=0;y<GRID_H;y++){
+    for(var x=0;x<GRID_W;x++){
+      if(grid[y][x]===CELL_WALL) continue;
+      // Draw a subtle darker edge if adjacent to wall
+      var hasWallN=(y>0&&grid[y-1][x]===CELL_WALL);
+      var hasWallS=(y<GRID_H-1&&grid[y+1][x]===CELL_WALL);
+      var hasWallW=(x>0&&grid[y][x-1]===CELL_WALL);
+      var hasWallE=(x<GRID_W-1&&grid[y][x+1]===CELL_WALL);
+      if(hasWallN||hasWallS||hasWallW||hasWallE){
+        ctx.fillStyle='rgba(0,0,0,0.25)';
+        ctx.fillRect(x*CELL_SIZE,y*CELL_SIZE,CELL_SIZE,CELL_SIZE);
+      }
+    }
+  }
+
+  // ── Draw main-chain entry chevrons ───────────────────────────────────────
+  // Draw a small filled triangle on the wall edge between consecutive rooms,
+  // pointing INTO the destination room. Cleaner than text labels.
+  if(CELL_SIZE>=8 && rooms.length>1){
+    ctx.save();
+    for(var ci=0;ci<rooms.length-1;ci++){
+      var ra=rooms[ci], rb=rooms[ci+1];
+      // Find the midpoint where the corridor enters room B
+      // Determine dominant direction from A centre to B centre
+      var dx=rb.cx-ra.cx, dy=rb.cy-ra.cy;
+      var entX, entY, ax, ay, bx2, by2, cx2, cy2;
+      var hs=Math.floor(CELL_SIZE*0.38);
+      // Place chevron at midpoint between room centres, on the corridor
+      var mx3=Math.floor((ra.cx+rb.cx)/2), my3=Math.floor((ra.cy+rb.cy)/2);
+      // Pixel centre of that cell
+      var px=mx3*CELL_SIZE+CELL_SIZE/2, py=my3*CELL_SIZE+CELL_SIZE/2;
+      // Draw arrow pointing in direction of travel (ra→rb)
+      var len=Math.sqrt(dx*dx+dy*dy)||1;
+      var nx=dx/len, ny=dy/len;  // unit vector
+      // Triangle: tip forward, two base corners back and perpendicular
+      var tip_x=px+nx*hs, tip_y=py+ny*hs;
+      var base_x=px-nx*hs, base_y=py-ny*hs;
+      var perp_x=-ny*hs*0.7, perp_y=nx*hs*0.7;
+      ctx.beginPath();
+      ctx.moveTo(tip_x, tip_y);
+      ctx.lineTo(base_x+perp_x, base_y+perp_y);
+      ctx.lineTo(base_x-perp_x, base_y-perp_y);
+      ctx.closePath();
+      ctx.fillStyle='rgba(0,0,0,0.55)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(tip_x-0.5, tip_y-0.5);
+      ctx.lineTo(base_x+perp_x-0.5, base_y+perp_y-0.5);
+      ctx.lineTo(base_x-perp_x-0.5, base_y-perp_y-0.5);
+      ctx.closePath();
+      ctx.fillStyle='rgba(255,255,190,0.82)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // ── Draw rooms with type colour overlays ─────────────────────────────────
+  rooms.forEach(function(r){
+    var col=ROOM_COLORS[r.type]||ROOM_COLORS.empty;
+    // Fill room with type colour
+    ctx.fillStyle=col;
+    ctx.globalAlpha=0.82;
+    ctx.fillRect(r.x*CELL_SIZE,r.y*CELL_SIZE,r.w*CELL_SIZE,r.h*CELL_SIZE);
+    ctx.globalAlpha=1;
+
+    // Room border — bright colour
+    var textCol=ROOM_TEXT_COLORS[r.type]||'#aaaaaa';
+    ctx.strokeStyle=textCol;
+    ctx.lineWidth=1.5;
+    ctx.globalAlpha=0.7;
+    ctx.strokeRect(r.x*CELL_SIZE+1,r.y*CELL_SIZE+1,r.w*CELL_SIZE-2,r.h*CELL_SIZE-2);
+    ctx.globalAlpha=1;
+
+    // ── Room labels ─────────────────────────────────────────────────────────
+    var rw=r.w*CELL_SIZE, rh=r.h*CELL_SIZE;
+    if(rw<16||rh<10) return;
+
+    var mid=r.cx*CELL_SIZE, midy=r.cy*CELL_SIZE;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+
+    // Room number — always shown
+    var numSize=Math.max(7,Math.min(11,Math.floor(CELL_SIZE*0.85)));
+    ctx.font='bold '+numSize+'px monospace';
+    // Shadow for readability
+    ctx.fillStyle='rgba(0,0,0,0.7)';
+    ctx.fillText('R'+(r.id+1),mid+1,midy-rh*0.13+1);
+    ctx.fillStyle='rgba(255,255,255,0.95)';
+    ctx.fillText('R'+(r.id+1),mid,midy-rh*0.13);
+
+    // Type label below number
+    if(rh>20){
+      var lblSize=Math.max(6,Math.min(9,Math.floor(CELL_SIZE*0.7)));
+      ctx.font='bold '+lblSize+'px monospace';
+      ctx.fillStyle='rgba(0,0,0,0.65)';
+      ctx.fillText(ROOM_LABEL[r.type]||'',mid+1,midy+rh*0.13+1);
+      ctx.fillStyle=textCol;
+      ctx.fillText(ROOM_LABEL[r.type]||'',mid,midy+rh*0.13);
+    }
+  });
+
+  // ── Draw doors (gold squares) ────────────────────────────────────────────
+  doors.forEach(function(d){
+    var dx=d.x*CELL_SIZE, dy=d.y*CELL_SIZE;
+    var pad=Math.max(1,Math.floor(CELL_SIZE*0.15));
+    ctx.fillStyle='#c9973a';
+    ctx.fillRect(dx+pad,dy+pad,CELL_SIZE-pad*2,CELL_SIZE-pad*2);
+    ctx.strokeStyle='#e8b84b';
+    ctx.lineWidth=1;
+    ctx.strokeRect(dx+pad,dy+pad,CELL_SIZE-pad*2,CELL_SIZE-pad*2);
+  });
+
+  // ── Hover: quick tooltip ──────────────────────────────────────────────────
+  function getRoomAt(e){
+    var rect=canvas.getBoundingClientRect();
+    var scaleX=cw/rect.width, scaleY=ch/rect.height;
+    var mx=Math.floor((e.clientX-rect.left)*scaleX/CELL_SIZE);
+    var my=Math.floor((e.clientY-rect.top)*scaleY/CELL_SIZE);
+    for(var i=0;i<rooms.length;i++){
+      var r=rooms[i];
+      if(mx>=r.x&&mx<r.x+r.w&&my>=r.y&&my<r.y+r.h) return r;
+    }
+    return null;
+  }
+
+  canvas.onmousemove=function(e){
+    var room=getRoomAt(e);
+    var tip=document.getElementById('hover-tip');
+    if(room){
+      var typeLabel=capitalize(room.type.replace('_',' '));
+      var content='<b style="color:'+ROOM_TEXT_COLORS[room.type]+'">Room '+(room.id+1)+': '+typeLabel+'</b><br>'
+        +room.feature.slice(0,120)+(room.feature.length>120?'\u2026':'')
+        +'<br><span style="font-size:.72rem;color:rgba(244,232,193,.5);">Click for full details</span>';
+      tip.innerHTML=content;
+      tip.style.display='block';
+      // Keep tip within viewport
+      var tx=e.clientX+16, ty=Math.max(10,e.clientY-10);
+      if(tx+280>window.innerWidth) tx=e.clientX-290;
+      tip.style.left=tx+'px'; tip.style.top=ty+'px';
+    } else {
+      tip.style.display='none';
+    }
+  };
+  canvas.onmouseleave=function(){document.getElementById('hover-tip').style.display='none';};
+
+  // ── Click: open room detail panel ────────────────────────────────────────
+  canvas.onclick=function(e){
+    document.getElementById('hover-tip').style.display='none';
+    var room=getRoomAt(e);
+    if(!room) return;
+    var typeLabel=capitalize(room.type.replace('_',' '));
+    var tc=ROOM_TEXT_COLORS[room.type]||'#aaa';
+    var title=document.getElementById('rd-title');
+    var detail=document.getElementById('room-detail');
+    title.style.color=tc;
+    title.textContent='Room '+(room.id+1)+': '+typeLabel;
+    document.getElementById('rd-feature').textContent=room.feature;
+
+    var enc=document.getElementById('rd-encounter');
+    if(room.encounter){
+      enc.innerHTML='\u2694 <b>Encounter:</b> '+room.encounter;
+      enc.style.display='block';
+    } else enc.style.display='none';
+
+    var trp=document.getElementById('rd-trap');
+    if(room.trap){
+      trp.innerHTML='\u26a0 <b>Trap:</b> '+room.trap;
+      trp.style.display='block';
+    } else trp.style.display='none';
+
+    var tre=document.getElementById('rd-treasure');
+    if(room.treasure){
+      tre.innerHTML='\u25c8 <b>Treasure:</b> '+room.treasure;
+      tre.style.display='block';
+    } else tre.style.display='none';
+
+    detail.style.display='block';
+    // Scroll detail into view on mobile
+    detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+}
+
+/* ─── ROOM NOTES ──────────────────────────────────────────────────────────── */
+function buildRoomNotes(){
+  var notes=document.getElementById('room-notes');
+  if(!rooms.length){notes.innerHTML='<em>No rooms generated.</em>';return;}
+  var html='';
+  rooms.forEach(function(r){
+    var typeLabel=capitalize(r.type.replace('_',' '));
+    var tc=ROOM_TEXT_COLORS[r.type]||'#888';
+    html+='<div class="room-note">'
+      +'<div class="rn-head" style="color:'+tc+'">Room '+(r.id+1)+': '+typeLabel+'</div>'
+      +'<div class="rn-body">'+r.feature+'</div>';
+    if(r.encounter) html+='<div class="rn-body" style="color:#9b3030;margin-top:.25rem;">\u2694 <b>Encounter:</b> '+r.encounter+'</div>';
+    if(r.trap)      html+='<div class="rn-body" style="color:#7a5010;margin-top:.25rem;">\u26a0 <b>Trap:</b> '+r.trap+'</div>';
+    if(r.treasure)  html+='<div class="rn-body" style="color:#1a4a8b;margin-top:.25rem;">\u25c8 <b>Treasure:</b> '+r.treasure+'</div>';
+    html+='</div>';
+  });
+  notes.innerHTML=html;
+}
+
+/* ─── EXPORT ──────────────────────────────────────────────────────────────── */
+function exportNotes(){
+  var lines=['DUNGEON NOTES — Seed: '+generatedSeed,'Type: '+dungeonType,'Level: '+partyLevel,'Rooms: '+rooms.length,''];
+  rooms.forEach(function(r){
+    lines.push('ROOM '+(r.id+1)+': '+r.type.replace('_',' ').toUpperCase());
+    lines.push(r.feature);
+    if(r.encounter) lines.push('Encounter: '+r.encounter);
+    if(r.trap)      lines.push('Trap: '+r.trap);
+    if(r.treasure)  lines.push('Treasure: '+r.treasure);
+    lines.push('');
+  });
+  try{
+    navigator.clipboard.writeText(lines.join('\n')).then(function(){
+      alert('Room notes copied to clipboard ('+rooms.length+' rooms)!');
+    });
+  }catch(e){
+    // Fallback for non-HTTPS
+    var ta=document.createElement('textarea');
+    ta.value=lines.join('\n');
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('Room notes copied ('+rooms.length+' rooms)!');
+  }
+}
+
+function capitalize(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+
+window.addEventListener('load',function(){setTimeout(generateDungeon,150);});
+window.addEventListener('resize',function(){if(rooms.length)renderDungeon();});
+
+</script>
+</body>
+</html>

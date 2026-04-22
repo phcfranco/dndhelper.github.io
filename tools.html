@@ -1657,6 +1657,20 @@ function buildReference() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildMerchant();
 buildReference();
+
+// ── Handle incoming hash from generators (e.g. #merchant-town) ──────────
+(function(){
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('merchant-') === 1) {
+    var size = hash.slice(10); // strip '#merchant-'
+    var sel = document.getElementById('settlement-size');
+    if (sel && sel.querySelector('option[value="'+size+'"]')) {
+      sel.value = size;
+      buildMerchant();
+      showPanel('merchant');
+    }
+  }
+})();
 </script>
 </body>
 </html>
