@@ -1287,6 +1287,9 @@
 <div class="sheet">
 
 <!-- Wizard step navigation -->
+<div style="text-align:center;margin-bottom:.5rem;">
+  <a href="index.html" style="font-family:var(--font-display,'Cinzel',serif);font-size:.65rem;letter-spacing:.1em;color:rgba(201,151,58,.6);text-decoration:none;border-bottom:1px dotted rgba(201,151,58,.3);">⌂ Character Forge Home</a>
+</div>
 <nav class="wizard-nav" id="wizard-nav">
   <button class="wizard-step-pill active" onclick="goStep(1)" id="pill-1"><span class="pill-num">1</span><span class="pill-label">Identity &amp; Species</span></button>
   <button class="wizard-step-pill" onclick="goStep(2)" id="pill-2"><span class="pill-num">2</span><span class="pill-label">Class</span></button>
@@ -1880,6 +1883,7 @@
 
     <div class="points-track"><div class="points-fill" id="points-fill"></div></div>
     <span class="points-count" id="points-count">27 / 27</span>
+    <div id="class-stat-hint" style="display:none;font-size:.82rem;font-style:italic;color:var(--gold);margin:.4rem 0 .2rem;text-align:center;"></div>
 
     <div class="abilities-grid" id="abilities-grid">
     </div>
@@ -2025,17 +2029,27 @@
   </div>
 
   <button class="generate-btn" onclick="generateSheet()" style="margin-top:2rem;">⚔ Generate Character Sheet PDF ⚔</button>
-  <p style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--ink-light);font-style:italic;">
-    After your first session, use the
-    <a href="level-up.html" style="color:var(--crimson);text-decoration:none;border-bottom:1px dotted rgba(139,26,26,.4);">Level Up Wizard</a>
-    to advance your character — upload this PDF and it reads your character automatically.
+  <div id="step8-action-bar" style="display:none;justify-content:center;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+    <a href="index.html" class="wizard-btn" style="text-decoration:none;background:rgba(139,26,26,.08);border:1px solid rgba(139,26,26,.3);color:var(--crimson);padding:.5rem 1.2rem;border-radius:4px;font-family:var(--font-display);font-size:.78rem;letter-spacing:.06em;">⌂ Home</a>
+    <a href="level-up.html" class="wizard-btn" style="text-decoration:none;background:rgba(26,92,42,.08);border:1px solid rgba(26,92,42,.3);color:#1a5c2a;padding:.5rem 1.2rem;border-radius:4px;font-family:var(--font-display);font-size:.78rem;letter-spacing:.06em;">★ Level Up Wizard →</a>
+  </div>
+  <p style="text-align:center;margin-top:.8rem;font-size:.82rem;color:var(--ink-light);font-style:italic;">
+    After your first session, upload this PDF to the Level Up Wizard — it reads your character automatically.
   </p>
+</div>
 
 <!-- Wizard navigation footer (shown on all steps except review) -->
-<div class="wizard-footer" id="wizard-footer">
-  <button class="wizard-btn wizard-btn-prev" id="btn-prev" onclick="stepNav(-1)" disabled>← Previous</button>
-  <span class="wizard-progress" id="wizard-progress">Step 1 of 9</span>
-  <button class="wizard-btn wizard-btn-next" id="btn-next" onclick="stepNav(1)">Next →</button>
+<div class="wizard-footer">
+  <button class="wizard-btn wizard-btn-prev" id="btn-prev">← Back</button>
+
+  <div class="wizard-progress" id="wizard-progress">
+    Step 1 of 8
+  </div>
+
+  <div style="display:flex; gap:0.5rem;">
+    <button class="wizard-btn" id="btn-home">⌂ Home</button>
+    <button class="wizard-btn wizard-btn-next" id="btn-next">Next →</button>
+  </div>
 </div>
 
 
@@ -2723,6 +2737,49 @@ function updateClassBanner() {
   document.getElementById('banner-saves').textContent   = c.saves;
   document.getElementById('banner-armor').textContent   = c.armor;
   banner.style.display = 'block';
+  if (typeof updatePointsUI === "function") {
+        updatePointsUI();
+    }
+}
+
+
+// Class → primary stat recommendations (in priority order)
+const CLASS_STAT_PRIORITY = {
+  barbarian:  ['STR','CON','DEX'],
+  bard:       ['CHA','DEX','CON'],
+  cleric:     ['WIS','CON','STR'],
+  druid:      ['WIS','CON','DEX'],
+  fighter:    ['STR','CON','DEX'],  // or DEX first for ranged
+  monk:       ['DEX','WIS','CON'],
+  paladin:    ['STR','CHA','CON'],
+  ranger:     ['DEX','WIS','CON'],
+  rogue:      ['DEX','CHA','INT'],
+  sorcerer:   ['CHA','CON','DEX'],
+  warlock:    ['CHA','CON','DEX'],
+  wizard:     ['INT','CON','DEX'],
+};
+
+function updateStatRecommendations() {
+  var cls = document.getElementById('class') ? document.getElementById('class').value : '';
+  var priority = cls && CLASS_STAT_PRIORITY[cls] ? CLASS_STAT_PRIORITY[cls] : [];
+  ABILITIES.forEach(function(ab) {
+    var block = document.getElementById('block-' + ab);
+    if (!block) return;
+    block.classList.remove('bg-recommended', 'ab-primary', 'ab-secondary');
+    if (priority[0] === ab) {
+      block.classList.add('bg-recommended', 'ab-primary');
+    } else if (priority.includes(ab)) {
+      block.classList.add('bg-recommended');
+    }
+  });
+  // Update banner hint text
+  var hint = document.getElementById('class-stat-hint');
+  if (hint && priority.length) {
+    hint.textContent = 'Primary: ' + priority[0] + '  ·  Secondary: ' + priority.slice(1).join(', ');
+    hint.style.display = 'block';
+  } else if (hint) {
+    hint.textContent = ''; hint.style.display = 'none';
+  }
 }
 
 // ── Point Buy ────────────────────────────────────────────────────────────────
@@ -5861,140 +5918,85 @@ function ensureOption(sel, value, label) {
 
 // ── Wizard Navigation ──────────────────────────────────────────────────────
 let currentStep = 1;
-const TOTAL_STEPS = 8;
+const totalSteps = 8;
 
-// Steps that should trigger a specific refresh when entered
-const STEP_REFRESH = {
-  4: function() { updateProficiencySection(); updateCombatSection(); },
-  5: function() {
-    // Move ASI panel into step 5 if not already there (legacy support)
-    var asiPanel = document.getElementById('bg-asi-panel');
-    var asiTarget = document.getElementById('asi-section');
-    if (asiPanel && asiTarget && asiPanel.parentElement !== asiTarget) {
-      asiTarget.appendChild(asiPanel);
-    }
-    if (asiPanel) {
-      var bg = document.getElementById('background').value;
-      if (bg) showASIPanel(bg);
-    }
-    updateProficiencySection();
-    var csp = document.getElementById('class-skill-picker');
-    if (csp) csp.style.display = '';
-  },
-  6: function() {
-    updateFeatsSection();
-    updateSpellsSection();
-    var cls = document.getElementById('class').value;
-    var hint = document.getElementById('step7-hint');
-    if (hint) {
-      var isCaster = cls && SPELL_COUNTS[cls];
-      hint.textContent = isCaster
-        ? 'Choose your cantrips and spells. Select your origin feat below.'
-        : 'No spell slots for this class. Review your origin feat below.';
-    }
-  },
-  8: function() { updateReview(); updateEquipmentSection(); updateCombatSection(); },
-};
+const sections = document.querySelectorAll('.wizard-section');
+const pills = document.querySelectorAll('.wizard-step-pill');
 
-function goStep(n) {
-  if (n < 1 || n > TOTAL_STEPS) return;
+const prevBtn = document.getElementById('btn-prev');
+const nextBtn = document.getElementById('btn-next');
+const homeBtn = document.getElementById('btn-home');
+const progress = document.getElementById('wizard-progress');
 
-  // Hide current, show new
-  var prev = document.getElementById('step-' + currentStep);
-  var next = document.getElementById('step-' + n);
-  if (prev) prev.classList.remove('active');
-  if (next) next.classList.add('active');
+// --- STEP SWITCHING ---
+function goStep(step) {
+  if (step < 1 || step > totalSteps) return;
 
-  // Update pill states
-  for (var i = 1; i <= TOTAL_STEPS; i++) {
-    var pill = document.getElementById('pill-' + i);
-    if (!pill) continue;
-    pill.classList.remove('active', 'done');
-    if (i === n) pill.classList.add('active');
-    else if (i < n) pill.classList.add('done');
+  currentStep = step;
+
+  sections.forEach((el, i) => {
+    el.classList.toggle('active', i === step - 1);
+  });
+
+  pills.forEach((el, i) => {
+    el.classList.toggle('active', i === step - 1);
+  });
+
+  updateNav();
+}
+
+// --- NEXT ---
+function nextStep() {
+  if (currentStep === totalSteps) {
+    generatePDFAndExit();
+    return;
+  }
+  goStep(currentStep + 1);
+}
+
+// --- PREVIOUS ---
+function prevStep() {
+  if (currentStep > 1) {
+    goStep(currentStep - 1);
+  }
+}
+
+// --- UPDATE UI ---
+function updateNav() {
+  prevBtn.disabled = currentStep === 1;
+
+  if (currentStep === totalSteps) {
+    nextBtn.textContent = "Finish & Download";
+  } else {
+    nextBtn.textContent = "Next →";
   }
 
-  currentStep = n;
+  progress.textContent = `Step ${currentStep} of ${totalSteps}`;
+}
 
-  // Run any refresh needed for this step
-  if (STEP_REFRESH[n]) STEP_REFRESH[n]();
+// --- HOME ---
+function goHome() {
+  window.location.href = "index.html";
+}
 
-  // Update footer
-  var prev_btn = document.getElementById('btn-prev');
-  var next_btn = document.getElementById('btn-next');
-  var progress = document.getElementById('wizard-progress');
-  var footer = document.getElementById('wizard-footer');
-  if (prev_btn) prev_btn.disabled = (n === 1);
-  if (next_btn) {
-    if (n === TOTAL_STEPS) {
-      next_btn.style.display = 'none';
-    } else {
-      next_btn.style.display = '';
-      next_btn.textContent = 'Next \u2192';
-    }
+// --- FINAL STEP ---
+function generatePDFAndExit() {
+  if (typeof generateSheet === "function") {
+    generateSheet().then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    window.location.href = "index.html";
   }
-  if (progress) progress.textContent = 'Step ' + n + ' of ' + TOTAL_STEPS;
-  if (footer) footer.style.display = (n === TOTAL_STEPS) ? 'none' : 'flex';
-
-  // Scroll to top of sheet
-  var sheet = document.querySelector('.sheet');
-  if (sheet) sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function stepNav(dir) {
-  goStep(currentStep + dir);
-}
+// --- EVENTS ---
+prevBtn.addEventListener("click", prevStep);
+nextBtn.addEventListener("click", nextStep);
+homeBtn.addEventListener("click", goHome);
 
-function updateReview() {
-  var grid = document.getElementById('review-grid');
-  if (!grid) return;
-  var name  = document.getElementById('char-name').value || 'Unnamed Hero';
-  var level = document.getElementById('char-level').value || '1';
-  var cls   = document.getElementById('class').value;
-  var spec  = document.getElementById('species').value;
-  var bg    = document.getElementById('background').value;
-  var align = selectedAlignment || 'Not chosen';
-  var prof  = getProfBonus(parseInt(level));
-  var c     = CLASS_BONUSES[cls] || {};
-
-  // Ability scores with ASI
-  var ABS = ['STR','DEX','CON','INT','WIS','CHA'];
-  var abRows = ABS.map(function(ab) {
-    var total = scores[ab] + (asiBonus[ab] || 0);
-    var modVal = Math.floor((total - 10) / 2);
-    return ab + ' ' + total + ' (' + (modVal >= 0 ? '+' : '') + modVal + ')';
-  }).join('  ');
-
-  var skillList = [...classSkillChoices, ...Object.keys(Object.fromEntries(
-    [...bgSkillsSet].map(function(s) { return [s, 1]; })
-  ))].filter(function(s, i, a) { return a.indexOf(s) === i; }).slice(0, 6).join(', ') || '—';
-
-  var hp = c.hpbase ? (c.hpbase + Math.floor((scores['CON'] + (asiBonus['CON']||0) - 10) / 2)) : '—';
-
-  var cards = [
-    { label: 'Name', value: name },
-    { label: 'Class', value: cls ? (cls.charAt(0).toUpperCase()+cls.slice(1)) : '—', sub: 'Level ' + level + ' · Prof +' + prof },
-    { label: 'Species', value: spec ? (spec.charAt(0).toUpperCase()+spec.slice(1)) : '—', sub: selectedLineage || '' },
-    { label: 'Background', value: bg ? (bg.charAt(0).toUpperCase()+bg.slice(1)) : '—' },
-    { label: 'Alignment', value: align },
-    { label: 'Hit Points', value: String(hp), sub: c.hitdie || '' },
-    { label: 'Ability Scores', value: abRows, wide: true },
-    { label: 'Proficient Skills', value: skillList, wide: true },
-  ];
-
-  grid.innerHTML = cards.map(function(card) {
-    return '<div class="review-card" style="' + (card.wide ? 'grid-column:1/-1;' : '') + '">'
-      + '<div class="review-card-label">' + card.label + '</div>'
-      + '<div class="review-card-value">' + card.value + '</div>'
-      + (card.sub ? '<div class="review-card-sub">' + card.sub + '</div>' : '')
-      + '</div>';
-  }).join('');
-}
-
-// Init wizard on load
-document.addEventListener('DOMContentLoaded', function() {
-  goStep(1);
-});
+// --- INIT ---
+goStep(1);
 
 </script>
 </body>
