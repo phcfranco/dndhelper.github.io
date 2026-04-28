@@ -158,8 +158,10 @@ label{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.1em;text-transf
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
         <button class="btn btn-gold btn-sm" onclick="rollInitiative()">🎲 Roll Initiative</button>
         <button class="btn btn-secondary btn-sm" onclick="nextTurn()">Next Turn ›</button>
-        <button class="btn btn-secondary btn-sm" onclick="saveEncounter()" title="Save current combat state to browser storage">💾 Save</button>
-        <button class="btn btn-secondary btn-sm" onclick="loadEncounter()" title="Restore saved combat state">📂 Load</button>
+        <button class="btn btn-secondary btn-sm" onclick="saveParty()" title="Save player names, HP and AC for quick reload">💾 Save Party</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadParty()" title="Reload saved party (replaces current players)">👥 Load Party</button>
+        <button class="btn btn-secondary btn-sm" onclick="saveEncounter()" title="Save full mid-combat state">💾 Combat</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadEncounter()" title="Restore mid-combat state">📂 Load Combat</button>
         <button class="btn btn-secondary btn-sm" onclick="resetCombat()">↺ Reset</button>
       </div>
     </div>
@@ -172,7 +174,8 @@ label{font-family:"Cinzel",serif;font-size:.6rem;letter-spacing:.1em;text-transf
       <div class="row">
         <div class="field"><label>Name</label><input type="text" id="p-name" placeholder="Player name"></div>
         <div class="field" style="max-width:80px"><label>Initiative Roll</label><input type="number" id="p-ini-roll" value="15" min="1" max="30" style="width:100%" title="The actual d20+mod result the player rolled"></div>
-        <div class="field" style="max-width:80px"><label>Max HP</label><input type="number" id="p-hp" value="20" style="width:100%"></div>
+        <div class="field" style="max-width:65px"><label>Max HP</label><input type="number" id="p-hp" value="20" style="width:100%"></div>
+        <div class="field" style="max-width:55px"><label>AC</label><input type="number" id="p-ac" value="10" min="1" max="30" style="width:100%" title="Armor Class"></div>
         <button class="btn btn-secondary" style="margin-bottom:0" onclick="addPlayer()">+ Add</button>
       </div>
       <p style="font-size:.78rem;color:var(--il);font-style:italic;margin-bottom:.6rem;">Players roll initiative physically and enter the result. Monsters roll automatically.</p>
@@ -345,10 +348,10 @@ function addPlayer() {
   var name      = document.getElementById('p-name').value.trim() || 'Player';
   var iniResult = parseInt(document.getElementById('p-ini-roll').value) || 10;
   var maxHp     = parseInt(document.getElementById('p-hp').value)  || 10;
-  // Players enter their actual rolled initiative; store it as ini and roll
-  combatants.push({id:genId(),name:name,type:'player',hp:maxHp,maxHp:maxHp,ac:10,ini:iniResult,iniMod:0,roll:iniResult,dead:false,monster:null});
+  var ac        = parseInt(document.getElementById('p-ac').value)   || 10;
+  combatants.push({id:genId(),name:name,type:'player',hp:maxHp,maxHp:maxHp,ac:ac,ini:iniResult,iniMod:0,roll:iniResult,dead:false,monster:null,conditions:{}});
   document.getElementById('p-name').value='';
-  log('Added player: '+name);
+  log('Added player: '+name+' (AC '+ac+', HP '+maxHp+')');
   renderCombatants();
 }
 
@@ -512,6 +515,16 @@ function renderCombatants() {
     iniEl.className = 'comb-ini';
     iniEl.textContent = (started && c.ini) ? c.ini : '-';
     top.appendChild(iniEl);
+
+    // AC badge — click to edit inline
+    var acBadge = document.createElement('div');
+    acBadge.style.cssText = 'font-size:.68rem;color:var(--il);white-space:nowrap;display:flex;align-items:center;gap:.18rem;flex-shrink:0;cursor:pointer;';
+    acBadge.title = 'Armor Class — click to edit';
+    (function(cid){
+      acBadge.innerHTML = '<span style="font-size:.7rem;">🛡</span><span id="ac-disp-'+cid+'">'+( c.ac||10)+'</span>';
+      acBadge.onclick = function(){ editAC(cid); };
+    })(c.id);
+    top.appendChild(acBadge);
 
     var nameEl = document.createElement('div');
     nameEl.className = 'comb-name' + (c.monster && c.monster.str ? ' has-stat' : '');
@@ -1014,6 +1027,59 @@ function toggleCondition(cid, key, el) {
 /* ─────────────────────────────────────────────────────────────────────────────
    SAVE / LOAD ENCOUNTER (localStorage)
 ───────────────────────────────────────────────────────────────────────────── */
+
+function editAC(cid) {
+  var c = combatants.find(function(x){ return x.id === cid; });
+  if (!c) return;
+  var span = document.getElementById('ac-disp-'+cid);
+  if (!span) return;
+  var input = document.createElement('input');
+  input.type = 'number'; input.value = c.ac||10; input.min = 1; input.max = 40;
+  input.style.cssText = 'width:38px;font-size:.72rem;text-align:center;border:1px solid var(--gold);border-radius:3px;padding:0 2px;';
+  span.parentNode.replaceChild(input, span);
+  input.focus(); input.select();
+  function commit() {
+    var v = parseInt(input.value)||10;
+    c.ac = v;
+    var newSpan = document.createElement('span');
+    newSpan.id = 'ac-disp-'+cid;
+    newSpan.textContent = v;
+    input.parentNode.replaceChild(newSpan, input);
+    log(c.name + ' AC set to ' + v + '.');
+  }
+  input.onblur = commit;
+  input.onkeydown = function(e){ if(e.key==='Enter'||e.key==='Escape') commit(); };
+}
+
+function saveParty() {
+  var players = combatants.filter(function(c){ return c.type === 'player'; });
+  if (!players.length) { alert('No players in tracker to save.'); return; }
+  var party = players.map(function(c){ return { name:c.name, maxHp:c.maxHp, ac:c.ac||10 }; });
+  try {
+    localStorage.setItem('charForge_party', JSON.stringify(party));
+    log('Party saved: ' + players.map(function(p){ return p.name; }).join(', ') + '.');
+    var btn = document.querySelector('[onclick="saveParty()"]');
+    if (btn){ btn.textContent = '\u2713 Saved'; setTimeout(function(){ btn.textContent = '\uD83D\uDCBE Save Party'; }, 1500); }
+  } catch(e) { alert('Could not save party: ' + e.message); }
+}
+
+function loadParty() {
+  try {
+    var raw = localStorage.getItem('charForge_party');
+    if (!raw) { alert('No saved party found. Add players and use Save Party first.'); return; }
+    var party = JSON.parse(raw);
+    combatants = combatants.filter(function(c){ return c.type !== 'player'; });
+    party.forEach(function(p){
+      combatants.push({ id:genId(), name:p.name, type:'player',
+        hp:p.maxHp, maxHp:p.maxHp, ac:p.ac||10,
+        ini:10, iniMod:0, roll:10, dead:false, monster:null, conditions:{} });
+    });
+    nextId = combatants.reduce(function(mx,c){ return Math.max(mx,c.id); }, 0) + 1;
+    log('Party loaded: ' + party.map(function(p){ return p.name+' (AC '+p.ac+', HP '+p.maxHp+')'; }).join(', ') + '.');
+    renderCombatants();
+  } catch(e) { alert('Could not load party: ' + e.message); }
+}
+
 function saveEncounter() {
   if (!combatants.length) { alert('Nothing to save — add combatants first.'); return; }
   var state = {
