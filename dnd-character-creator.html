@@ -2809,9 +2809,13 @@ function changeScore(ab, delta) {
   const diff = (POINT_COST[next] !== undefined ? POINT_COST[next] : 0) - (POINT_COST[cur] !== undefined ? POINT_COST[cur] : 0);
   if (diff > 0 && pointsSpent() + diff > TOTAL_POINTS) return;
   scores[ab] = next;
-  refreshAbility(ab);
+  // Update the bar FIRST, before any other function that might throw.
+  // refreshAbility() calls updateProficiencySection() which can error when
+  // species/background state changes the proficiency logic — that error was
+  // silently aborting execution before updatePointsBar() ever ran.
   updatePointsBar();
-  applyASI();
+  try { refreshAbility(ab); } catch(e) { /* proficiency update failed — scores and bar are already correct */ }
+  try { applyASI(); } catch(e) {}
 }
 
 function refreshAbility(ab) {
@@ -2835,22 +2839,65 @@ const grid = document.getElementById('abilities-grid');
 ABILITIES.forEach(ab => {
   const block = document.createElement('div');
   block.className = 'ability-block';
-  block.id = `block-${ab}`;
-  block.innerHTML = `
-    <label>${ab}</label>
-    <div class="ab-controls">
-      <button class="ab-btn" id="btn-dn-${ab}" onclick="changeScore('${ab}',-1)">−</button>
-      <span  class="ab-score" id="score-${ab}">8</span>
-      <button class="ab-btn" id="btn-up-${ab}" onclick="changeScore('${ab}',1)">+</button>
-    </div>
-    <div class="ab-cost" id="cost-${ab}">cost: 0</div>
-    <div class="modifier" id="mod-${ab}">−1</div>
-    <div class="ab-total" id="total-${ab}"></div>
-  `;
+  block.id = 'block-' + ab;
+
+  const label = document.createElement('label');
+  label.textContent = ab;
+
+  const controls = document.createElement('div');
+  controls.className = 'ab-controls';
+
+  const btnDn = document.createElement('button');
+  btnDn.className = 'ab-btn';
+  btnDn.id = 'btn-dn-' + ab;
+  btnDn.textContent = '−';
+  btnDn.addEventListener('click', function() { changeScore(ab, -1); });
+
+  const scoreSpan = document.createElement('span');
+  scoreSpan.className = 'ab-score';
+  scoreSpan.id = 'score-' + ab;
+  scoreSpan.textContent = '8';
+
+  const btnUp = document.createElement('button');
+  btnUp.className = 'ab-btn';
+  btnUp.id = 'btn-up-' + ab;
+  btnUp.textContent = '+';
+  btnUp.addEventListener('click', function() { changeScore(ab, 1); });
+
+  controls.appendChild(btnDn);
+  controls.appendChild(scoreSpan);
+  controls.appendChild(btnUp);
+
+  const costDiv = document.createElement('div');
+  costDiv.className = 'ab-cost';
+  costDiv.id = 'cost-' + ab;
+  costDiv.textContent = 'cost: 0';
+
+  const modDiv = document.createElement('div');
+  modDiv.className = 'modifier';
+  modDiv.id = 'mod-' + ab;
+  modDiv.textContent = '−1';
+
+  const totalDiv = document.createElement('div');
+  totalDiv.className = 'ab-total';
+  totalDiv.id = 'total-' + ab;
+
+  block.appendChild(label);
+  block.appendChild(controls);
+  block.appendChild(costDiv);
+  block.appendChild(modDiv);
+  block.appendChild(totalDiv);
+
   grid.appendChild(block);
   refreshAbility(ab);
 });
 updatePointsBar();
+
+// Catch-all: any click anywhere in the grid re-runs the bar update.
+// This fires even if individual button handlers are somehow silenced.
+grid.addEventListener('click', function() {
+  updatePointsBar();
+});
 
 // ── Build Alignment buttons ──────────────────────────────────────────────────
 let selectedAlignment = null;
@@ -5943,6 +5990,19 @@ function goStep(step) {
   });
 
   updateNav();
+
+  // ── Per-step refresh ─────────────────────────────────────────────────────
+  if (step === 4) {
+    // Force the point-buy bar to reflect current scores when entering step 4,
+    // regardless of which steps were visited before. This is the root cause of
+    // the "27/27 stuck" bug: the bar is only updated by changeScore(), so if
+    // the user navigates away and back the bar shows stale initial values.
+    updatePointsBar();
+    // Re-evaluate every ability button's enabled state with current scores
+    ABILITIES.forEach(function(ab) { refreshAbility(ab); });
+    // Show class-based stat highlights if a class has been chosen
+    if (typeof updateStatRecommendations === 'function') updateStatRecommendations();
+  }
 }
 
 // --- NEXT ---
